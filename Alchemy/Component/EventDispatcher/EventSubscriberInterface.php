@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace IronG\Component\EventDispatcher;
+namespace Alchemy\Component\EventDispatcher;
 
 /**
  * An EventSubscriber knows himself what events he is interested in.

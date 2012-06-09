@@ -1,5 +1,5 @@
 <?php
-use IronG\Component\EventDispatcher\Event;
+use Alchemy\Component\EventDispatcher\Event;
 
 class SampleListener
 {

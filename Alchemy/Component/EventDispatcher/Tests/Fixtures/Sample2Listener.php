@@ -1,6 +1,6 @@
 <?php
-use IronG\Component\EventDispatcher\EventSubscriberInterface;
-use IronG\Component\EventDispatcher\Event;
+use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
+use Alchemy\Component\EventDispatcher\Event;
 
 class Sample2Listener implements EventSubscriberInterface
 {

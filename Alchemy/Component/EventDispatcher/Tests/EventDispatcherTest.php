@@ -1,7 +1,7 @@
 <?php
 //require_once 'EventDispatcher.php';
-use IronG\Component\EventDispatcher\EventDispatcher;
-use IronG\Component\EventDispatcher\Event;
+use Alchemy\Component\EventDispatcher\EventDispatcher;
+use Alchemy\Component\EventDispatcher\Event;
 
 require_once dirname(__FILE__) . '/Fixtures/mix_events.php';
 require_once dirname(__FILE__) . '/Fixtures/SampleListener.php';
