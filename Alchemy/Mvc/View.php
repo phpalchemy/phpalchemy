@@ -30,11 +30,60 @@ class View
     protected $_basePath = '';
 
     /**
+     * Contains the absolute path where the engine store the cache files
+     *
+     * @var string
+     */
+    protected $_cachePath = '';
+
+    /**
      * String to store the output string that is sent by http response
      *
      * @var string
      */
     protected $_content  = '';
+
+    /**
+     * Relative path of template file
+     *
+     * @var string
+     */
+    protected $_tpl  = '';
+
+    /**
+     * Cache flag to specify if templating cache is enabled or not
+     *
+     * @var string
+     */
+    protected $_cacheEnabled = false;
+
+    /**
+     * @param string $tpl template file
+     */
+    public function __construct($tpl = '')
+    {
+        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
+
+        if (!empty($tpl)) {
+            $this->setTpl($tpl);
+        }
+    }
+
+    /**
+     * @param unknown_type $tpl
+     */
+    public function setTpl($tpl)
+    {
+        $this->_tpl = $tpl;
+    }
+
+    /**
+     *
+     */
+    public function getTpl()
+    {
+        return $this->_tpl;
+    }
 
     /**
      * Assings a variable to the template file
@@ -53,6 +102,21 @@ class View
         }
 
         $this->_data[$name] = $value;
+    }
+
+    /**
+     * Gets a variable that was previously assigned
+     *
+     * @param  string $name  name or key to store teh value passed
+     * @param  string $value variable value
+     */
+    public function getVar($name)
+    {
+        if (!isset($this->_data[$name])) {
+            throw new \InvalidArgumentException("Variable '$name' doesn't exist.");
+        }
+
+        return $this->_data[$name];
     }
 
     /**
@@ -111,5 +175,26 @@ class View
     public function getBasePath()
     {
         return $this->_basePath;
+    }
+
+    /**
+     * @param string $path cache directory path
+     */
+    public function setCachePath($path)
+    {
+        $this->_cachePath = $path;
+    }
+
+    /**
+     * Gets cache path
+     */
+    public function getCachePath()
+    {
+        return $this->_cachePath;
+    }
+
+    public function disableCache($value)
+    {
+        $this->_cacheEnabled = $value === true;
     }
 }

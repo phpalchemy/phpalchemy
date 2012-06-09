@@ -1,8 +1,8 @@
 <?php
 namespace Alchemy\Mvc;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Alchemy\Net\Http\Request;
+use Alchemy\Net\Http\Response;
 
 /**
  * Controller

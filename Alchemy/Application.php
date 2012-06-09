@@ -13,15 +13,12 @@ namespace Alchemy;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 use Alchemy\Component\ClassLoader;
 use Alchemy\Mvc\ControllerResolver;
+use Alchemy\Net\Http\Request;
+use Alchemy\Net\Http\Response;
+use Alchemy\Util\Yaml;
 
 use Symfony\Component\Routing;
 use Symfony\Component\Routing\RouteCollection;
-
-use Alchemy\Net\Http\Request;
-use Alchemy\Net\Http\Response;
-
-use Alchemy\Util\Yaml;
-
 use Symfony\Component\Routing\Route;
 
 //use Symfony\Component\HttpKernel\HttpCache\HttpCache;
