@@ -14,9 +14,9 @@ class SmartyView extends \Alchemy\Mvc\View
     }
 
     //Wrapped
-    public function setBaseDir($dir)
+    public function setTemplateDir($dir)
     {
-        parent::setBaseDir($dir);
+        parent::setTemplateDir($dir);
         $this->smarty->template_dir = $dir;
     }
 
@@ -52,15 +52,18 @@ class SmartyView extends \Alchemy\Mvc\View
         return $this->smarty->cache_dir;
     }
 
-    public function disableCache($value)
+    public function enableCache($value)
     {
-        $this->smarty->caching        = $value === true;
-        $this->smarty->cache_lifetime = 120;
+        $this->smarty->caching = $value === true;
+
+        if ($this->smarty->caching) {
+            $this->smarty->cache_lifetime = 120;
+        }
     }
 
     public function render()
     {
-        $this->smarty->display($this->getBaseDir() . $this->getTpl());
+        $this->smarty->display($this->getTemplateDir() . $this->getTpl());
     }
 }
 

@@ -27,14 +27,14 @@ class View
      *
      * @var string
      */
-    protected $_basePath = '';
+    protected $_templateDir = '';
 
     /**
      * Contains the absolute path where the engine store the cache files
      *
      * @var string
      */
-    protected $_cachePath = '';
+    protected $_cacheDir = '';
 
     /**
      * String to store the output string that is sent by http response
@@ -131,30 +131,23 @@ class View
         }
     }
 
-    /**
-     * Sets the content of parsed output string
-     * @param string $content contents the parsed output string
-     */
-    public function setContent($content)
+    public function getOutput()
     {
-        $this->_content = $content;
-    }
+        $output = '';
+        ob_start();
+        $this->render();
+        $output = ob_get_contents();
+        ob_end_clean();
 
-    /**
-     * Gets the parsed contents
-     * @return string return the parsed content
-     */
-    public function getContent()
-    {
-        return $this->_content;
+        return $output;
     }
 
     /**
      * Render the output string
+     * Needs to override
      */
     public function render()
     {
-        echo $this->getContent();
     }
 
     /**
@@ -162,9 +155,9 @@ class View
      *
      * @param string $path contains the absolute path where templates are stored
      */
-    public function setBasePath($path)
+    public function setTemplateDir($path)
     {
-        $this->_basePath = $path;
+        $this->_templateDir = $path;
     }
 
     /**
@@ -172,28 +165,28 @@ class View
      *
      * @return string returns the templates base path
      */
-    public function getBasePath()
+    public function getTemplateDir()
     {
-        return $this->_basePath;
+        return $this->_templateDir;
     }
 
     /**
      * @param string $path cache directory path
      */
-    public function setCachePath($path)
+    public function setCacheDir($path)
     {
-        $this->_cachePath = $path;
+        $this->_cacheDir = $path;
     }
 
     /**
      * Gets cache path
      */
-    public function getCachePath()
+    public function getCacheDir()
     {
-        return $this->_cachePath;
+        return $this->_cacheDir;
     }
 
-    public function disableCache($value)
+    public function enableCache($value)
     {
         $this->_cacheEnabled = $value === true;
     }

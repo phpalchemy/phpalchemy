@@ -13,12 +13,12 @@ namespace Alchemy;
  */
 class Config
 {
-    private $_config     = array();
-    private $_appPath    = '';
-    private $_configPath = '';
+    private $config     = array();
+    private $appPath    = '';
+    private $configPath = '';
 
-    private $_appIniFile = '';
-    private $_envIniFile = '';
+    private $appIniFile = '';
+    private $envIniFile = '';
 
     public function __construct()
     {
@@ -40,60 +40,60 @@ class Config
         $this->loadEnvConfFile();
     }
 
-    function setAppPath($path)
+    public function setAppPath($path)
     {
-        $this->_appPath = rtrim($path, DS) . DS;
+        $this->appPath = rtrim($path, DS) . DS;
     }
 
-    function getAppPath()
+    public function getAppPath()
     {
-        if (empty($this->_appPath)) {
+        if (empty($this->appPath)) {
             throw new \Exception("Missing configuration for 'Application Path'!");
         }
 
-        return $this->_appPath;
+        return $this->appPath;
     }
 
-    function setConfigPath($path)
+    public function setConfigPath($path)
     {
-        $this->_configPath = rtrim($path, DS) . DS;
+        $this->configPath = rtrim($path, DS) . DS;
     }
 
-    function getConfigPath()
+    public function getConfigPath()
     {
-        if (empty($this->_configPath)) {
+        if (empty($this->configPath)) {
             throw new \Exception("Missing configuration for 'Application Config Path'!");
         }
 
-        return $this->_configPath;
+        return $this->configPath;
     }
 
-    function setAppIniFile($path)
+    public function setAppIniFile($path)
     {
-        $this->_appIniFile = $path;
+        $this->appIniFile = $path;
     }
 
-    function getAppIniFile()
+    public function getAppIniFile()
     {
-        if (empty($this->_appIniFile)) {
-            throw new \Exception("Application ini file ({$this->_appIniFile}) is missing!");
+        if (empty($this->appIniFile)) {
+            throw new \Exception("Application ini file ({$this->appIniFile}) is missing!");
         }
 
-        return $this->_appIniFile;
+        return $this->appIniFile;
     }
 
-    function setEnvIniFile($path)
+    public function setEnvIniFile($path)
     {
-        $this->_envIniFile = $path;
+        $this->envIniFile = $path;
     }
 
-    function getEnvIniFile()
+    public function getEnvIniFile()
     {
-        if (empty($this->_envIniFile)) {
+        if (empty($this->envIniFile)) {
             throw new \Exception("'Environment ini file' is missing!");
         }
 
-        return $this->_envIniFile;
+        return $this->envIniFile;
     }
 
 
@@ -106,10 +106,14 @@ class Config
     public function set($name, $value)
     {
         if (!is_string($name)) {
-            throw new \Exception("Invalid configuration key");
+            throw new \Exception("Invalid configuration key.");
         }
 
-        $this->_config[$name] = $value;
+        if (is_string($value) && strpos($value, '%project_dir%') !== false) {
+            $value = str_replace('%project_dir%', rtrim($this->getAppPath(), DS), $value);
+        }
+
+        $this->config[$name] = $value;
     }
 
     /**
@@ -122,11 +126,16 @@ class Config
      */
     public function get($name, $default = null)
     {
-        if (empty($default) && !isset($this->_config[$name])) {
+        if (empty($default) && !isset($this->config[$name])) {
             throw new \Exception(get_class($this) . " - Configuration doesn't exist for key: $name");
         }
 
-        return isset($this->_config[$name]) ? $this->_config[$name] : $default;
+        return isset($this->config[$name]) ? $this->config[$name] : $default;
+    }
+
+    public function exists($name)
+    {
+        return isset($this->config[$name]);
     }
 
     /**
@@ -146,7 +155,7 @@ class Config
     }
 
     /**
-     * Load configuration from a ini file and store on self::_config array
+     * Load configuration from a ini file and store on self::config array
      *
      * @param string $iniFilename Absolute ath to read the ini file
      */
@@ -171,7 +180,7 @@ class Config
 
     private function prepare()
     {
-        if (empty($this->_configPath)) {
+        if (empty($this->configPath)) {
             $this->setConfigPath($this->getAppPath() . 'config' . DS);
         }
 

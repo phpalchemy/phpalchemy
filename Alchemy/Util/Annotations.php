@@ -24,6 +24,13 @@ class Annotations
 {
     private static $annotationCache;
 
+    public $defaultAnnotationNamespace = '';
+
+    public function setDefaultAnnotationNamespace($namespace)
+    {
+        $this->defaultAnnotationNamespace = $namespace;
+    }
+
     public static function getClassAnnotations($className)
     {
         if (!isset(self::$annotationCache[$className])) {
@@ -50,6 +57,27 @@ class Annotations
         return self::$annotationCache[$className . '::' . $methodName];
     }
 
+    public function getMethodAnnotationsObjects($className, $methodName)
+    {
+        $annotations = $this->getMethodAnnotations($className, $methodName);
+        $objects     = array();
+
+        foreach ($annotations as $annotationClass => $listParams) {
+            $annotationClass = ucfirst($annotationClass);
+            $class = $this->defaultAnnotationNamespace . $annotationClass . 'Annotation';
+
+            if (class_exists($class)) {
+                $objects[$annotationClass] = array();
+
+                foreach ($listParams as $params) {
+                    $objects[$annotationClass][] = new $class($params);
+                }
+            }
+        }
+
+        return $objects;
+    }
+
     /**
      * @param  string $docblock
      * @return array
@@ -62,7 +90,6 @@ class Annotations
         // Strip away the docblock header and footer to ease parsing of one line annotations
         $docblock = substr($docblock, 3, -2);
 
-        //if (preg_match_all('/@(?<name>[A-Za-z_-]+)(?<args>.*)[ \t]*\r?$/m', $docblock, $matches)) {
         if (preg_match_all('/@(?<name>[A-Za-z_-]+)[\s\t]*\((?<args>.*)\)[\s\t]*\r?$/m', $docblock, $matches)) {
             $numMatches = count($matches[0]);
 

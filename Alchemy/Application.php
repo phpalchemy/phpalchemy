@@ -36,29 +36,34 @@ use Symfony\Component\Routing\Route;
  */
 class Application
 {
-    protected $_appName  = '';
-    protected $_config   = null;
-    protected $_appPath = '';
+    protected $appName  = '';
+    protected $config   = null;
+    protected $appPath = '';
 
     public function __construct(Config $config)
     {
-        if (!defined('DS')) {
-            define('DS', DIRECTORY_SEPARATOR);
-        }
+        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 
         // Getting app configuration
-        $this->_config  = $config;
-        $this->_appPath = $config->getAppPath();
+        $this->config  = $config;
+        $this->appPath = $config->getAppPath();
 
         $config->init();
+        $this->configure();
+        $this->prepare();
+
 
         // including vendors autoload
         $classLoader = ClassLoader::getInstance();
 
+        if (!$this->config->exists('app.namespace')) {
+            throw new \Exception("Configuration Missing: namespace is not set on " . $config->getAppIniFile());
+        }
+
         // registering the aplication namespace
         $classLoader->register(
-            $this->_appName,
-            realpath($this->_appPath . 'app') . DS,
+            $this->appName,
+            realpath($this->appPath . 'app') . DS,
             $config->get('app.namespace')
         );
     }
@@ -89,7 +94,7 @@ class Application
 
         //$dispatcher->addSubscriber(new Simplex\ContentLengthListener());
 
-        $framework = new Kernel($dispatcher, $matcher, $resolver, $this->_config);
+        $framework = new Kernel($dispatcher, $matcher, $resolver, $this->config);
 
         /**
          * The HttpCache class implements a fully-featured reverse proxy,
@@ -102,20 +107,20 @@ class Application
         $response->send();
     }
 
-    protected function getRoutes()
+    private function getRoutes()
     {
-        if (file_exists($this->_appPath . 'config' . DS . 'routes.php')) {
-            $routes = include $this->_appPath . 'config' . DS . 'routes.php';
+        if (file_exists($this->appPath . 'config' . DS . 'routes.php')) {
+            $routes = include $this->appPath . 'config' . DS . 'routes.php';
 
             if (!($routes instanceof RouteCollection)) {
                 throw new \InvalidArgumentException("Routes Collection is missing.");
             }
         }
-        else if (file_exists($this->_appPath . 'config' . DS . 'routes.yaml')) {
+        else if (file_exists($this->appPath . 'config' . DS . 'routes.yaml')) {
             $yaml   = new Yaml();
             $routes = new RouteCollection();
 
-            $routesList = $yaml->loadFile($this->_appPath . 'config' . DS . 'routes.yaml');
+            $routesList = $yaml->loadFile($this->appPath . 'config' . DS . 'routes.yaml');
 
             foreach ($routesList as $name => $routeConfig) {
                 $this->parseRoute($routes, $name, $routeConfig);
@@ -125,7 +130,7 @@ class Application
         return $routes;
     }
 
-    protected function parseRoute(RouteCollection $collection, $name, $config)
+    private function parseRoute(RouteCollection $collection, $name, $config)
     {
         $defaults = isset($config['defaults']) ? $config['defaults'] : array();
         $requirements = isset($config['requirements']) ? $config['requirements'] : array();
@@ -138,5 +143,56 @@ class Application
         $route = new Route($config['pattern'], $defaults, $requirements, $options);
 
         $collection->add($name, $route);
+    }
+
+    private function configure()
+    {
+        if (!$this->config->exists('app.cache_dir')) {
+            $this->config->set('app.cache_dir', $this->appPath . 'cache');
+        }
+
+        if (!$this->config->exists('templating.templates_dir')) {
+            $this->config->set('templating.templates_dir', $this->appPath . 'app' . DS . 'views' . DS);
+        }
+
+        if (!$this->config->exists('tempating.default_engine')) {
+            $this->config->set('tempating.default_engine', 'smarty');
+        }
+
+        if (!$this->config->exists('templating.cache_dir')) {
+            $this->config->set('templating.cache_dir', $this->config->get('app.cache_dir'));
+        }
+
+        // fix paths
+        $this->config->set('app.cache_dir', rtrim($this->config->get('app.cache_dir'), DS) . DS);
+        $this->config->set('templating.cache_dir', rtrim($this->config->get('templating.cache_dir'), DS) . DS);
+    }
+
+    private function prepare()
+    {
+        // preparing directories
+        if (!is_dir($this->config->get('app.cache_dir'))) {
+            if (!is_writable(dirname($this->config->get('app.cache_dir')))) {
+                throw new \Exception(
+                    "Error: System can't 'Application Cache Dir': " .
+                    $this->config->get('app.cache_dir') . "\n" .
+                    "Directory '" . dirname($this->config->get('app.cache_dir')) . "' is no writable."
+                );
+            }
+
+            mkdir($this->config->get('app.cache_dir'));
+        }
+
+        if (!is_dir($this->config->get('templating.cache_dir'))) {
+            if (!is_writable(dirname($this->config->get('templating.cache_dir')))) {
+                throw new \Exception(
+                    "Error: System can't 'Application Cache Dir': " .
+                    $this->config->get('app.cache_dir') . "\n" .
+                    "Directory: '" . dirname($this->config->get('templating.cache_dir')) . "' is no writable."
+                );
+            }
+
+            mkdir($this->config->get('templating.cache_dir'));
+        }
     }
 }

@@ -18,9 +18,7 @@ use Alchemy\Net\Http\Response;
  */
 class Controller
 {
-    public function __construct()
-    {
-    }
+    public $view = null;
 
     public function __get($name)
     {
