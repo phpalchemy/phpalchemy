@@ -148,7 +148,7 @@ class Kernel
                 $engine = $annotationObjects['View'][0]->engine;
             }
 
-            $viewClass = sprintf('\Alchemy\Adapter\\%sView', $engine);
+            $viewClass = sprintf('\Alchemy\Adapter\\%sView', ucfirst($engine));
 
             $view = new $viewClass($template);
 

@@ -20,42 +20,42 @@ class View
      *
      * @var array
      */
-    protected $_data     = array();
+    protected $data     = array();
 
     /**
      * Contains the absolute path where the engine can found all templates
      *
      * @var string
      */
-    protected $_templateDir = '';
+    protected $templateDir = '';
 
     /**
      * Contains the absolute path where the engine store the cache files
      *
      * @var string
      */
-    protected $_cacheDir = '';
+    protected $cacheDir = '';
 
     /**
      * String to store the output string that is sent by http response
      *
      * @var string
      */
-    protected $_content  = '';
+    protected $content  = '';
 
     /**
      * Relative path of template file
      *
      * @var string
      */
-    protected $_tpl  = '';
+    protected $tpl  = '';
 
     /**
      * Cache flag to specify if templating cache is enabled or not
      *
      * @var string
      */
-    protected $_cacheEnabled = false;
+    protected $cacheEnabled = false;
 
     /**
      * @param string $tpl template file
@@ -74,7 +74,7 @@ class View
      */
     public function setTpl($tpl)
     {
-        $this->_tpl = $tpl;
+        $this->tpl = $tpl;
     }
 
     /**
@@ -82,7 +82,7 @@ class View
      */
     public function getTpl()
     {
-        return $this->_tpl;
+        return $this->tpl;
     }
 
     /**
@@ -101,7 +101,7 @@ class View
             throw new \InvalidArgumentException("Invalid data type '" .gettype($name) . "' for key.");
         }
 
-        $this->_data[$name] = $value;
+        $this->data[$name] = $value;
     }
 
     /**
@@ -112,11 +112,11 @@ class View
      */
     public function getVar($name)
     {
-        if (!isset($this->_data[$name])) {
+        if (!isset($this->data[$name])) {
             throw new \InvalidArgumentException("Variable '$name' doesn't exist.");
         }
 
-        return $this->_data[$name];
+        return $this->data[$name];
     }
 
     /**
@@ -134,17 +134,17 @@ class View
     public function getOutput()
     {
         $output = '';
-        ob_start();
+        \ob_start();
         $this->render();
-        $output = ob_get_contents();
-        ob_end_clean();
+        $output = \ob_get_contents();
+        \ob_end_clean();
 
         return $output;
     }
 
     /**
      * Render the output string
-     * Needs to override
+     * To override by childs classes
      */
     public function render()
     {
@@ -157,7 +157,7 @@ class View
      */
     public function setTemplateDir($path)
     {
-        $this->_templateDir = $path;
+        $this->templateDir = $path;
     }
 
     /**
@@ -167,7 +167,7 @@ class View
      */
     public function getTemplateDir()
     {
-        return $this->_templateDir;
+        return $this->templateDir;
     }
 
     /**
@@ -175,7 +175,7 @@ class View
      */
     public function setCacheDir($path)
     {
-        $this->_cacheDir = $path;
+        $this->cacheDir = $path;
     }
 
     /**
@@ -183,11 +183,11 @@ class View
      */
     public function getCacheDir()
     {
-        return $this->_cacheDir;
+        return $this->cacheDir;
     }
 
     public function enableCache($value)
     {
-        $this->_cacheEnabled = $value === true;
+        $this->cacheEnabled = $value === true;
     }
 }

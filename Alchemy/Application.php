@@ -36,24 +36,41 @@ use Symfony\Component\Routing\Route;
  */
 class Application
 {
-    protected $appName  = '';
-    protected $config   = null;
-    protected $appPath = '';
+    /**
+     * Contains application name identifier
+     * @var string
+     */
+    private $appName = '';
 
+    /**
+     * Contains application home absolute path
+     * @var string
+     */
+    private $appPath = '';
+
+    /**
+     * Config object that contains all applications configuration needed
+     * @var Config
+     */
+    private $config = null;
+
+    /**
+     * Construct application object
+     * @param Config $config Contains all app configuration
+     */
     public function __construct(Config $config)
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 
         // Getting app configuration
         $this->config  = $config;
-        $this->appPath = $config->getAppPath();
+        $this->appPath = $config->getAppRootDir() . DS;
 
-        $config->init();
+        // configuring and preparing application env.
         $this->configure();
         $this->prepare();
 
-
-        // including vendors autoload
+        // setting app classes to autoloader
         $classLoader = ClassLoader::getInstance();
 
         if (!$this->config->exists('app.namespace')) {
@@ -115,8 +132,7 @@ class Application
             if (!($routes instanceof RouteCollection)) {
                 throw new \InvalidArgumentException("Routes Collection is missing.");
             }
-        }
-        else if (file_exists($this->appPath . 'config' . DS . 'routes.yaml')) {
+        } else if (file_exists($this->appPath . 'config' . DS . 'routes.yaml')) {
             $yaml   = new Yaml();
             $routes = new RouteCollection();
 
@@ -125,6 +141,11 @@ class Application
             foreach ($routesList as $name => $routeConfig) {
                 $this->parseRoute($routes, $name, $routeConfig);
             }
+        } else {
+            throw new \Exception(
+                "Application Error: No routes found for this app.\n" .
+                "You need create & configure 'config/routes.yaml'"
+            );
         }
 
         return $routes;
@@ -132,9 +153,9 @@ class Application
 
     private function parseRoute(RouteCollection $collection, $name, $config)
     {
-        $defaults = isset($config['defaults']) ? $config['defaults'] : array();
+        $defaults     = isset($config['defaults'])     ? $config['defaults']     : array();
         $requirements = isset($config['requirements']) ? $config['requirements'] : array();
-        $options = isset($config['options']) ? $config['options'] : array();
+        $options      = isset($config['options'])      ? $config['options']      : array();
 
         if (!isset($config['pattern'])) {
             throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $name));
@@ -171,10 +192,11 @@ class Application
     private function prepare()
     {
         // preparing directories
+
         if (!is_dir($this->config->get('app.cache_dir'))) {
             if (!is_writable(dirname($this->config->get('app.cache_dir')))) {
                 throw new \Exception(
-                    "Error: System can't 'Application Cache Dir': " .
+                    "Error: System can't create 'Application Cache Dir': " .
                     $this->config->get('app.cache_dir') . "\n" .
                     "Directory '" . dirname($this->config->get('app.cache_dir')) . "' is no writable."
                 );
@@ -186,7 +208,7 @@ class Application
         if (!is_dir($this->config->get('templating.cache_dir'))) {
             if (!is_writable(dirname($this->config->get('templating.cache_dir')))) {
                 throw new \Exception(
-                    "Error: System can't 'Application Cache Dir': " .
+                    "Error: System can't create 'Application Cache Dir': " .
                     $this->config->get('app.cache_dir') . "\n" .
                     "Directory: '" . dirname($this->config->get('templating.cache_dir')) . "' is no writable."
                 );

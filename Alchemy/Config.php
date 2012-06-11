@@ -14,58 +14,55 @@ namespace Alchemy;
 class Config
 {
     private $config     = array();
-    private $appPath    = '';
-    private $configPath = '';
-
     private $appIniFile = '';
     private $envIniFile = '';
 
-    public function __construct()
+    public function __construct($params = array())
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
-    }
 
-    /**
-     * Init read configuration from ini files
-     */
-    public function init()
-    {
-        // prepare configuration
-        $this->prepare();
+        if (empty($params['phpalchemy']['root_dir'])) {
+            throw new \Exception("Configuration Missing: 'phpalchemy.root_dir' is not defined.");
+        }
 
-        //load configuration application ini file
-        $this->loadAppConfFile();
+        if (empty($params['app']['root_dir'])) {
+            throw new \Exception("Configuration Missing: 'app.root_dir' is not defined.");
+        }
+
+        // fix base paths
+        $params['phpalchemy']['root_dir'] = realpath($params['phpalchemy']['root_dir']);
+        //var_dump($params['phpalchemy']['root_dir']); die;
+        $params['app']['root_dir'] = realpath($params['app']['root_dir']);
+
+        $this->set('phpalchemy.root_dir', $params['phpalchemy']['root_dir']);
+        $this->set('app.root_dir', $params['app']['root_dir']);
+
+        unset($params['phpalchemy']['root_dir']);
+        unset($params['app']['root_dir']);
+
+        // load defaults configurations
+        $this->loadFromFile($this->get('phpalchemy.root_dir') . '/config/project.defaults.ini');
+
+        // load application config
+        $this->loadFromArray($params);
 
         //load configuration environment ini file
         $this->loadEnvConfFile();
     }
 
-    public function setAppPath($path)
+    public function setAppRootDir($path)
     {
-        $this->appPath = rtrim($path, DS) . DS;
+        $this->set('app.root_dir', rtrim($path, DS) . DS);
     }
 
-    public function getAppPath()
+    public function getAppRootDir()
     {
-        if (empty($this->appPath)) {
-            throw new \Exception("Missing configuration for 'Application Path'!");
-        }
-
-        return $this->appPath;
+        return $this->get('app.root_dir');
     }
 
-    public function setConfigPath($path)
+    public function getAppConfigDir()
     {
-        $this->configPath = rtrim($path, DS) . DS;
-    }
-
-    public function getConfigPath()
-    {
-        if (empty($this->configPath)) {
-            throw new \Exception("Missing configuration for 'Application Config Path'!");
-        }
-
-        return $this->configPath;
+        return $this->get('app.config_dir');
     }
 
     public function setAppIniFile($path)
@@ -90,7 +87,7 @@ class Config
     public function getEnvIniFile()
     {
         if (empty($this->envIniFile)) {
-            throw new \Exception("'Environment ini file' is missing!");
+            $this->setEnvIniFile($this->getAppConfigDir() . DS . 'env.ini');
         }
 
         return $this->envIniFile;
@@ -109,8 +106,21 @@ class Config
             throw new \Exception("Invalid configuration key.");
         }
 
-        if (is_string($value) && strpos($value, '%project_dir%') !== false) {
-            $value = str_replace('%project_dir%', rtrim($this->getAppPath(), DS), $value);
+        if (is_string($value) && preg_match('/.*\%(.+\..+)\%.*/', $value, $match)) {
+            try {
+                $value = str_replace("%{$match[1]}%", $this->get($match[1]), $value);
+            } catch(\Exception $e) {
+                throw new \Exception(
+                    "Configuration Missing for %" . $match[1] . "% for " .
+                    "key: '$name', with value: '$value'"
+                );
+            }
+
+            if (substr($name, -4) === '_dir') {
+                $value = rtrim($value, DS);
+            }
+
+            $this->config[$name] = $value;
         }
 
         $this->config[$name] = $value;
@@ -126,11 +136,11 @@ class Config
      */
     public function get($name, $default = null)
     {
-        if (empty($default) && !isset($this->config[$name])) {
-            throw new \Exception(get_class($this) . " - Configuration doesn't exist for key: $name");
+        if (empty($default) && !$this->exists($name)) {
+            throw new \Exception("Configuration Missing: '$name' is not defined.");
         }
 
-        return isset($this->config[$name]) ? $this->config[$name] : $default;
+        return $this->exists($name) ? $this->config[$name] : $default;
     }
 
     public function exists($name)
@@ -171,6 +181,11 @@ class Config
             throw new \Exception("Parse Error: File $iniFilename has errors.");
         }
 
+        $this->loadFromArray($configList);
+    }
+
+    private function loadFromArray($configList)
+    {
         foreach ($configList as $section => $config) {
             foreach ($config as $key => $value) {
                 $this->set("$section.$key", $value);
@@ -178,18 +193,8 @@ class Config
         }
     }
 
-    private function prepare()
+    public function getAll()
     {
-        if (empty($this->configPath)) {
-            $this->setConfigPath($this->getAppPath() . 'config' . DS);
-        }
-
-        if (empty($this->appIniFile)) {
-            $this->setAppIniFile($this->getConfigPath() . 'application.ini');
-        }
-
-        if (empty($this->envIniFile)) {
-            $this->setEnvIniFile($this->getConfigPath() . 'env.ini');
-        }
+        return $this->config;
     }
 }

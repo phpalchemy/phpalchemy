@@ -29,10 +29,10 @@ class SmartyView extends \Alchemy\Mvc\View
         }
     }
 
-    public function setCachePath($path)
+    public function setCacheDir($path)
     {
-        $this->smarty->compile_dir = $path . 'smarty' . DS . 'compiled' . DS;
-        $this->smarty->cache_dir   = $path . 'smarty' . DS . 'cache' . DS;
+        $this->smarty->compile_dir = $path . 'compiled' . DS;
+        $this->smarty->cache_dir   = $path . 'cache' . DS;
 
         if  (!is_dir($this->smarty->compile_dir)) {
             if (!@mkdir($this->smarty->compile_dir)) {
@@ -47,7 +47,7 @@ class SmartyView extends \Alchemy\Mvc\View
         }
     }
 
-    public function getCachePath()
+    public function getCacheDir()
     {
         return $this->smarty->cache_dir;
     }
@@ -63,7 +63,7 @@ class SmartyView extends \Alchemy\Mvc\View
 
     public function render()
     {
-        $this->smarty->display($this->getTemplateDir() . $this->getTpl());
+        $this->smarty->display($this->getTpl());
     }
 }
 
