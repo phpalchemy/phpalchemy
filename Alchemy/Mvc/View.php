@@ -173,9 +173,15 @@ class View
     /**
      * @param string $path cache directory path
      */
-    public function setCacheDir($path)
+    public function setCacheDir($dir)
     {
-        $this->cacheDir = $path;
+        $this->cacheDir = $dir;
+
+        if  (!is_dir($this->cacheDir)) {
+            if (!@mkdir($this->cacheDir)) {
+                throw new \Exception("Could't create template engine cache directory: '$dir'");
+            }
+        }
     }
 
     /**

@@ -54,7 +54,7 @@ class SmartyView extends \Alchemy\Mvc\View
 
     public function enableCache($value)
     {
-        $this->smarty->caching = $value === true;
+        $this->smarty->caching = $value;
 
         if ($this->smarty->caching) {
             $this->smarty->cache_lifetime = 120;

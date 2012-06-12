@@ -64,15 +64,28 @@ class Kernel
     public function handle(Request $request)
     {
         $viewData = array();
+
         try {
             $requestParams  = $this->matcher->match($request->getPathInfo());
             $requestParams  = array_merge($requestParams, $request->query->all());
-            $controllerName = str_replace(' ', '', ucwords(str_replace('_', ' ', $requestParams['_controller'])));
+
+            if (strpos($requestParams['_controller'], '_') === false) {
+                $requestParams['_controller'] = ucfirst($requestParams['_controller']);
+            } else {
+                $requestParams['_controller'] = str_replace(
+                    ' ', '', ucwords(str_replace('_', ' ', $requestParams['_controller']))
+                );
+            }
+
+            if (strpos($requestParams['_action'], '_') !== false) {
+                $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $requestParams['_action'])));
+                $requestParams['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
+            }
 
             $this->controllerMeta['class'] = sprintf(
                 '\\%s\\Controller\\%sController',
                 $this->config->get('app.namespace'),
-                $controllerName
+                $requestParams['_controller']
             );
 
             $this->controllerMeta['method'] = $requestParams['_action'] . 'Action';
@@ -92,14 +105,10 @@ class Kernel
             $response = call_user_func_array($controller, $arguments);
             $controllerObject = $controller[0];
 
-            // if action() returns array data for template
-            if (is_array($response)) {
-                // returns view data
+            if (is_array($response)) { // if returns a array with data for template
                 $viewData = $response;
-            }
-            // if action() had not returned any value
-            else if ($response === null) {
-                // if the response object was built in action
+            } elseif ($response === null) { // if doesn't return any value
+                // if response object was built in action
                 if (isset($controllerObject->response)) {
                     $response = $controllerObject->response;
                 }
@@ -110,16 +119,16 @@ class Kernel
                 $response = new Response();
             }
 
+            $view = $this->handleView(array_merge($viewData, (array) $controllerObject->view));
+
+            if (!empty($view)) {
+                $response->setContent($view->getOutput());
+            }
+
         } catch (ResourceNotFoundException $e) {
             $response = new Response($e->getMessage(), 404);
         } catch (\Exception $e) {
             $response = new Response('<pre>'.$e->getMessage().'<br/>'.$e->getTraceAsString(), 500);
-        }
-
-        $view = $this->handleView(array_merge($viewData, (array) $controllerObject->view));
-
-        if (!empty($view)) {
-            $response->setContent($view->getOutput());
         }
         // dispatch a response event
         //$this->dispatcher->dispatch('response', new ResponseEvent($response, $request));
@@ -130,9 +139,14 @@ class Kernel
 
     private function handleView($data)
     {
-        $annotation  = new Annotations();
+        $annotation   = new Annotations();
+        $templateDir  = $this->config->get('app.views_dir') . DS;
+        $cacheDir     = $this->config->get('templating.cache_dir') . DS;
+        $cacheEnabled = $this->config->get('templating.cache_enabled');
+        $extension    = $this->config->get('templating.extension');
+        $view         = null;
+
         $annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
-        $view = null;
 
         $annotationObjects = $annotation->getMethodAnnotationsObjects(
             $this->controllerMeta['class'],
@@ -141,20 +155,42 @@ class Kernel
 
         if (isset($annotationObjects['View'])) {
             $template = $annotationObjects['View'][0]->template;
+            $engine   = $this->config->get('templating.default_engine');
 
-            if (empty($annotationObjects['View'][0]->engine)) {
-                $engine = $this->config->get('templating.default_engine');
-            } else {
+            // setting template engine
+            if (!empty($annotationObjects['View'][0]->engine)) {
                 $engine = $annotationObjects['View'][0]->engine;
+            }
+
+            if (empty($template)) { //template filename empty
+                // use the controller class and method names to compose the template path
+                // removing ...Controller & ..Action from their names
+                $nsSepPos  = strrpos($this->controllerMeta['class'], '\\');
+                $template  = substr($this->controllerMeta['class'], $nsSepPos + 1, -10) . DS;
+                $template .= substr($this->controllerMeta['method'], 0, -6);
+            }
+
+            // file extension validation
+            if (strpos($template, '.') === false && !empty($extension)) {
+                $template .= '.' . $extension;
+            }
+
+            // if the view annotation was defined bug the template doesn't exist
+            if (file_exists($templateDir . $template)) { // throws an exception
+
+            } elseif (file_exists($template)) {
+
+            } else {
+                throw new \Exception("Error, File Not Found: tamplate file doesn't exist: '$template'");
             }
 
             $viewClass = sprintf('\Alchemy\Adapter\\%sView', ucfirst($engine));
 
             $view = new $viewClass($template);
 
-            $view->setCacheDir($this->config->get('templating.cache_dir'));
-            $view->setTemplateDir($this->config->get('templating.templates_dir'));
-            $view->enableCache(false);
+            $view->setCacheDir($cacheDir);
+            $view->setTemplateDir($templateDir);
+            $view->enableCache($cacheEnabled);
 
             foreach ($data as $key => $value) {
                 $view->assign($key, $value);

@@ -31,8 +31,7 @@ class Config
 
         // fix base paths
         $params['phpalchemy']['root_dir'] = realpath($params['phpalchemy']['root_dir']);
-        //var_dump($params['phpalchemy']['root_dir']); die;
-        $params['app']['root_dir'] = realpath($params['app']['root_dir']);
+        $params['app']['root_dir']        = realpath($params['app']['root_dir']);
 
         $this->set('phpalchemy.root_dir', $params['phpalchemy']['root_dir']);
         $this->set('app.root_dir', $params['app']['root_dir']);
@@ -52,7 +51,7 @@ class Config
 
     public function setAppRootDir($path)
     {
-        $this->set('app.root_dir', rtrim($path, DS) . DS);
+        $this->set('app.root_dir', $path);
     }
 
     public function getAppRootDir()

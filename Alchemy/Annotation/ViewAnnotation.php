@@ -15,6 +15,8 @@ class ViewAnnotation
                 $this->template = $param['template'];
             } elseif (isset($param['tpl'])) { // short name
                 $this->template = $param['tpl'];
+            } elseif (isset($param['file'])) { // short name
+                $this->template = $param['file'];
             }
 
             if (isset($param['engine'])) {

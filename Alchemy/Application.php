@@ -168,25 +168,25 @@ class Application
 
     private function configure()
     {
-        if (!$this->config->exists('app.cache_dir')) {
-            $this->config->set('app.cache_dir', $this->appPath . 'cache');
-        }
+        // if (!$this->config->exists('app.cache_dir')) {
+        //     $this->config->set('app.cache_dir', $this->appPath . 'cache');
+        // }
 
-        if (!$this->config->exists('templating.templates_dir')) {
-            $this->config->set('templating.templates_dir', $this->appPath . 'app' . DS . 'views' . DS);
-        }
+        // if (!$this->config->exists('templating.templates_dir')) {
+        //     $this->config->set('templating.templates_dir', $this->appPath . 'app' . DS . 'views' . DS);
+        // }
 
-        if (!$this->config->exists('tempating.default_engine')) {
-            $this->config->set('tempating.default_engine', 'smarty');
-        }
+        // if (!$this->config->exists('tempating.default_engine')) {
+        //     $this->config->set('tempating.default_engine', 'smarty');
+        // }
 
-        if (!$this->config->exists('templating.cache_dir')) {
-            $this->config->set('templating.cache_dir', $this->config->get('app.cache_dir'));
-        }
+        // if (!$this->config->exists('templating.cache_dir')) {
+        //     $this->config->set('templating.cache_dir', $this->config->get('app.cache_dir'));
+        // }
 
-        // fix paths
-        $this->config->set('app.cache_dir', rtrim($this->config->get('app.cache_dir'), DS) . DS);
-        $this->config->set('templating.cache_dir', rtrim($this->config->get('templating.cache_dir'), DS) . DS);
+        // // fix paths
+        // $this->config->set('app.cache_dir', rtrim($this->config->get('app.cache_dir'), DS) . DS);
+        // $this->config->set('templating.cache_dir', rtrim($this->config->get('templating.cache_dir'), DS) . DS);
     }
 
     private function prepare()
