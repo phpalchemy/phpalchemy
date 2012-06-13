@@ -3,9 +3,9 @@ namespace Alchemy\Adapter;
 
 class SmartyView extends \Alchemy\Mvc\View
 {
-    private $smarty;
+    protected $smarty;
 
-    public function __construct($tpl = NULL)
+    public function __construct($tpl = '')
     {
         require_once '3rd-party/smarty/libs/Smarty.class.php';
         parent::__construct($tpl);
@@ -17,16 +17,7 @@ class SmartyView extends \Alchemy\Mvc\View
     public function setTemplateDir($dir)
     {
         parent::setTemplateDir($dir);
-        $this->smarty->template_dir = $dir;
-    }
-
-    public function assign($key, $value)
-    {
-        parent::assign($key, $value);
-
-        if (is_string($key)) {
-            $this->smarty->assign($key, $this->getVar($key));
-        }
+        $this->smarty->template_dir = $this->getTemplateDir();
     }
 
     public function setCacheDir($path)
@@ -54,11 +45,40 @@ class SmartyView extends \Alchemy\Mvc\View
 
     public function enableCache($value)
     {
-        $this->smarty->caching = $value;
+        parent::enableCache($value);
+        $this->smarty->caching = $this->cache;
 
-        if ($this->smarty->caching) {
+        if ($this->cache) {
             $this->smarty->cache_lifetime = 120;
         }
+    }
+
+    public function enableDebug($value)
+    {
+        parent::enableDebug($value);
+        $this->smarty->debugging = $this->debug;
+    }
+
+    public function setCharset($charset)
+    {
+        parent::setCharset($charset);
+        \Smarty::$_CHARSET = $this->charset;
+    }
+
+
+    public function assign($name, $value = null)
+    {
+        parent::assign($name, $value);
+
+        if (is_string($name)) {
+            return $this->smarty->assign($name, $value);
+        }
+
+        if (is_array($name)) {
+            return $this->assignFromArray($name);
+        }
+
+        throw new \InvalidArgumentException("Invalid data type for key, '" .gettype($name) . "' given.");
     }
 
     public function render()
