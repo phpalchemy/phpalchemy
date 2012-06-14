@@ -12,6 +12,8 @@ namespace Alchemy;
 
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 use Alchemy\Component\ClassLoader;
+use Alchemy\Kernel\EventListener;
+use Alchemy\Kernel\Kernel;
 use Alchemy\Mvc\ControllerResolver;
 use Alchemy\Net\Http\Request;
 use Alchemy\Net\Http\Response;
@@ -67,8 +69,8 @@ class Application
         $this->appPath = $config->getAppRootDir() . DS;
 
         // configuring and preparing application env.
-        $this->configure();
-        $this->prepare();
+        // $this->configure();
+        // $this->prepare();
 
         // setting app classes to autoloader
         $classLoader = ClassLoader::getInstance();
@@ -109,7 +111,9 @@ class Application
         $resolver   = new ControllerResolver();
         $dispatcher = new EventDispatcher();
 
-        //$dispatcher->addSubscriber(new Simplex\ContentLengthListener());
+        // subscribing evenyts
+        $dispatcher->addSubscriber(new EventListener\ControllerListener());
+        $dispatcher->addSubscriber(new EventListener\ViewHandlerListener());
 
         $framework = new Kernel($dispatcher, $matcher, $resolver, $this->config);
 
@@ -166,55 +170,55 @@ class Application
         $collection->add($name, $route);
     }
 
-    private function configure()
-    {
-        // if (!$this->config->exists('app.cache_dir')) {
-        //     $this->config->set('app.cache_dir', $this->appPath . 'cache');
-        // }
+    // private function configure()
+    // {
+    //     if (!$this->config->exists('app.cache_dir')) {
+    //         $this->config->set('app.cache_dir', $this->appPath . 'cache');
+    //     }
 
-        // if (!$this->config->exists('templating.templates_dir')) {
-        //     $this->config->set('templating.templates_dir', $this->appPath . 'app' . DS . 'views' . DS);
-        // }
+    //     if (!$this->config->exists('templating.templates_dir')) {
+    //         $this->config->set('templating.templates_dir', $this->appPath . 'app' . DS . 'views' . DS);
+    //     }
 
-        // if (!$this->config->exists('tempating.default_engine')) {
-        //     $this->config->set('tempating.default_engine', 'smarty');
-        // }
+    //     if (!$this->config->exists('tempating.default_engine')) {
+    //         $this->config->set('tempating.default_engine', 'smarty');
+    //     }
 
-        // if (!$this->config->exists('templating.cache_dir')) {
-        //     $this->config->set('templating.cache_dir', $this->config->get('app.cache_dir'));
-        // }
+    //     if (!$this->config->exists('templating.cache_dir')) {
+    //         $this->config->set('templating.cache_dir', $this->config->get('app.cache_dir'));
+    //     }
 
-        // // fix paths
-        // $this->config->set('app.cache_dir', rtrim($this->config->get('app.cache_dir'), DS) . DS);
-        // $this->config->set('templating.cache_dir', rtrim($this->config->get('templating.cache_dir'), DS) . DS);
-    }
+    //     // fix paths
+    //     $this->config->set('app.cache_dir', rtrim($this->config->get('app.cache_dir'), DS) . DS);
+    //     $this->config->set('templating.cache_dir', rtrim($this->config->get('templating.cache_dir'), DS) . DS);
+    // }
 
-    private function prepare()
-    {
-        // preparing directories
+    // private function prepare()
+    // {
+    //     // preparing directories
 
-        if (!is_dir($this->config->get('app.cache_dir'))) {
-            if (!is_writable(dirname($this->config->get('app.cache_dir')))) {
-                throw new \Exception(
-                    "Error: System can't create 'Application Cache Dir': " .
-                    $this->config->get('app.cache_dir') . "\n" .
-                    "Directory '" . dirname($this->config->get('app.cache_dir')) . "' is no writable."
-                );
-            }
+    //     if (!is_dir($this->config->get('app.cache_dir'))) {
+    //         if (!is_writable(dirname($this->config->get('app.cache_dir')))) {
+    //             throw new \Exception(
+    //                 "Error: System can't create 'Application Cache Dir': " .
+    //                 $this->config->get('app.cache_dir') . "\n" .
+    //                 "Directory '" . dirname($this->config->get('app.cache_dir')) . "' is no writable."
+    //             );
+    //         }
 
-            mkdir($this->config->get('app.cache_dir'));
-        }
+    //         mkdir($this->config->get('app.cache_dir'));
+    //     }
 
-        if (!is_dir($this->config->get('templating.cache_dir'))) {
-            if (!is_writable(dirname($this->config->get('templating.cache_dir')))) {
-                throw new \Exception(
-                    "Error: System can't create 'Application Cache Dir': " .
-                    $this->config->get('app.cache_dir') . "\n" .
-                    "Directory: '" . dirname($this->config->get('templating.cache_dir')) . "' is no writable."
-                );
-            }
+    //     if (!is_dir($this->config->get('templating.cache_dir'))) {
+    //         if (!is_writable(dirname($this->config->get('templating.cache_dir')))) {
+    //             throw new \Exception(
+    //                 "Error: System can't create 'Application Cache Dir': " .
+    //                 $this->config->get('app.cache_dir') . "\n" .
+    //                 "Directory: '" . dirname($this->config->get('templating.cache_dir')) . "' is no writable."
+    //             );
+    //         }
 
-            mkdir($this->config->get('templating.cache_dir'));
-        }
-    }
+    //         mkdir($this->config->get('templating.cache_dir'));
+    //     }
+    // }
 }

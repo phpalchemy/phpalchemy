@@ -16,6 +16,7 @@ use Alchemy\Net\Http\Response;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
  */
+
 class Controller
 {
     public $view = null;
@@ -35,4 +36,13 @@ class Controller
         }
     }
 
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+    }
 }
