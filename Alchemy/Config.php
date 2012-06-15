@@ -13,9 +13,11 @@ namespace Alchemy;
  */
 class Config
 {
-    private $config     = array();
-    private $appIniFile = '';
-    private $envIniFile = '';
+    protected $config     = array();
+    protected $appIniFile = '';
+    protected $envIniFile = '';
+
+    private static $appDefaultsIniFile = 'defaults.application.ini';
 
     public function __construct($params = array())
     {
@@ -40,7 +42,7 @@ class Config
         unset($params['app']['root_dir']);
 
         // load defaults configurations
-        $this->loadFromFile($this->get('phpalchemy.root_dir') . '/config/project.defaults.ini');
+        $this->loadFromFile($this->get('phpalchemy.root_dir').DS.'config'.DS.self::$appDefaultsIniFile);
 
         // load application config
         $this->loadFromArray($params);

@@ -1,13 +1,31 @@
 <?php
-/*namespace Alchemy\Net\Http;
+/*
+ * This file is part of the phpalchemy package.
+ *
+ * (c) Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-class Request extends \Symfony\Component\HttpFoundation\Request
-{
-
-}*/
+/*
+ * This Class is a simplified version of \Symfony\Component\HttpFoundation\Request
+ * Code subject to the MIT license
+ * Copyright (c) 2004-2012 Fabien Potencier
+ */
 
 namespace Alchemy\Net\Http;
 
+/**
+ * Class Request
+ *
+ * @version   1.0
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/phpalchemy
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   phpalchemy
+ */
 class Request
 {
     static protected $trustProxy   = false;
@@ -326,6 +344,12 @@ class Request
         return $this->requestUri;
     }
 
+    /*
+     * The following methods are derived from code of the Zend Framework (1.10dev - 2010-01-24)
+     *
+     * Code subject to the new BSD license (http://framework.zend.com/license/new-bsd).
+     * Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+     */
     protected function prepareRequestUri()
     {
         $requestUri = '';

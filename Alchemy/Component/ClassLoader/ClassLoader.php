@@ -2,10 +2,17 @@
 namespace Alchemy\Component;
 
 /**
+ * Class Route
+ *
  * SplClassLoader implementation that implements the technical interoperability
  * standards for PHP 5.3 namespaces and class names.
  *
- * @author Erik Amaru Ortiz <aortiz.erik@gmail.org>
+ * @version   1.0
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/phpalchemy
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   Alchemy/Component/ClassLoader
  */
 class ClassLoader
 {

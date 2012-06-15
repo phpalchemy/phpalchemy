@@ -19,9 +19,9 @@ use Alchemy\Net\Http\Request;
 use Alchemy\Net\Http\Response;
 use Alchemy\Util\Yaml;
 
-use Symfony\Component\Routing;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\Route;
+// use Symfony\Component\Routing;
+// use Symfony\Component\Routing\RouteCollection;
+// use Symfony\Component\Routing\Route;
 
 use Alchemy\Component\Routing\Mapper;
 
@@ -44,19 +44,26 @@ class Application
      * Contains application name identifier
      * @var string
      */
-    private $appName = '';
+    protected $appName = '';
 
     /**
-     * Contains application home absolute path
+     * Contains application root directory
      * @var string
      */
-    private $appPath = '';
+    protected $appRootDir = '';
+
+    /**
+     * Application Namespace
+     * @var string
+     */
+    protected $namespace = '';
 
     /**
      * Config object that contains all applications configuration needed
      * @var Config
      */
-    private $config = null;
+    protected $config = null;
+
 
     /**
      * Construct application object
@@ -66,13 +73,11 @@ class Application
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 
-        // Getting app configuration
-        $this->config  = $config;
-        $this->appPath = $config->getAppRootDir() . DS;
+        // getting app configuration
+        $this->config     = $config;
+        $this->appRootDir = realpath($config->getAppRootDir()) . DS;
 
-        // configuring and preparing application env.
-        // $this->configure();
-        // $this->prepare();
+        $this->namespace  = $config->get('app.namespace');
 
         // setting app classes to autoloader
         $classLoader = ClassLoader::getInstance();
@@ -81,10 +86,10 @@ class Application
             throw new \Exception("Configuration Missing: namespace is not set on " . $config->getAppIniFile());
         }
 
-        // registering the aplication namespace
+        // registering the aplication namespace to SPL ClassLoader
         $classLoader->register(
             $this->appName,
-            realpath($this->appPath . 'app') . DS,
+            $config->get('app.app_dir') . DS,
             $config->get('app.namespace')
         );
     }
@@ -94,61 +99,38 @@ class Application
      */
     public function run()
     {
-        $request = Request::createFromGlobals();
-
-        $context = new Routing\RequestContext();
-
-        // $context->fromRequest($request); this function "fromRequest()" is available only on dev branch
-        // Compatibility for v2.0.14 (next 6 lines)
-        $context->setBaseUrl($request->getBaseUrl());
-        $context->setMethod($request->getMethod());
-        $context->setHost($request->getHost());
-        $context->setScheme($request->getScheme());
-        $context->setHttpPort($request->isSecure() ? $context->httpPort : $request->getPort());
-        $context->setHttpsPort($request->isSecure() ? $request->getPort() : $context->getHttpsPort());
-        /////////
-
-        //$routes     = $this->getRoutes();
-        //$matcher    = new Routing\Matcher\UrlMatcher($routes, $context);
-
-        $matcher    = $this->getRoutes();
-
-        $resolver   = new ControllerResolver();
         $dispatcher = new EventDispatcher();
+        $resolver   = new ControllerResolver();
+        $request    = Request::createFromGlobals();
+        $mapper     = $this->loadMapper();
 
         // subscribing evenyts
         $dispatcher->addSubscriber(new EventListener\ControllerListener());
         $dispatcher->addSubscriber(new EventListener\ViewHandlerListener());
 
-        $framework = new Kernel($dispatcher, $matcher, $resolver, $this->config);
+        // Create a Kernel instance to manage the application
+        $framework = new Kernel($dispatcher, $mapper, $resolver, $this->config);
 
-        /**
-         * The HttpCache class implements a fully-featured reverse proxy,
-         * it implements HttpKernelInterface and wraps another HttpKernelInterface instance:
-         */
-        //$framework = new HttpCache($framework, new Store(__DIR__.'/../cache'));
+        // retrieve the response object from kernel's handler
+        $response  = $framework->handle($request);
 
-        $response = $framework->handle($request);
-
+        // send response to the client
         $response->send();
     }
 
-    private function getRoutes()
+    private function loadMapper()
     {
-        if (file_exists($this->appPath . 'config' . DS . 'routes.php')) {
-            $routes = include $this->appPath . 'config' . DS . 'routes.php';
+        if (file_exists($this->appRootDir . 'config' . DS . 'routes.php')) {
+            $routes = include $this->appRootDir . 'config' . DS . 'routes.php';
 
-            // if (!($routes instanceof RouteCollection)) {
-            //     throw new \InvalidArgumentException("Routes Collection is missing.");
-            // }
             if (!($routes instanceof Mapper)) {
-                throw new \InvalidArgumentException("Routes Collection is missing.");
+                throw new \InvalidArgumentException("Routing Mapper is missing.");
             }
-        } else if (file_exists($this->appPath . 'config' . DS . 'routes.yaml')) {
+        } else if (file_exists($this->appRootDir . 'config' . DS . 'routes.yaml')) {
             $yaml   = new Yaml();
             $routes = new RouteCollection();
 
-            $routesList = $yaml->loadFile($this->appPath . 'config' . DS . 'routes.yaml');
+            $routesList = $yaml->loadFile($this->appRootDir . 'config' . DS . 'routes.yaml');
 
             foreach ($routesList as $name => $routeConfig) {
                 $this->parseRoute($routes, $name, $routeConfig);
@@ -177,56 +159,4 @@ class Application
 
         $collection->add($name, $route);
     }
-
-    // private function configure()
-    // {
-    //     if (!$this->config->exists('app.cache_dir')) {
-    //         $this->config->set('app.cache_dir', $this->appPath . 'cache');
-    //     }
-
-    //     if (!$this->config->exists('templating.templates_dir')) {
-    //         $this->config->set('templating.templates_dir', $this->appPath . 'app' . DS . 'views' . DS);
-    //     }
-
-    //     if (!$this->config->exists('tempating.default_engine')) {
-    //         $this->config->set('tempating.default_engine', 'smarty');
-    //     }
-
-    //     if (!$this->config->exists('templating.cache_dir')) {
-    //         $this->config->set('templating.cache_dir', $this->config->get('app.cache_dir'));
-    //     }
-
-    //     // fix paths
-    //     $this->config->set('app.cache_dir', rtrim($this->config->get('app.cache_dir'), DS) . DS);
-    //     $this->config->set('templating.cache_dir', rtrim($this->config->get('templating.cache_dir'), DS) . DS);
-    // }
-
-    // private function prepare()
-    // {
-    //     // preparing directories
-
-    //     if (!is_dir($this->config->get('app.cache_dir'))) {
-    //         if (!is_writable(dirname($this->config->get('app.cache_dir')))) {
-    //             throw new \Exception(
-    //                 "Error: System can't create 'Application Cache Dir': " .
-    //                 $this->config->get('app.cache_dir') . "\n" .
-    //                 "Directory '" . dirname($this->config->get('app.cache_dir')) . "' is no writable."
-    //             );
-    //         }
-
-    //         mkdir($this->config->get('app.cache_dir'));
-    //     }
-
-    //     if (!is_dir($this->config->get('templating.cache_dir'))) {
-    //         if (!is_writable(dirname($this->config->get('templating.cache_dir')))) {
-    //             throw new \Exception(
-    //                 "Error: System can't create 'Application Cache Dir': " .
-    //                 $this->config->get('app.cache_dir') . "\n" .
-    //                 "Directory: '" . dirname($this->config->get('templating.cache_dir')) . "' is no writable."
-    //             );
-    //         }
-
-    //         mkdir($this->config->get('templating.cache_dir'));
-    //     }
-    // }
 }

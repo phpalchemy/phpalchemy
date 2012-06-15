@@ -11,11 +11,16 @@
 namespace Alchemy\Component\Routing;
 
 /**
- * Route url string for a given pattern
+ * Class Route
  *
- * @author Erik Amaru ortiz <aortiz.erik@gmail.com>
- * @version 1.0
- * @package Routing
+ * This class match http url strings for a pattern given
+ *
+ * @version   1.0
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/phpalchemy
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   Alchemy/Component/Routing
  */
 class Route
 {

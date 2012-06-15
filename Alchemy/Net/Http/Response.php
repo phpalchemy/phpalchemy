@@ -1,11 +1,31 @@
 <?php
+/*
+ * This file is part of the phpalchemy package.
+ *
+ * (c) Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+/*
+ * This Class is a simplified version of \Symfony\Component\HttpFoundation\Response
+ * Code subject to the MIT license
+ * Copyright (c) 2004-2012 Fabien Potencier
+ */
+
 namespace Alchemy\Net\Http;
 
-/*class Response extends \Symfony\Component\HttpFoundation\Response
-{
-
-}*/
-
+/**
+ * Class Response
+ *
+ * @version   1.0
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/phpalchemy
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   phpalchemy
+ */
 class Response
 {
     public $headers;

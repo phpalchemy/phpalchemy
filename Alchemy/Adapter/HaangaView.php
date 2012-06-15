@@ -7,7 +7,7 @@ class HaangaView extends \Alchemy\Mvc\View
     {
         parent::__construct($tpl);
 
-        require "Haanga/lib/Haanga.php";
+        require "crodas/Haanga/lib/Haanga.php";
     }
 
     //Wrapped
