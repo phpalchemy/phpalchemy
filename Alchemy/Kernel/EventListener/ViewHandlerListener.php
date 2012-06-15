@@ -3,16 +3,18 @@ namespace Alchemy\Kernel\EventListener;
 
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Kernel\Event\ViewEvent;
-use Alchemy\Net\Http\Response;
 use Alchemy\Kernel\KernelEvents;
+use Alchemy\Net\Http\Response;
 use Alchemy\Util\Annotations;
 
 class ViewHandlerListener implements EventSubscriberInterface
 {
-    public function __construct()
-    {
-    }
-
+    /**
+     * This method hadle the View layer at MVC Patter
+     *
+     * @param  ViewEvent $event event that contains all information to build
+     *                          a adapter of supported template engines
+     */
     public function onViewHandling(ViewEvent $event)
     {
         // create Annotation object to read controller's method annotations
@@ -100,6 +102,11 @@ class ViewHandlerListener implements EventSubscriberInterface
         $event->setView($view);
     }
 
+    /**
+     * Static method that returns all subscribed events on this listener
+     *
+     * @return array subscribed events
+     */
     static public function getSubscribedEvents()
     {
         return array(KernelEvents::VIEW => array('onViewHandling'));

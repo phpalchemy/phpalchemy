@@ -19,25 +19,31 @@ use Alchemy\Net\Http\Response;
 
 class Controller
 {
+    /**
+     * Meta object to store all data that will use on templates
+     * @var [type]
+     */
     public $view = null;
 
-    public function __get($name)
+    protected $reponse = null;
+    protected $request = null;
+
+    public function setRequest(Request $request)
     {
-        if ($name == 'request') {
-            $this->request = new Request();
+        $this->request = $request;
+    }
 
-            return $this->request;
-        }
-
-        if ($name == 'response') {
-            $this->response = new Response();
-
-            return $this->response;
-        }
+    public function getRequest()
+    {
+        return $this->request;
     }
 
     public function getResponse()
     {
+        if (empty($this->response)) {
+            $this->response = new Response();
+        }
+
         return $this->response;
     }
 

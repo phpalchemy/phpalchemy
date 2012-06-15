@@ -114,26 +114,22 @@ class Kernel implements KernelInterface
 
             $arguments = $this->resolver->getArguments($request, $controller);
 
-
-            // call handleController() that resturns an Response object
-            // if the controller or action does not exists it throws an exception
-
-            //WRAPPED by event
-            //$response = $this->handleController();
-
+            // creating controllerEvent instance
             $controllerEvent = new ControllerEvent($this, $controller, $arguments, $request);
+
+            // dispatch all KernelEvents::CONTROLLER events
             $this->dispatcher->dispatch(KernelEvents::CONTROLLER, $controllerEvent);
 
             $controller = $controllerEvent->getController();
 
-            // handle view and gets the view output
-            // if template file or engine doesn't exist it throws an exception
-
-            ///////$viewOutput = $this->handleView(((array) $controller[0]->view));
             $data = (array) $controller[0]->view;
+            // creating viewEvent instance
             $viewEvent = new ViewEvent($this, $data, $controllerMeta, $this->config, $request);
+
+            // dispatch all KernelEvents::VIEW events
             $this->dispatcher->dispatch(KernelEvents::VIEW, $viewEvent);
 
+            // getting Response instance
             $response = $controller[0]->getResponse();
             $view = $viewEvent->getView();
 
