@@ -25,11 +25,11 @@ class Route
     protected $defaults;
     protected $requirements;
     protected $urlString;
-    protected $success;
+
     protected $type;
     protected $resourcePath;
 
-    public $result;
+    public $parameters = array();
 
     public function __construct($pattern = null, $defaults = null, $requirements = null, $type = null, $resourcePath = null)
     {
@@ -42,8 +42,7 @@ class Route
         $this->setRequirements($requirements ? $requirements : Array());
 
         $this->type    = $type;
-        $this->success = false;
-        $this->result  = array();
+        $this->parameters  = array();
 
         $this->resourcePath = $resourcePath;
 
@@ -113,52 +112,30 @@ class Route
     {
         $this->urlString = urldecode($urlString);
 
-        $this->success = (bool) preg_match("/^{$this->realPattern}$/", $this->urlString, $compiledMatches);
-
-        if ($this->success) {
-            if (!(isset($this->vars[1]) && count($compiledMatches) >= count($this->vars[1]))) {
-                throw new Exception("Error while matching result, url string given: '$urlString'");
-            }
-
-            $varValues = array_slice($compiledMatches, 1);
-
-            foreach ($this->vars[1] as $i => $varName) {
-                $this->result[$varName] = $varValues[$i];
-                unset($varValues[$i]);
-            }
-
-            foreach ($varValues as $varValue) {
-                if (substr($varValue, 0, 1) != '?') {
-                    $this->result[] = $varValue;
-                }
-            }
-
-            $this->result = array_merge($this->defaults, $this->result);
-
-            if (strpos($this->urlString, '?') !== false) {
-                $params = array();
-                list($pattern, $urlParams) = explode('?', $this->urlString);
-                $urlParams = explode('&', $urlParams);
-
-                foreach ($urlParams as $urlParam) {
-                    list($var, $val) = explode('=', $urlParam);
-                    $params[htmlspecialchars(urldecode($var))] = htmlspecialchars(urldecode($val));
-                }
-                $this->result = array_merge($this->result, $params);
-            }
+        if (!preg_match('/^'.$this->realPattern.'$/', $this->urlString, $compiledMatches)) {
+            return false;
         }
-        //var_dump($this->result);
-        //var_dump($this->getType());
-        if ($this->result) {
-            if ($this->getType() == 'resource') {
-                if (!isset($this->result['file'])) {
-                    throw new \Exception("The \$file var on pattern was not set for resource type");
-                }
-                $this->result = rtrim($this->resourcePath, DS) . DS . $this->result['file'];
+
+        if (!(isset($this->vars[1]) && count($compiledMatches) >= count($this->vars[1]))) {
+            throw new \Exception("Error while matching parameters, url string given: '$urlString'");
+        }
+
+        $varValues = array_slice($compiledMatches, 1);
+
+        foreach ($this->vars[1] as $i => $varName) {
+            $this->parameters[$varName] = $varValues[$i];
+            unset($varValues[$i]);
+        }
+
+        foreach ($varValues as $varValue) {
+            if (substr($varValue, 0, 1) != '?') {
+                $this->parameters[] = $varValue;
             }
         }
 
-        return $this->success;
+        $this->parameters = array_merge($this->defaults, $this->parameters);
+
+        return $this->parameters;
     }
 }
 

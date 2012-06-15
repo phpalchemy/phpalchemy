@@ -22,8 +22,10 @@ use Alchemy\Net\Http\Request;
 use Alchemy\Net\Http\Response;
 use Alchemy\Config;
 
-use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+//use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
+use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
+
+use Alchemy\Component\Routing\Mapper;
 
 /**
  * Class Kernel
@@ -57,7 +59,7 @@ class Kernel implements KernelInterface
      * @param ControllerResolver  $resolver   Controller resolver object.
      * @param Config              $config     Configuration object.
      */
-    public function __construct(EventDispatcher $dispatcher, UrlMatcherInterface $matcher, ControllerResolver $resolver, Config $config)
+    public function __construct(EventDispatcher $dispatcher, Mapper $matcher, ControllerResolver $resolver, Config $config)
     {
         $this->matcher    = $matcher;
         $this->resolver   = $resolver;

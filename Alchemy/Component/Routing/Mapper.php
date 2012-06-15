@@ -20,61 +20,39 @@ namespace Alchemy\Component\Routing;
 
 class Mapper
 {
-    public $routeList; // routes list
-    public $routePreferredList;
-    public $route; // for matched route
+    public $routes = array();
 
     public function __construct()
     {
-        $this->routeList          = Array();
-        $this->routePreferredList = Array();
     }
 
-    public function connect($name, $pattern, $defaults = null, $requirements = null, $type = null, $resourcePath = null)
+    public function connect($name, Route $route)
     {
-        if ($type == 'resource') {
-            $this->routePreferredList[] = array(
-                'name'  => $name,
-                'route' => new Route($pattern, $defaults, $requirements, $type, $resourcePath)
-            );
-        } else {
-            $this->routeList[] = array(
-                'name'  => $name,
-                'route' => new Route($pattern, $defaults, $requirements)
-            );
-        }
+        $this->routes[$name] = $route;
     }
 
     public function match($pattern)
     {
-        foreach ($this->routePreferredList as $item) {
-            if ($item['route']->match($pattern)) {
-                $this->route = $item['route'];
-                return $item['route']->result;
+        foreach ($this->routes as $name => $route) {
+            if (($params = $route->match($pattern)) !== false) {
+                return $params;
             }
         }
 
-        foreach ($this->routeList as $item) {
-            if ($item['route']->match($pattern)) {
-                $this->route = $item['route'];
-                return $item['route']->result;
-            }
-        }
-
-        return false;
+        throw new ResourceNotFoundException($this->urlString);
     }
 
     public function preOrder()
     {
         //TODO store the first preordering set in cache, it need to order just one time
-        foreach ($this->routeList as $i => $item) {
-            $this->routeList[$i]['patCount'] = count(explode('/', $item['route']->getPattern()));
-            $this->routeList[$i]['reqCount'] = count($item['route']->getRequirements());
-            $this->routeList[$i]['varCount'] = count($item['route']->getVars());
-            $this->routeList[$i]['pop'] = trim(array_pop(explode('/', $item['route']->getPattern())));
+        foreach ($this->routes as $i => $item) {
+            $this->routes[$i]['patCount'] = count(explode('/', $item['route']->getPattern()));
+            $this->routes[$i]['reqCount'] = count($item['route']->getRequirements());
+            $this->routes[$i]['varCount'] = count($item['route']->getVars());
+            $this->routes[$i]['pop'] = trim(array_pop(explode('/', $item['route']->getPattern())));
         }
 
-        $list = $this->routeList;
+        $list = $this->routes;
         // first, order by separator number '/'
         usort($list, function ($a, $b)
         {
@@ -99,7 +77,7 @@ class Mapper
             }
         }
 
-        $this->routeList = $list;
+        $this->routes = $list;
     }
 
     public function swap_values(&$a, &$b)

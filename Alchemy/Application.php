@@ -23,6 +23,8 @@ use Symfony\Component\Routing;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Route;
 
+use Alchemy\Component\Routing\Mapper;
+
 //use Symfony\Component\HttpKernel\HttpCache\HttpCache;
 //use Symfony\Component\HttpKernel\HttpCache\Store;
 
@@ -106,8 +108,11 @@ class Application
         $context->setHttpsPort($request->isSecure() ? $request->getPort() : $context->getHttpsPort());
         /////////
 
-        $routes     = $this->getRoutes();
-        $matcher    = new Routing\Matcher\UrlMatcher($routes, $context);
+        //$routes     = $this->getRoutes();
+        //$matcher    = new Routing\Matcher\UrlMatcher($routes, $context);
+
+        $matcher    = $this->getRoutes();
+
         $resolver   = new ControllerResolver();
         $dispatcher = new EventDispatcher();
 
@@ -133,7 +138,10 @@ class Application
         if (file_exists($this->appPath . 'config' . DS . 'routes.php')) {
             $routes = include $this->appPath . 'config' . DS . 'routes.php';
 
-            if (!($routes instanceof RouteCollection)) {
+            // if (!($routes instanceof RouteCollection)) {
+            //     throw new \InvalidArgumentException("Routes Collection is missing.");
+            // }
+            if (!($routes instanceof Mapper)) {
                 throw new \InvalidArgumentException("Routes Collection is missing.");
             }
         } else if (file_exists($this->appPath . 'config' . DS . 'routes.yaml')) {

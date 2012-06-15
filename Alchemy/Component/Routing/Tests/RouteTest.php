@@ -162,8 +162,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $route    = new Route('/', array('controller'=>'test', 'action'=>'index'));
         $expected = array('controller'=>'test', 'action'=>'index');
 
-        $this->assertTrue($route->match('/'));
-        $this->assertEquals($expected, $route->result);
+        $this->assertEquals($expected, $route->match('/'));
     }
 
     /**
@@ -176,8 +175,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $route    = new Route('/{controller}', array('action' => 'index'));
         $expected = array('controller' => 'my_controller', 'action' => 'index');
 
-        $this->assertTrue($route->match('/my_controller'));
-        $this->assertEquals($expected, $route->result);
+        $this->assertEquals($expected, $route->match('/my_controller'));
     }
 
     /**
@@ -190,8 +188,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $route    = new Route('/my_controller/{action}', array('controller'=>'my_controller'));
         $expected = array('controller'=>'my_controller', 'action'=>'my_action');
 
-        $this->assertTrue($route->match('/my_controller/my_action'));
-        $this->assertEquals($expected, $route->result);
+        $this->assertEquals($expected, $route->match('/my_controller/my_action'));
     }
 
     /**
@@ -204,8 +201,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $route    = new Route('/{controller}/{action}');
         $expected = array('controller'=>'my_controller', 'action'=>'my_action');
 
-        $this->assertTrue($route->match('/my_controller/my_action'));
-        $this->assertEquals($expected, $route->result);
+        $this->assertEquals($expected, $route->match('/my_controller/my_action'));
     }
 
     /**
@@ -218,8 +214,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $route    = new Route('/{controller}/{action}/{year}/{month}');
         $expected = array('controller'=>'my_controller', 'action'=>'my_action', 'year'=>'2012', 'month'=>'05');
 
-        $this->assertTrue($route->match('/my_controller/my_action/2012/05'));
-        $this->assertEquals($expected, $route->result);
+        $this->assertEquals($expected, $route->match('/my_controller/my_action/2012/05'));
     }
 
     /**
@@ -232,8 +227,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         $route    = new Route('/{language}-{country}/{controller}/{action}');
         $expected = array('controller'=>'my_controller', 'action'=>'my_action', 'language'=>'en', 'country'=>'us');
 
-        $this->assertTrue($route->match('/en-us/my_controller/my_action'));
-        $this->assertEquals($expected, $route->result);
+        $this->assertEquals($expected, $route->match('/en-us/my_controller/my_action'));
     }
 
     /**
@@ -250,13 +244,7 @@ class RouteTest extends PHPUnit_Framework_TestCase
         );
         $expected = array('controller'=>'my_controller', 'action'=>'my_action', 'year'=>2012);
 
-        $this->assertTrue($route->match('/my_controller/my_action/2012'));
-        $this->assertEquals($expected, $route->result);
-
-        $this->assertTrue($route->match('/my_controller/my_action/2012'));
-        $this->assertTrue($route->match('/my_controller/my_action/7777'));
-        $this->assertFalse($route->match('/my_controller/my_action/2012n'));
-        $this->assertFalse($route->match('/my_controller/my_action/2012_'));
+        $this->assertEquals($expected, $route->match('/my_controller/my_action/2012'));
     }
 }
 
