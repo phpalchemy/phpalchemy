@@ -19,14 +19,8 @@ use Alchemy\Net\Http\Request;
 use Alchemy\Net\Http\Response;
 use Alchemy\Util\Yaml;
 
-// use Symfony\Component\Routing;
-// use Symfony\Component\Routing\RouteCollection;
-// use Symfony\Component\Routing\Route;
-
 use Alchemy\Component\Routing\Mapper;
-
-//use Symfony\Component\HttpKernel\HttpCache\HttpCache;
-//use Symfony\Component\HttpKernel\HttpCache\Store;
+use Alchemy\Component\Routing\Route;
 
 /**
  * Class Application
@@ -121,19 +115,30 @@ class Application
     private function loadMapper()
     {
         if (file_exists($this->appRootDir . 'config' . DS . 'routes.php')) {
-            $routes = include $this->appRootDir . 'config' . DS . 'routes.php';
+            $mapper = include $this->appRootDir . 'config' . DS . 'routes.php';
 
-            if (!($routes instanceof Mapper)) {
+            if (!($mapper instanceof Mapper)) {
                 throw new \InvalidArgumentException("Routing Mapper is missing.");
             }
         } else if (file_exists($this->appRootDir . 'config' . DS . 'routes.yaml')) {
             $yaml   = new Yaml();
-            $routes = new RouteCollection();
+            $mapper = new Mapper();
 
             $routesList = $yaml->loadFile($this->appRootDir . 'config' . DS . 'routes.yaml');
 
-            foreach ($routesList as $name => $routeConfig) {
-                $this->parseRoute($routes, $name, $routeConfig);
+            foreach ($routesList as $rname => $rconf) {
+                $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
+                $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
+                $options      = isset($rconf['options'])      ? $rconf['options']      : array();
+
+                if (!isset($rconf['pattern'])) {
+                    throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $name));
+                }
+
+                $mapper->connect(
+                    $rname,
+                    new Route($rconf['pattern'], $defaults, $requirements, $options)
+                );
             }
         } else {
             throw new \Exception(
@@ -142,7 +147,7 @@ class Application
             );
         }
 
-        return $routes;
+        return $mapper;
     }
 
     private function parseRoute(RouteCollection $collection, $name, $config)

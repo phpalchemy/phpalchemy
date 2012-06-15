@@ -13,7 +13,7 @@ namespace Alchemy\Kernel;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 
 use Alchemy\Kernel\Event\ControllerEvent;
-use Alchemy\Kernel\Event\viewEvent;
+use Alchemy\Kernel\Event\ViewEvent;
 
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Kernel\KernelInterface;
@@ -22,9 +22,7 @@ use Alchemy\Net\Http\Request;
 use Alchemy\Net\Http\Response;
 use Alchemy\Config;
 
-//use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
-
 use Alchemy\Component\Routing\Mapper;
 
 /**
