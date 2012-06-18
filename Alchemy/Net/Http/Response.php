@@ -182,6 +182,11 @@ class Response
         $this->content = (string) $content;
     }
 
+    public function getContent()
+    {
+        return $this->content;
+    }
+
     public function sendContent()
     {
         echo $this->content;

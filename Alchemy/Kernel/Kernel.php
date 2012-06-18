@@ -14,6 +14,7 @@ use Alchemy\Component\EventDispatcher\EventDispatcher;
 
 use Alchemy\Kernel\Event\ControllerEvent;
 use Alchemy\Kernel\Event\ViewEvent;
+use Alchemy\Kernel\Event\ResponseEvent;
 
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Kernel\KernelInterface;
@@ -43,9 +44,7 @@ class Kernel implements KernelInterface
     protected $config = null;
 
     protected $view = null;
-    //protected $viewMeta = array();
     protected $controller = null;
-    //protected $controllerMeta = array();
 
     public $request = null;
 
@@ -114,7 +113,7 @@ class Kernel implements KernelInterface
 
             $arguments = $this->resolver->getArguments($request, $controller);
 
-            // creating controllerEvent instance
+            // create controllerEvent instance
             $controllerEvent = new ControllerEvent($this, $controller, $arguments, $request);
 
             // dispatch all KernelEvents::CONTROLLER events
@@ -122,127 +121,35 @@ class Kernel implements KernelInterface
 
             $controller = $controllerEvent->getController();
 
+            // getting data for voew from ontroller.
             $data = (array) $controller[0]->view;
+
             // creating viewEvent instance
             $viewEvent = new ViewEvent($this, $data, $controllerMeta, $this->config, $request);
 
             // dispatch all KernelEvents::VIEW events
             $this->dispatcher->dispatch(KernelEvents::VIEW, $viewEvent);
 
-            // getting Response instance
+            // gets Response instance
             $response = $controller[0]->getResponse();
+
+            // gets View instance
             $view = $viewEvent->getView();
 
+            // if there is a view adapter instance, get its contents and set to response content
             if (!empty($view)) {
                 $response->setContent($viewEvent->getView()->getOutput());
             }
+
         } catch (ResourceNotFoundException $e) {
             $response = new Response($e->getMessage(), 404);
         } catch (\Exception $e) {
             $response = new Response('<pre>'.$e->getMessage().'<br/>'.$e->getTraceAsString(), 500);
         }
-        // dispatch a response event
-        //$this->dispatcher->dispatch('response', new ResponseEvent($response, $request));
 
+        // dispatch a response event
+        $this->dispatcher->dispatch(KernelEvents::RESPONSE, new ResponseEvent($this, $response, $request));
 
         return $response;
     }
-
-    // protected function handleController()
-    // {
-    //     $controllerResolved = $this->resolver->getController($this->request);
-    //     $arguments  = $this->resolver->getArguments($this->request, $controllerResolved);
-
-    //     // call the controller action
-    //     $response = call_user_func_array($controllerResolved, $arguments);
-    //     $this->controller = $controllerResolved[0];
-
-    //     if (is_array($response)) { // if returns a array with data for template
-    //         $this->viewMeta['data'] = $response;
-    //     } elseif ($response === null) { // if doesn't return any value
-    //         // if response object was built in action
-    //         if (isset($controller->response)) {
-    //             $response = $controller->response;
-    //         }
-    //     }
-
-    //     return $response instanceof Response ? $response : new Response();
-    // }
-
-    // protected function handleView($data)
-    // {
-    //     $annotation = new Annotations();
-    //     $annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
-
-    //     $annotationObjects = $annotation->getMethodAnnotationsObjects(
-    //         $this->controllerMeta['class'],
-    //         $this->controllerMeta['method']
-    //     );
-
-    //     // if there isn't a @view definition controller annotations
-    //     if (!isset($annotationObjects['View'])) {
-    //         return $this->view; // just return $this->view (empty)
-    //     }
-
-    //     // getting 'view' configuration
-    //     $conf = new \StdClass();
-    //     $conf->template     = $annotationObjects['View'][0]->template;
-    //     $conf->engine       = $this->config->get('templating.default_engine');
-    //     $conf->templateDir  = $this->config->get('app.views_dir') . DS;
-    //     $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
-    //     $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
-    //     $conf->extension    = $this->config->get('templating.extension');
-    //     $conf->charset      = $this->config->get('templating.charset');
-    //     $conf->debug        = $this->config->get('templating.debug');
-
-    //     // setting template engine
-    //     if (!empty($annotationObjects['View'][0]->engine)) {
-    //         $conf->engine = $annotationObjects['View'][0]->engine;
-    //     }
-
-    //     if (empty($conf->template)) { //template filename empty
-    //         // use the controller class and method names to compose the template path
-    //         // removing ...Controller & ..Action from their names
-    //         $nsSepPos  = strrpos($this->controllerMeta['class'], '\\');
-    //         $conf->template  = substr($this->controllerMeta['class'], $nsSepPos + 1, -10) . DS;
-    //         $conf->template .= substr($this->controllerMeta['method'], 0, -6);
-    //     }
-
-    //     // file extension validation
-    //     if (strpos($conf->template, '.') === false && !empty($conf->extension)) {
-    //         $conf->template .= '.' . $conf->extension;
-    //     }
-
-    //     // if the view annotation was defined bug the template doesn't exist
-    //     if (file_exists($conf->templateDir . $conf->template)) { // throws an exception
-
-    //     } elseif (file_exists($conf->template)) {
-
-    //     } else {
-    //         throw new \Exception("Error, File Not Found: template file doesn't exist: '{$conf->template}'");
-    //     }
-
-    //     $viewClass = '\Alchemy\Adapter\\'.ucfirst($conf->engine).'View';
-
-    //     // building & configuring view object
-    //     if (!class_exists($viewClass)) {
-    //         throw new Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
-    //     }
-
-    //     $this->view = new $viewClass($conf->template);
-
-    //     $this->view->enableDebug($conf->debug);
-    //     $this->view->enableCache($conf->cacheEnabled);
-    //     $this->view->setCacheDir($conf->cacheDir);
-    //     $this->view->setTemplateDir($conf->templateDir);
-    //     $this->view->setCharset($conf->charset);
-
-    //     // setting data to be used by template
-    //     $this->view->assign($data);
-
-    //     // unset temporal view configuration object
-    //     unset($conf);
-
-    //     return $this->view->getOutput();
-    // }
 }

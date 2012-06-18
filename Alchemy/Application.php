@@ -91,16 +91,20 @@ class Application
     /**
      * Run de application
      */
-    public function run()
+    public function run(Request $request = null)
     {
+        if (empty($request)) {
+            $request = Request::createFromGlobals();
+        }
+
         $dispatcher = new EventDispatcher();
         $resolver   = new ControllerResolver();
-        $request    = Request::createFromGlobals();
         $mapper     = $this->loadMapper();
 
         // subscribing evenyts
         $dispatcher->addSubscriber(new EventListener\ControllerListener());
         $dispatcher->addSubscriber(new EventListener\ViewHandlerListener());
+        $dispatcher->addSubscriber(new EventListener\ResponseListener());
 
         // Create a Kernel instance to manage the application
         $framework = new Kernel($dispatcher, $mapper, $resolver, $this->config);
@@ -148,20 +152,5 @@ class Application
         }
 
         return $mapper;
-    }
-
-    private function parseRoute(RouteCollection $collection, $name, $config)
-    {
-        $defaults     = isset($config['defaults'])     ? $config['defaults']     : array();
-        $requirements = isset($config['requirements']) ? $config['requirements'] : array();
-        $options      = isset($config['options'])      ? $config['options']      : array();
-
-        if (!isset($config['pattern'])) {
-            throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $name));
-        }
-
-        $route = new Route($config['pattern'], $defaults, $requirements, $options);
-
-        $collection->add($name, $route);
     }
 }

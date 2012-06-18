@@ -6,7 +6,7 @@ use Alchemy\Net\Http\Request;
 use Alchemy\Net\Http\Response;
 
 class ResponseEvent extends KernelEvent
-
+{
     private $request;
     private $response;
 

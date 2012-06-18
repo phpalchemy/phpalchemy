@@ -23,7 +23,7 @@ final class KernelEvents
      *
      * @var string
      */
-    const REQUEST = 'kernel.request';
+    const REQUEST = 'events.request';
 
     /**
      * The EXCEPTION event
@@ -37,7 +37,7 @@ final class KernelEvents
      *
      * @api
      */
-    const EXCEPTION = 'kernel.exception';
+    const EXCEPTION = 'events.exception';
 
     /**
      * The VIEW event
@@ -49,7 +49,7 @@ final class KernelEvents
      *
      * @var string
      */
-    const VIEW = 'kernel.view';
+    const VIEW = 'events.view';
 
     /**
      * The CONTROLLER event
@@ -61,7 +61,7 @@ final class KernelEvents
      *
      * @var string
      */
-    const CONTROLLER = 'kernel.controller';
+    const CONTROLLER = 'events.controller';
 
     /**
      * The RESPONSE event
@@ -73,7 +73,7 @@ final class KernelEvents
      *
      * @var string
      */
-    const RESPONSE = 'kernel.response';
+    const RESPONSE = 'events.response';
 
     /**
      * The TERMINATE event
@@ -84,5 +84,5 @@ final class KernelEvents
      *
      * @var string
      */
-    const TERMINATE = 'kernel.terminate';
+    const TERMINATE = 'events.terminate';
 }

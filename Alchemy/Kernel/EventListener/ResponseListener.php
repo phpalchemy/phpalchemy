@@ -8,23 +8,15 @@ use Alchemy\Net\Http\Response;
 
 class ResponseListener implements EventSubscriberInterface
 {
-    public function onControllerHandling(ControllerEvent $event)
+    public function onResponse(ResponseEvent $event)
     {
-        // getting information from ControllerEvent object
-        $controller = $event->getController();
-        $arguments  = $event->getArguments();
+        $response = $event->getResponse();
+        $headers  = $response->headers;
 
-        // call (execute) the controller method
-        $response = call_user_func_array($controller, $arguments);
+        $headers->set('Content-Length', 11);
 
-        // check returned value from method
-        if (is_array($response)) { // if it returns a array
-            // set all data to view instance from controller
-            foreach ($response as $key => $value) {
-                $controller[0]->view->$key = $value;
-            }
-        } elseif ($response instanceof Response) {
-            $controller[0]->setResponse($response);
+        if (!$headers->has('Content-Length') && !$headers->has('Transfer-Encoding')) {
+            $headers->set('Content-Length', strlen($response->getContent()));
         }
     }
 
@@ -36,7 +28,7 @@ class ResponseListener implements EventSubscriberInterface
     static public function getSubscribedEvents()
     {
         return array(
-            KernelEvents::CONTROLLER => array('onControllerHandling'),
+            KernelEvents::RESPONSE => array('onResponse'),
         );
     }
 }
