@@ -39,30 +39,7 @@ use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
  */
 class Application extends \DependencyInjectionContainer implements KernelInterface, EventSubscriberInterface
 {
-    /**
-     * Contains application name identifier
-     * @var string
-     */
-    protected $appName = '';
-
-    /**
-     * Contains application root directory
-     * @var string
-     */
-    protected $appRootDir = '';
-
-    /**
-     * Application Namespace
-     * @var string
-     */
-    protected $namespace = '';
-
-    /**
-     * Config object that contains all applications configuration needed
-     * @var Config
-     */
-    //protected $config = null;
-
+    private $appConfLoaded = false;
 
     /**
      * Construct application object
@@ -93,14 +70,17 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         );
     }
 
-    public function __construct($conf)
+    public function __construct($conf = array())
     {
+        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
+
         $app = $this;
 
         $this['logger'] = null;
 
-        $this['config'] = $this->share(function () use ($conf){
-            return new Config($conf);
+        $this['config'] = $this->share(function () {
+            //return new Config($conf);
+            return new Config();
         });
 
         $this['autoloader'] = $this->share(function () {
@@ -123,16 +103,11 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             $dispatcher = new EventDispatcher();
             $dispatcher->addSubscriber($app);
 
-            // $urlMatcher = new LazyUrlMatcher(function () use ($app) {
-            //     return $app['url_matcher'];
-            // });
-            // $dispatcher->addSubscriber(new RouterListener($urlMatcher, $app['logger']));
-            // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
-
             // subscribing events
             $dispatcher->addSubscriber(new EventListener\ControllerListener());
             $dispatcher->addSubscriber(new EventListener\ViewHandlerListener());
             $dispatcher->addSubscriber(new EventListener\ResponseListener());
+            // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 
             return $dispatcher;
         });
@@ -193,13 +168,12 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         // $this['debug'] = false;
         // $this['charset'] = 'UTF-8';
         // $this['locale'] = 'en';
-        //
-        // registering the aplication namespace to SPL ClassLoader
-        $this['autoloader']->register(
-            $this['config']->get('app.name'),
-            $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
-            $this['config']->get('app.namespace')
-        );
+
+        if (isset($conf['__autoload__'])) {
+            unset($conf['__autoload__']);
+
+            $this->loadAppConfigurationFiles($conf);
+        }
     }
 
     /**
@@ -227,6 +201,17 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
 
     public function run(Request $request = null)
     {
+        if (!$this->appConfLoaded){
+            $this->loadAppConfigurationFiles();
+        }
+
+        // registering the aplication namespace to SPL ClassLoader
+        $this['autoloader']->register(
+            $this['config']->get('app.name'),
+            $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
+            $this['config']->get('app.namespace')
+        );
+
         if (empty($request)) {
             $request = Request::createFromGlobals();
         }
@@ -294,14 +279,14 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
     {
         $config = $this['config'];
 
-        if (file_exists($config->get('app.root_dir') . '/config' . DS . 'routes.php')) {
-            $mapper = include $config->get('app.root_dir') . '/config' . DS . 'routes.php';
+        if (file_exists($config->get('app.root_dir') . DS .'config' . DS . 'routes.php')) {
+            $mapper = include $config->get('app.root_dir') . DS .'config' . DS . 'routes.php';
 
             if (!($mapper instanceof Mapper)) {
                 throw new \InvalidArgumentException("Routing Mapper is missing.");
             }
-        } else if (file_exists($config->get('app.root_dir') . '/config' . DS . 'routes.yaml')) {
-            $routesList = $this['yaml']->loadFile($config->get('app.root_dir') . '/config' . DS . 'routes.yaml');
+        } else if (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
+            $routesList = $this['yaml']->loadFile($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
 
             foreach ($routesList as $rname => $rconf) {
                 $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
@@ -312,10 +297,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
                     throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $name));
                 }
 
-                $this['mapper']->connect(
-                    $rname,
-                    new Route($rconf['pattern'], $defaults, $requirements, $options)
-                );
+                $this['mapper']->connect($rname, new Route($rconf['pattern'], $defaults, $requirements, $options));
             }
         } else {
             throw new \Exception(
@@ -323,6 +305,67 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
                 "You need create & configure 'config/routes.yaml'"
             );
         }
+    }
+
+    public function loadAppConfigurationFiles($conf = array())
+    {
+        if (isset($conf['phpalchemy']['root_dir'])) {
+            $this['config']->set('phpalchemy.root_dir', $conf['phpalchemy']['root_dir']);
+            unset($conf['phpalchemy']['root_dir']);
+        }
+
+        if (isset($conf['app']['root_dir'])) {
+            $this['config']->set('app.root_dir', $conf['app']['root_dir']);
+            unset($conf['app']['root_dir']);
+        }
+
+        if (!$this['config']->exists('phpalchemy.root_dir')) {
+            throw new \Exception("Configuration Missing: 'phpalchemy.root_dir' is not defined.");
+        }
+
+        if (!$this['config']->exists('app.root_dir')) {
+            throw new \Exception("Configuration Missing: 'app.root_dir' is not defined.");
+        }
+
+        // load defaults configurations
+        $this['config']->load($this['config']->get('phpalchemy.root_dir').DS.'config'.DS.'defaults.application.ini');
+
+        //load app. configuration ini file
+        empty($conf) ? $this['config']->load($this->getAppIniFile()) : $this['config']->load($conf);
+
+
+        //load env. configuration ini file
+        $this['config']->load($this->getEnvIniFile());
+
+        $this->appConfLoaded = true;
+    }
+
+    public function setAppIniFile($filename)
+    {
+        $this['config']->set('app.app_ini_file', $filename);
+    }
+
+    public function getAppIniFile()
+    {
+        if (!$this['config']->exists('app.app_ini_file')) {
+            $this->setAppIniFile($this['config']->get('app.root_dir') . DS . 'application.ini');
+        }
+
+        return $this['config']->get('app.app_ini_file');
+    }
+
+    public function setEnvIniFile($filename)
+    {
+        $this['config']->set('app.env_ini_file', $filename);
+    }
+
+    public function getEnvIniFile()
+    {
+        if (!$this['config']->exists('app.env_ini_file')) {
+            $this->setEnvIniFile($this['config']->get('app.config_dir') . DS . 'env.ini');
+        }
+
+        return $this['config']->get('app.env_ini_file');
     }
 
     /**

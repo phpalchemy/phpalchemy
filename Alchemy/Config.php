@@ -13,87 +13,12 @@ namespace Alchemy;
  */
 class Config
 {
-    protected $config     = array();
-    protected $appIniFile = '';
-    protected $envIniFile = '';
+    protected $config = array();
 
-    private static $appDefaultsIniFile = 'defaults.application.ini';
-
-    public function __construct($params = array())
+    public function __construct($data = array())
     {
-        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
-
-        if (empty($params['phpalchemy']['root_dir'])) {
-            throw new \Exception("Configuration Missing: 'phpalchemy.root_dir' is not defined.");
-        }
-
-        if (empty($params['app']['root_dir'])) {
-            throw new \Exception("Configuration Missing: 'app.root_dir' is not defined.");
-        }
-
-        // fix base paths
-        $params['phpalchemy']['root_dir'] = realpath($params['phpalchemy']['root_dir']);
-        $params['app']['root_dir']        = realpath($params['app']['root_dir']);
-
-        $this->set('phpalchemy.root_dir', $params['phpalchemy']['root_dir']);
-        $this->set('app.root_dir', $params['app']['root_dir']);
-
-        unset($params['phpalchemy']['root_dir']);
-        unset($params['app']['root_dir']);
-
-        // load defaults configurations
-        $this->loadFromFile($this->get('phpalchemy.root_dir').DS.'config'.DS.self::$appDefaultsIniFile);
-
-        // load application config
-        $this->loadFromArray($params);
-
-        //load configuration environment ini file
-        $this->loadEnvConfFile();
+        empty($data) || $this->load($data);
     }
-
-    public function setAppRootDir($path)
-    {
-        $this->set('app.root_dir', $path);
-    }
-
-    public function getAppRootDir()
-    {
-        return $this->get('app.root_dir');
-    }
-
-    public function getAppConfigDir()
-    {
-        return $this->get('app.config_dir');
-    }
-
-    public function setAppIniFile($path)
-    {
-        $this->appIniFile = $path;
-    }
-
-    public function getAppIniFile()
-    {
-        if (empty($this->appIniFile)) {
-            throw new \Exception("Application ini file ({$this->appIniFile}) is missing!");
-        }
-
-        return $this->appIniFile;
-    }
-
-    public function setEnvIniFile($path)
-    {
-        $this->envIniFile = $path;
-    }
-
-    public function getEnvIniFile()
-    {
-        if (empty($this->envIniFile)) {
-            $this->setEnvIniFile($this->getAppConfigDir() . DS . 'env.ini');
-        }
-
-        return $this->envIniFile;
-    }
-
 
     /**
      * Set a setting on configuration object
@@ -150,22 +75,6 @@ class Config
     }
 
     /**
-     * Load Application Configuration ini file
-     */
-    private function loadAppConfFile()
-    {
-        $this->loadFromFile($this->getAppIniFile());
-    }
-
-    /**
-     * Load Environment Configuration ini file
-     */
-    private function loadEnvConfFile()
-    {
-        $this->loadFromFile($this->getEnvIniFile());
-    }
-
-    /**
      * Load configuration from a ini file and store on self::config array
      *
      * @param string $iniFilename Absolute ath to read the ini file
@@ -189,13 +98,36 @@ class Config
     {
         foreach ($configList as $section => $config) {
             foreach ($config as $key => $value) {
-                $this->set("$section.$key", $value);
+                if (substr_count($value, '%') !== 2) {
+                    $this->set($section . '.' . $key, $value);
+                    unset($configList[$section][$key]);
+                }
             }
+        }
+
+        foreach ($configList as $section => $config) {
+            foreach ($config as $key => $value) {
+                $this->set($section . '.' . $key, $value);
+            }
+        }
+    }
+
+    public function load($value=null)
+    {
+        if (is_array($value)) {
+            $this->loadFromArray($value);
+        } elseif (is_string($value) && file_exists($value)){
+            $this->loadFromFile($value);
         }
     }
 
     public function getAll()
     {
         return $this->config;
+    }
+
+    public function all()
+    {
+        return $this->getAll();
     }
 }
