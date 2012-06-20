@@ -18,9 +18,9 @@ use Alchemy\Kernel\EventListener;
 use Alchemy\Kernel\Kernel;
 
 use Alchemy\Mvc\ControllerResolver;
-use Alchemy\Net\Http\Request;
-use Alchemy\Net\Http\Response;
-use Alchemy\Util\Yaml;
+use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
+use Alchemy\Lib\Util\Yaml;
 
 use Alchemy\Component\Routing\Mapper;
 use Alchemy\Component\Routing\Route;
@@ -105,7 +105,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
 
             // subscribing events
             $dispatcher->addSubscriber(new EventListener\ControllerListener());
-            $dispatcher->addSubscriber(new EventListener\ViewHandlerListener());
+            $dispatcher->addSubscriber(new EventListener\ViewListener());
             $dispatcher->addSubscriber(new EventListener\ResponseListener());
             // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 

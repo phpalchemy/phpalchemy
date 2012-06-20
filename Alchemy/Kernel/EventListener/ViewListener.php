@@ -4,10 +4,10 @@ namespace Alchemy\Kernel\EventListener;
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Kernel\Event\ViewEvent;
 use Alchemy\Kernel\KernelEvents;
-use Alchemy\Net\Http\Response;
-use Alchemy\Util\Annotations;
+use Alchemy\Component\Http\Response;
+use Alchemy\Lib\Util\Annotations;
 
-class ViewHandlerListener implements EventSubscriberInterface
+class ViewListener implements EventSubscriberInterface
 {
     /**
      * This method hadle the View layer at MVC Patter

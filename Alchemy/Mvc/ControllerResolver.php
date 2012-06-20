@@ -16,7 +16,7 @@
 
 namespace Alchemy\Mvc;
 
-use Alchemy\Net\Http\Request;
+use Alchemy\Component\Http\Request;
 
 /**
  * ControllerResolver.

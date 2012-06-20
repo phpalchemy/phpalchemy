@@ -2,8 +2,8 @@
 namespace Alchemy\Kernel\Event;
 
 use Alchemy\Kernel\KernelInterface;
-use Alchemy\Net\Http\Request;
-use Alchemy\Net\Http\Response;
+use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
 
 class ResponseEvent extends KernelEvent
 {

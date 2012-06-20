@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Alchemy\Net\Http;
+namespace Alchemy\Component\Http;
 
 /**
  * Class Collection

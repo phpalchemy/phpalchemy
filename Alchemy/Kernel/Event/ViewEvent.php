@@ -3,7 +3,7 @@ namespace Alchemy\Kernel\Event;
 
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Config;
-use Alchemy\Net\Http\Request;
+use Alchemy\Component\Http\Request;
 
 class ViewEvent extends KernelEvent
 {

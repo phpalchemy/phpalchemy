@@ -1,7 +1,7 @@
 <?php
 namespace Alchemy\Kernel\Event;
 
-use Alchemy\Net\Http\Request;
+use Alchemy\Component\Http\Request;
 use Alchemy\Component\EventDispatcher\Event;
 use Alchemy\Kernel\KernelInterface;
 

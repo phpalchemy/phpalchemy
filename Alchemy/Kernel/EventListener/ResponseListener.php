@@ -4,7 +4,7 @@ namespace Alchemy\Kernel\EventListener;
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Kernel\Event\ResponseEvent;
 use Alchemy\Kernel\KernelEvents;
-use Alchemy\Net\Http\Response;
+use Alchemy\Component\Http\Response;
 
 class ResponseListener implements EventSubscriberInterface
 {

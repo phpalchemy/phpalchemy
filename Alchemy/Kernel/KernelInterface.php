@@ -1,8 +1,7 @@
 <?php
 namespace Alchemy\Kernel;
 
-use Alchemy\Net\Http\Request;
-use Alchemy\Net\Http\Response;
+use Alchemy\Component\Http\Request;
 
 /**
  * KernelInterface handles a Request to convert it to a Response.

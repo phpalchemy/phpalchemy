@@ -1,8 +1,8 @@
 <?php
 namespace Alchemy\Mvc;
 
-use Alchemy\Net\Http\Request;
-use Alchemy\Net\Http\Response;
+use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
 
 /**
  * Controller

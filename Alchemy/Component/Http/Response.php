@@ -14,7 +14,7 @@
  * Copyright (c) 2004-2012 Fabien Potencier
  */
 
-namespace Alchemy\Net\Http;
+namespace Alchemy\Component\Http;
 
 /**
  * Class Response

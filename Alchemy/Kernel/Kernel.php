@@ -19,8 +19,8 @@ use Alchemy\Kernel\Event\ResponseEvent;
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Mvc\ControllerResolver;
-use Alchemy\Net\Http\Request;
-use Alchemy\Net\Http\Response;
+use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
 use Alchemy\Config;
 
 use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
