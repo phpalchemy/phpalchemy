@@ -133,6 +133,9 @@ class ClassLoader
      */
     public function loadClass($className)
     {
+        if (class_exists($className)) {
+            return true;
+        }
 
         if (false !== strpos($className, '\\')) {
             $className = str_replace(self::$_nsSep, self::$_dirSep, ltrim($className, '\\'));

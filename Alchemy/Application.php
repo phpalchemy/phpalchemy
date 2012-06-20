@@ -21,6 +21,7 @@ use Alchemy\Mvc\ControllerResolver;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 use Alchemy\Lib\Util\Yaml;
+use Alchemy\Lib\Util\Annotations;
 
 use Alchemy\Component\Routing\Mapper;
 use Alchemy\Component\Routing\Route;
@@ -68,6 +69,10 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             return new Yaml();
         });
 
+        $this['annotation'] = $this->share(function () {
+            return new Annotations();
+        });
+
         $this['mapper'] = $this->share(function () {
             return new Mapper();
         });
@@ -94,7 +99,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         });
 
         $this['kernel'] = $this->share(function () use ($app) {
-            return new Kernel($app['dispatcher'], $app['mapper'], $app['resolver'], $app['config']);
+            return new Kernel($app['dispatcher'], $app['mapper'], $app['resolver'], $app['config'], $app['annotation']);
         });
 
         // $this['route_before_middlewares_trigger'] = $this->protect(function (GetResponseEvent $event) use ($app) {

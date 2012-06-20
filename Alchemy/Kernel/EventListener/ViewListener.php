@@ -5,7 +5,6 @@ use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Kernel\Event\ViewEvent;
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Component\Http\Response;
-use Alchemy\Lib\Util\Annotations;
 
 class ViewListener implements EventSubscriberInterface
 {
@@ -17,28 +16,30 @@ class ViewListener implements EventSubscriberInterface
      */
     public function onViewHandling(ViewEvent $event)
     {
-        // create Annotation object to read controller's method annotations
-        $annotation = new Annotations();
-        $annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
-
         // getting information from ViewEvent object
-        $class  = $event->getControllerClass();
-        $method = $event->getControllerMethod();
-        $config = $event->getConfig();
-        $data   = $event->getData();
-
-        // getting all annotations of controller's method
-        $annotationObjects = $annotation->getMethodAnnotationsObjects($class, $method);
+        $annotation = $event->getAnnotation();
+        $config     = $event->getConfig();
+        $data       = $event->getData();
+        $class      = $event->getControllerClass();
+        $method     = $event->getControllerMethod();
 
         // check if a @view definition exists on method's annotations
-        if (empty($annotationObjects['View'])) {
+        if (empty($annotation)) {
             return null; // no @view annotation found, just return to break view handling
         }
+
+        if (count($annotation) > 1) {
+            throw new \Exception(sprintf(
+                "View Annotations Error: Just can define one @View annotation, (%s) annotations found.",
+                count($annotation)
+            ));
+        }
+        $annotation = $annotation[0];
 
         // creating config obj and setting it with all defaults configurations
         $conf = new \StdClass();
 
-        $conf->template     = $annotationObjects['View'][0]->template;
+        $conf->template     = $annotation->template;
         $conf->engine       = $config->get('templating.default_engine');
         $conf->templateDir  = $config->get('app.views_dir') . DS;
         $conf->cacheDir     = $config->get('templating.cache_dir') . DS;
@@ -49,17 +50,17 @@ class ViewListener implements EventSubscriberInterface
 
         // Setting template engine
         // Check if template engine param was set on annotation. i.e.: @view(engine=...)
-        if (!empty($annotationObjects['View'][0]->engine)) {
-            $conf->engine = $annotationObjects['View'][0]->engine; // it exits, use it!
+        if (!empty($annotation->engine)) {
+            $conf->engine = $annotation->engine; // it exits, use it!
         }
 
         // check if template filename is empty
         if (empty($conf->template)) { //that means it wasn't set on @view annotation
             // Then we compose a template filename using controller class and method names but
             // removing ...Controller & ..Action sufixes from those names
-            $nsSepPos       = strrpos($this->controllerMeta['class'], '\\');
-            $conf->template = substr($this->controllerMeta['class'], $nsSepPos + 1, -10) . DS;
-            $conf->template .= substr($this->controllerMeta['method'], 0, -6);
+            $nsSepPos        = strrpos($class, '\\');
+            $conf->template  = substr($class, $nsSepPos + 1, -10) . DS;
+            $conf->template .= substr($method, 0, -6);
         }
 
         // File extension validation

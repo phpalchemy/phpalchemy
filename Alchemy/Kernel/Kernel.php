@@ -21,10 +21,13 @@ use Alchemy\Kernel\KernelInterface;
 use Alchemy\Mvc\ControllerResolver;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
+use Alchemy\Lib\Util\Annotations;
 use Alchemy\Config;
 
 use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
 use Alchemy\Component\Routing\Mapper;
+
+use Alchemy\Annotation\ViewAnnotation;
 
 /**
  * Class Kernel
@@ -56,12 +59,13 @@ class Kernel implements KernelInterface
      * @param ControllerResolver  $resolver   Controller resolver object.
      * @param Config              $config     Configuration object.
      */
-    public function __construct(EventDispatcher $dispatcher, Mapper $matcher, ControllerResolver $resolver, Config $config)
+    public function __construct(EventDispatcher $dispatcher, Mapper $matcher, ControllerResolver $resolver, Config $config, Annotations $annotation)
     {
         $this->matcher    = $matcher;
         $this->resolver   = $resolver;
         $this->dispatcher = $dispatcher;
         $this->config     = $config;
+        $this->annotation = $annotation;
 
         $this->viewMeta['data'] = array();
     }
@@ -75,6 +79,8 @@ class Kernel implements KernelInterface
         $reqParams = $this->matcher->match($request->getPathInfo());
         $reqParams = array_merge($reqParams, $request->query->all());
         $namespace = $this->config->get('app.namespace');
+
+        $viewAnnotations = array();
 
         try {
             if (strpos($reqParams['_controller'], '_') === false) {
@@ -93,7 +99,7 @@ class Kernel implements KernelInterface
 
             $ctrlrClass  = '\\'.$namespace.'\\Controller\\'.$reqParams['_controller'].'Controller';
             $ctrlrMethod = $reqParams['_action'] . 'Action';
-            
+
             $reqParams['_controller'] = $ctrlrClass . '::' . $ctrlrMethod;
 
             $request->attributes->add($reqParams);
@@ -109,6 +115,17 @@ class Kernel implements KernelInterface
                 ));
             }
 
+            // create Annotation object to read controller's method annotations
+            $this->annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
+
+            // getting all annotations of controller's method
+            $annotationObjects = $this->annotation->getMethodAnnotationsObjects($ctrlrClass, $ctrlrMethod);
+
+            // check if a @view definition exists on method's annotations
+            if (!empty($annotationObjects['View'])) {
+                $viewAnnotations = $annotationObjects['View'];
+            }
+
             $arguments = $this->resolver->getArguments($request, $controller);
 
             // create controllerEvent instance
@@ -121,9 +138,9 @@ class Kernel implements KernelInterface
 
             // getting data for voew from ontroller.
             $data = (array) $controller[0]->view;
-			
+
             // creating viewEvent instance
-            $viewEvent = new ViewEvent($this, $ctrlrClass, $ctrlrMethod, $data, $this->config, $request);
+            $viewEvent = new ViewEvent($this, $ctrlrClass, $ctrlrMethod, $data, $viewAnnotations, $this->config, $request);
 
             // dispatch all KernelEvents::VIEW events
             $this->dispatcher->dispatch(KernelEvents::VIEW, $viewEvent);
@@ -133,7 +150,7 @@ class Kernel implements KernelInterface
 
             // gets View instance
             $view = $viewEvent->getView();
-            
+
             // if there is a view adapter instance, get its contents and set to response content
             if (!empty($view)) {
                 $response->setContent($viewEvent->getView()->getOutput());

@@ -4,15 +4,34 @@ namespace Alchemy\Kernel\Event;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Config;
 use Alchemy\Component\Http\Request;
+use Alchemy\Annotation\ViewAnnotation;
 
 class ViewEvent extends KernelEvent
 {
     /**
-     * The view object
-     * @var callable
+     * Contains the controller class name
+     * @var array
      */
-    protected $view   = null;
-    
+    protected $controllerClass = '';
+
+    /**
+     * Contains the controller method name
+     * @var array
+     */
+    protected $controllerMethod = '';
+
+    /**
+     * Contains all data that can be passed to template file
+     * @var array
+     */
+    protected $data = array();
+
+    /**
+     * Contains the view annotation from controller method docblock
+     * @var array
+     */
+    protected $annotation = array();
+
     /**
      * Config instance, it contains all app configuration
      * @var Config
@@ -20,39 +39,31 @@ class ViewEvent extends KernelEvent
     protected $config = null;
 
     /**
-     * Contains the controller class name 
-     * @var string
+     * Contains the view object
+     * @var View
      */
-    protected $ctrlrClass  = '';
-    
-    /**
-     * Contains Controller method name 
-     * @var string
-     */
-    protected $ctrlrMethod = '';
-    
-    /**
-     * Contains all data that can be passed to template file
-     * @var array
-     */
-    protected $data = array();
-    
-    /**
-     * Contains the current request instance
-     * @var Request
-     */
-    protected $request = null;
+    protected $view = null;
 
-    public function __construct(KernelInterface $kernel, $ctrlrClass, $ctrlrMethod, 
-                                array $data, Config $config, Request $request)
+    public function __construct(KernelInterface $kernel, $ctrlrClass, $ctrlrMethod, array $data, array $annotation, Config $config, Request $request)
     {
         parent::__construct($kernel, $request);
 
-        $this->ctrlrClass  = $ctrlrClass;
-        $this->ctrlrMethod = $ctrlrMethod;
-        $this->data        = $data;
-        $this->config      = $config;
-        $this->request     = $request;
+        $this->controllerClass  = $ctrlrClass;
+        $this->controllerMethod = $ctrlrMethod;
+
+        $this->data       = $data;
+        $this->annotation = $annotation;
+        $this->config     = $config;
+    }
+
+    public function getControllerClass()
+    {
+        return $this->controllerClass;
+    }
+
+    public function getControllerMethod()
+    {
+        return $this->controllerMethod;
     }
 
     public function getData()
@@ -60,14 +71,9 @@ class ViewEvent extends KernelEvent
         return $this->data;
     }
 
-    public function getControllerClass()
+    public function getAnnotation()
     {
-        return $this->ctrlrClass;
-    }
-    
-    public function getControllerMethod()
-    {
-        return $this->ctrlrMethod;
+        return $this->annotation;
     }
 
     public function getConfig()
@@ -75,16 +81,11 @@ class ViewEvent extends KernelEvent
         return $this->config;
     }
 
-    public function getRequest()
-    {
-        return $this->request;
-    }
-    
     public function setView($view)
     {
         $this->view = $view;
     }
-    
+
     public function getView()
     {
         return $this->view;
