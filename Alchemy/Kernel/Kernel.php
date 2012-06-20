@@ -76,9 +76,6 @@ class Kernel implements KernelInterface
         $reqParams = array_merge($reqParams, $request->query->all());
         $namespace = $this->config->get('app.namespace');
 
-        $controllerMeta['class']  = '';
-        $controllerMeta['method'] = '';
-
         try {
             if (strpos($reqParams['_controller'], '_') === false) {
                 $reqParams['_controller'] = ucfirst($reqParams['_controller']);
@@ -94,9 +91,10 @@ class Kernel implements KernelInterface
                 unset($tmp);
             }
 
-            $controllerMeta['class']  = '\\'.$namespace.'\\Controller\\'.$reqParams['_controller'].'Controller';
-            $controllerMeta['method'] = $reqParams['_action'] . 'Action';
-            $reqParams['_controller'] = $controllerMeta['class'].'::'.$controllerMeta['method'];
+            $ctrlrClass  = '\\'.$namespace.'\\Controller\\'.$reqParams['_controller'].'Controller';
+            $ctrlrMethod = $reqParams['_action'] . 'Action';
+            
+            $reqParams['_controller'] = $ctrlrClass . '::' . $ctrlrMethod;
 
             $request->attributes->add($reqParams);
 
@@ -123,9 +121,9 @@ class Kernel implements KernelInterface
 
             // getting data for voew from ontroller.
             $data = (array) $controller[0]->view;
-
+			
             // creating viewEvent instance
-            $viewEvent = new ViewEvent($this, $data, $controllerMeta, $this->config, $request);
+            $viewEvent = new ViewEvent($this, $ctrlrClass, $ctrlrMethod, $data, $this->config, $request);
 
             // dispatch all KernelEvents::VIEW events
             $this->dispatcher->dispatch(KernelEvents::VIEW, $viewEvent);
@@ -135,7 +133,7 @@ class Kernel implements KernelInterface
 
             // gets View instance
             $view = $viewEvent->getView();
-
+            
             // if there is a view adapter instance, get its contents and set to response content
             if (!empty($view)) {
                 $response->setContent($viewEvent->getView()->getOutput());

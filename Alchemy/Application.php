@@ -94,7 +94,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         });
 
         $this['kernel'] = $this->share(function () use ($app) {
-            //return new Kernel($app['dispatcher'], $app['resolver']);
             return new Kernel($app['dispatcher'], $app['mapper'], $app['resolver'], $app['config']);
         });
 

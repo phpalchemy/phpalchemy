@@ -22,15 +22,13 @@ class ViewListener implements EventSubscriberInterface
         $annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
 
         // getting information from ViewEvent object
-        $controllerMeta = $event->getControllerMeta();
-        $config         = $event->getConfig();
-        $data           = $event->getData();
+        $class  = $event->getControllerClass();
+        $method = $event->getControllerMethod();
+        $config = $event->getConfig();
+        $data   = $event->getData();
 
         // getting all annotations of controller's method
-        $annotationObjects = $annotation->getMethodAnnotationsObjects(
-            $controllerMeta['class'],
-            $controllerMeta['method']
-        );
+        $annotationObjects = $annotation->getMethodAnnotationsObjects($class, $method);
 
         // check if a @view definition exists on method's annotations
         if (empty($annotationObjects['View'])) {

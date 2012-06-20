@@ -9,26 +9,50 @@ class ViewEvent extends KernelEvent
 {
     /**
      * The view object
-     *
      * @var callable
      */
     protected $view   = null;
+    
+    /**
+     * Config instance, it contains all app configuration
+     * @var Config
+     */
     protected $config = null;
 
-    protected $controllerMeta = array();
-    protected $data           = array();
+    /**
+     * Contains the controller class name 
+     * @var string
+     */
+    protected $ctrlrClass  = '';
+    
+    /**
+     * Contains Controller method name 
+     * @var string
+     */
+    protected $ctrlrMethod = '';
+    
+    /**
+     * Contains all data that can be passed to template file
+     * @var array
+     */
+    protected $data = array();
+    
+    /**
+     * Contains the current request instance
+     * @var Request
+     */
+    protected $request = null;
 
-    public function __construct(
-        KernelInterface $kernel, array $data, array $controllerMeta,
-        Config $config, Request $request
-    )
+    public function __construct(KernelInterface $kernel, $ctrlrClass, $ctrlrMethod, 
+                                array $data, Config $config, Request $request)
     {
         parent::__construct($kernel, $request);
 
-        $this->controllerMeta = $controllerMeta;
-
-        $this->data   = $data;
-        $this->config = $config;
+        $this->ctrlrClass  = $ctrlrClass;
+        $this->ctrlrMethod = $ctrlrMethod;
+        $this->data        = $data;
+        $this->config      = $config;
+        $this->request     = $request;
     }
 
     public function getData()
@@ -36,9 +60,14 @@ class ViewEvent extends KernelEvent
         return $this->data;
     }
 
-    public function getControllerMeta()
+    public function getControllerClass()
     {
-        return $this->controllerMeta;
+        return $this->ctrlrClass;
+    }
+    
+    public function getControllerMethod()
+    {
+        return $this->ctrlrMethod;
     }
 
     public function getConfig()
@@ -46,11 +75,16 @@ class ViewEvent extends KernelEvent
         return $this->config;
     }
 
+    public function getRequest()
+    {
+        return $this->request;
+    }
+    
     public function setView($view)
     {
         $this->view = $view;
     }
-
+    
     public function getView()
     {
         return $this->view;
