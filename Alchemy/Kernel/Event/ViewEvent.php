@@ -44,7 +44,10 @@ class ViewEvent extends KernelEvent
      */
     protected $view = null;
 
-    public function __construct(KernelInterface $kernel, $ctrlrClass, $ctrlrMethod, array $data, array $annotation, Config $config, Request $request)
+    public function __construct(
+        KernelInterface $kernel, $ctrlrClass, $ctrlrMethod, array $data,
+        array $annotation, Config $config, Request $request
+    )
     {
         parent::__construct($kernel, $request);
 

@@ -59,7 +59,10 @@ class Kernel implements KernelInterface
      * @param ControllerResolver  $resolver   Controller resolver object.
      * @param Config              $config     Configuration object.
      */
-    public function __construct(EventDispatcher $dispatcher, Mapper $matcher, ControllerResolver $resolver, Config $config, Annotations $annotation)
+    public function __construct(
+        EventDispatcher $dispatcher, Mapper $matcher, ControllerResolver $resolver,
+        Config $config, Annotations $annotation
+    )
     {
         $this->matcher    = $matcher;
         $this->resolver   = $resolver;
@@ -140,7 +143,9 @@ class Kernel implements KernelInterface
             $data = (array) $controller[0]->view;
 
             // creating viewEvent instance
-            $viewEvent = new ViewEvent($this, $ctrlrClass, $ctrlrMethod, $data, $viewAnnotations, $this->config, $request);
+            $viewEvent = new ViewEvent(
+                $this, $ctrlrClass, $ctrlrMethod, $data, $viewAnnotations, $this->config, $request
+            );
 
             // dispatch all KernelEvents::VIEW events
             $this->dispatcher->dispatch(KernelEvents::VIEW, $viewEvent);
@@ -159,7 +164,7 @@ class Kernel implements KernelInterface
         } catch (ResourceNotFoundException $e) {
             $response = new Response($e->getMessage(), 404);
         } catch (\Exception $e) {
-            $response = new Response('<pre>'.$e->getMessage().'<br/>'.$e->getTraceAsString(), 500);
+            $response = new Response($e->getMessage(), 500);
         }
 
         // dispatch a response event

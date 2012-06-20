@@ -14,7 +14,7 @@ class ViewListener implements EventSubscriberInterface
      * @param  ViewEvent $event event that contains all information to build
      *                          a adapter of supported template engines
      */
-    public function onViewHandling(ViewEvent $event)
+    public function onView(ViewEvent $event)
     {
         // getting information from ViewEvent object
         $annotation = $event->getAnnotation();
@@ -34,6 +34,7 @@ class ViewListener implements EventSubscriberInterface
                 count($annotation)
             ));
         }
+
         $annotation = $annotation[0];
 
         // creating config obj and setting it with all defaults configurations
@@ -108,6 +109,6 @@ class ViewListener implements EventSubscriberInterface
      */
     static public function getSubscribedEvents()
     {
-        return array(KernelEvents::VIEW => array('onViewHandling'));
+        return array(KernelEvents::VIEW => array('onView'));
     }
 }

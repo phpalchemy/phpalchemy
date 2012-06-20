@@ -57,7 +57,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         $this['logger'] = null;
 
         $this['config'] = $this->share(function () {
-            //return new Config($conf);
             return new Config();
         });
 
@@ -102,57 +101,8 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             return new Kernel($app['dispatcher'], $app['mapper'], $app['resolver'], $app['config'], $app['annotation']);
         });
 
-        // $this['route_before_middlewares_trigger'] = $this->protect(function (GetResponseEvent $event) use ($app) {
-        //     $request = $event->getRequest();
-        //     $routeName = $request->attributes->get('_route');
-        //     if (!$route = $app['routes']->get($routeName)) {
-        //         return;
-        //     }
-
-        //     foreach ((array) $route->getOption('_before_middlewares') as $callback) {
-        //         $ret = call_user_func($callback, $request);
-        //         if ($ret instanceof Response) {
-        //             $event->setResponse($ret);
-
-        //             return;
-        //         } elseif (null !== $ret) {
-        //             throw new \RuntimeException(sprintf('A before middleware for route "%s" returned an invalid response value. Must return null or an instance of Response.', $routeName));
-        //         }
-        //     }
-        // });
-
-        // $this['route_after_middlewares_trigger'] = $this->protect(function (FilterResponseEvent $event) use ($app) {
-        //     $request = $event->getRequest();
-        //     $routeName = $request->attributes->get('_route');
-        //     if (!$route = $app['routes']->get($routeName)) {
-        //         return;
-        //     }
-
-        //     foreach ((array) $route->getOption('_after_middlewares') as $callback) {
-        //         $response = call_user_func($callback, $request, $event->getResponse());
-        //         if ($response instanceof Response) {
-        //             $event->setResponse($response);
-        //         } elseif (null !== $response) {
-        //             throw new \RuntimeException(sprintf('An after middleware for route "%s" returned an invalid response value. Must return null or an instance of Response.', $routeName));
-        //         }
-        //     }
-        // });
-
-        // $this['request_error'] = $this->protect(function () {
-        //     throw new \RuntimeException('Accessed request service outside of request scope. Try moving that call to a before handler or controller.');
-        // });
-
-        // $this['request'] = $this['request_error'];
-
-        // $this['request.http_port'] = 80;
-        // $this['request.https_port'] = 443;
-        // $this['debug'] = false;
-        // $this['charset'] = 'UTF-8';
-        // $this['locale'] = 'en';
-
         if (isset($conf['__autoload__'])) {
             unset($conf['__autoload__']);
-
             $this->loadAppConfigurationFiles($conf);
         }
     }
@@ -178,13 +128,12 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         }
 
         $response = $this->handle($request);
+
         $response->send();
     }
 
     public function handle(Request $request)
     {
-        //$this->beforeDispatched = false;
-
         //$current = HttpKernelInterface::SUB_REQUEST === $type ? $this['request'] : $this['request_error'];
 
         $this['request'] = $request;
