@@ -27,6 +27,8 @@ use Alchemy\Component\Routing\Route;
 
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 
+use Alchemy\Kernel\KernelEvents;
+
 /**
  * Class Application
  *
@@ -45,31 +47,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
      * Construct application object
      * @param Config $config Contains all app configuration
      */
-    public function __construct2(Config $config)
-    {
-        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
-
-        // getting app configuration
-        $this->config     = $config;
-        $this->appRootDir = realpath($config->getAppRootDir()) . DS;
-
-        $this->namespace  = $config->get('app.namespace');
-
-        // setting app classes to autoloader
-        $classLoader = ClassLoader::getInstance();
-
-        if (!$this->config->exists('app.namespace')) {
-            throw new \Exception("Configuration Missing: namespace is not set on " . $config->getAppIniFile());
-        }
-
-        // registering the aplication namespace to SPL ClassLoader
-        $classLoader->register(
-            $this->appName,
-            $config->get('app.app_dir') . DS,
-            $config->get('app.namespace')
-        );
-    }
-
     public function __construct($conf = array())
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
@@ -179,26 +156,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
     /**
      * Run de application
      */
-    public function run2(Request $request = null)
-    {
-        if (empty($request)) {
-            $request = Request::createFromGlobals();
-        }
-
-        $dispatcher = new EventDispatcher();
-        $resolver   = new ControllerResolver();
-        $mapper     = $this->loadMapper();
-
-        // Create a Kernel instance to manage the application
-        $framework = new Kernel($dispatcher, $mapper, $resolver, $this->config);
-
-        // retrieve the response object from kernel's handler
-        $response  = $framework->handle($request);
-
-        // send response to the client
-        $response->send();
-    }
-
     public function run(Request $request = null)
     {
         if (!$this->appConfLoaded){
@@ -237,44 +194,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         return $response;
     }
 
-    private function loadMapper2()
-    {
-        if (file_exists($this->appRootDir . 'config' . DS . 'routes.php')) {
-            $mapper = include $this->appRootDir . 'config' . DS . 'routes.php';
-
-            if (!($mapper instanceof Mapper)) {
-                throw new \InvalidArgumentException("Routing Mapper is missing.");
-            }
-        } else if (file_exists($this->appRootDir . 'config' . DS . 'routes.yaml')) {
-            $yaml   = new Yaml();
-            $mapper = new Mapper();
-
-            $routesList = $yaml->loadFile($this->appRootDir . 'config' . DS . 'routes.yaml');
-
-            foreach ($routesList as $rname => $rconf) {
-                $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
-                $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
-                $options      = isset($rconf['options'])      ? $rconf['options']      : array();
-
-                if (!isset($rconf['pattern'])) {
-                    throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $name));
-                }
-
-                $mapper->connect(
-                    $rname,
-                    new Route($rconf['pattern'], $defaults, $requirements, $options)
-                );
-            }
-        } else {
-            throw new \Exception(
-                "Application Error: No routes found for this app.\n" .
-                "You need create & configure 'config/routes.yaml'"
-            );
-        }
-
-        return $mapper;
-    }
-
     public function loadRoutes()
     {
         $config = $this['config'];
@@ -294,7 +213,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
                 $options      = isset($rconf['options'])      ? $rconf['options']      : array();
 
                 if (!isset($rconf['pattern'])) {
-                    throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $name));
+                    throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $rname));
                 }
 
                 $this['mapper']->connect($rname, new Route($rconf['pattern'], $defaults, $requirements, $options));

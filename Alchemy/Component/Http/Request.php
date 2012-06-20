@@ -318,21 +318,22 @@ class Request
         $pathInfo = '/';
 
         // Remove the query string from REQUEST_URI
-        if ($pos = strpos($requestUri, '?')) {
+        $pos = strpos($requestUri, '?');
+        
+        if ($pos !== false) {
             $requestUri = substr($requestUri, 0, $pos);
         }
 
-        //if ($baseUrl !== null && (false === ($pathInfo = substr(urldecode($requestUri), strlen(urldecode($baseUrl)))))) {
-        $pathInfo = substr(urldecode($requestUri), strlen(urldecode($baseUrl)));
+        $pathInfo = rtrim(substr(urldecode($requestUri), strlen(urldecode($baseUrl))), '/');
 
         if ($baseUrl !== null && $pathInfo === false) {
             // If substr() returns false then PATH_INFO is set to an empty string
             return '/';
         } elseif ($baseUrl === null) {
-            return $requestUri;
+            return rtrim($requestUri, '/');
         }
 
-        return (string) $pathInfo;
+        return $pathInfo;
     }
 
     public function getRequestUri()
