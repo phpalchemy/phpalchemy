@@ -35,15 +35,15 @@ class Mapper
         $this->routes[$name] = $route;
     }
 
-    public function match($pattern)
+    public function match($urlString)
     {
         foreach ($this->routes as $name => $route) {
-            if (($params = $route->match($pattern)) !== false) {
+            if (($params = $route->match($urlString)) !== false) {
                 return $params;
             }
         }
 
-        throw new ResourceNotFoundException($this->urlString);
+        throw new Exception\ResourceNotFoundException($urlString);
     }
 
     public function preOrder()

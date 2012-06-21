@@ -82,11 +82,11 @@ class Kernel implements KernelInterface
      */
     public function handle(Request $request)
     {
-        /*
-         * Trigger KernelEvents::REQUEST using GetResponse Event
+        /* Trigger KernelEvents::REQUEST using GetResponse Event
          *
          * This event can be used by an application to filter a request before
-         * ever all kernel logic being executed
+         * ever all kernel logic being executed, listeners for this event should
+         * be registered outside framework logic (should be on application logic).
          */
         $event = new GetResponseEvent($this, $request);
         $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
@@ -97,37 +97,33 @@ class Kernel implements KernelInterface
 
             return $event->getResponse();
         }
-
-        $reqParams = $this->matcher->match($request->getPathInfo());
-        $reqParams = array_merge($reqParams, $request->query->all());
-        $namespace = $this->config->get('app.namespace');
+        // end KernelEvents::REQUEST
 
         $viewAnnotations = array();
 
         try {
-            if (strpos($reqParams['_controller'], '_') === false) {
-                $reqParams['_controller'] = ucfirst($reqParams['_controller']);
-            } else {
-                $reqParams['_controller'] = str_replace(
-                    ' ', '', ucwords(str_replace('_', ' ', $reqParams['_controller']))
-                );
-            }
+            /* try match the url request with a defined route.
+             * it any route match the current url a ResourceNotFoundException
+             * will be thrown.
+             */
+            $params = $this->matcher->match($request->getPathInfo());
 
-            if (strpos($reqParams['_action'], '_') !== false) {
-                $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $reqParams['_action'])));
-                $reqParams['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
-                unset($tmp);
-            }
+            // prepare request params.
+            $params = $this->prepareRequestParams(array($params, $request->query->all()));
 
-            $ctrlrClass  = '\\'.$namespace.'\\Controller\\'.$reqParams['_controller'].'Controller';
-            $ctrlrMethod = $reqParams['_action'] . 'Action';
-
-            $reqParams['_controller'] = $ctrlrClass . '::' . $ctrlrMethod;
-
-            $request->attributes->add($reqParams);
+            // add prepared params to request as attributes.
+            $request->attributes->add($params);
 
             // load controller
-            $controller = $this->resolver->getController($request);
+            try {
+                $controller = $this->resolver->getController($request);
+            } catch (\Exception $exception) {
+                if (substr($this->config->get('env.type'), 0, 3) !== 'dev') {
+                    $exception = new ResourceNotFoundException($request->getPathInfo());
+                }
+
+                throw $exception;
+            }
 
             if ($controller === false) {
                 throw new NotFoundHttpException(sprintf(
@@ -141,7 +137,9 @@ class Kernel implements KernelInterface
             $this->annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
 
             // getting all annotations of controller's method
-            $annotationObjects = $this->annotation->getMethodAnnotationsObjects($ctrlrClass, $ctrlrMethod);
+            $annotationObjects = $this->annotation->getMethodAnnotationsObjects(
+                $params['_controllerClass'], $params['_controllerMethod']
+            );
 
             // check if a @view definition exists on method's annotations
             if (!empty($annotationObjects['View'])) {
@@ -163,7 +161,8 @@ class Kernel implements KernelInterface
 
             // creating viewEvent instance
             $viewEvent = new ViewEvent(
-                $this, $ctrlrClass, $ctrlrMethod, $data, $viewAnnotations, $this->config, $request
+                $this, $params['_controllerClass'], $params['_controllerMethod'],
+                $data, $viewAnnotations, $this->config, $request
             );
 
             // dispatch all KernelEvents::VIEW events
@@ -190,5 +189,35 @@ class Kernel implements KernelInterface
         $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response));
 
         return $response;
+    }
+
+    protected function prepareRequestParams($data)
+    {
+        $params    = array();
+        $namespace = $this->config->get('app.namespace');
+
+        foreach ($data as $listParams) {
+            $params = array_merge($params, $listParams);
+        }
+
+        if (strpos($params['_controller'], '_') === false) {
+            $params['_controller'] = ucfirst($params['_controller']);
+        } else {
+            $params['_controller'] = str_replace(
+                ' ', '', ucwords(str_replace('_', ' ', $params['_controller']))
+            );
+        }
+
+        if (strpos($params['_action'], '_') !== false) {
+            $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $params['_action'])));
+            $params['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
+            unset($tmp);
+        }
+
+        $params['_controllerClass']  = '\\'.$namespace.'\\Controller\\'.$params['_controller'].'Controller';
+        $params['_controllerMethod'] = $params['_action'] . 'Action';
+        $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
+
+        return $params;
     }
 }
