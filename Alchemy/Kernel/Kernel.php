@@ -12,6 +12,9 @@ namespace Alchemy\Kernel;
 
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 
+// events
+use Alchemy\Kernel\Event\GetResponseEvent;
+use Alchemy\Kernel\Event\FilterResponseEvent;
 use Alchemy\Kernel\Event\ControllerEvent;
 use Alchemy\Kernel\Event\ViewEvent;
 use Alchemy\Kernel\Event\ResponseEvent;
@@ -79,6 +82,22 @@ class Kernel implements KernelInterface
      */
     public function handle(Request $request)
     {
+        /*
+         * Trigger KernelEvents::REQUEST using GetResponse Event
+         *
+         * This event can be used by an application to filter a request before
+         * ever all kernel logic being executed
+         */
+        $event = new GetResponseEvent($this, $request);
+        $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
+
+        if ($event->hasResponse()) {
+            $event = new FilterResponseEvent($this, $request, $event->getResponse());
+            $this->dispatcher->dispatch(KernelEvents::RESPONSE, $event);
+
+            return $event->getResponse();
+        }
+
         $reqParams = $this->matcher->match($request->getPathInfo());
         $reqParams = array_merge($reqParams, $request->query->all());
         $namespace = $this->config->get('app.namespace');
@@ -168,7 +187,7 @@ class Kernel implements KernelInterface
         }
 
         // dispatch a response event
-        $this->dispatcher->dispatch(KernelEvents::RESPONSE, new ResponseEvent($this, $response, $request));
+        $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response));
 
         return $response;
     }

@@ -85,9 +85,10 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             $dispatcher->addSubscriber($app);
 
             // subscribing events
+            $dispatcher->addSubscriber(new EventListener\ResponseListener($app['config']->get('templating.charset')));
             $dispatcher->addSubscriber(new EventListener\ControllerListener());
             $dispatcher->addSubscriber(new EventListener\ViewListener());
-            $dispatcher->addSubscriber(new EventListener\ResponseListener());
+
             // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 
             return $dispatcher;
@@ -105,6 +106,13 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             unset($conf['__autoload__']);
             $this->loadAppConfigurationFiles($conf);
         }
+
+        // registering the aplication namespace to SPL ClassLoader
+        $this['autoloader']->register(
+            $this['config']->get('app.name'),
+            $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
+            $this['config']->get('app.namespace')
+        );
     }
 
     /**
@@ -115,13 +123,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         if (!$this->appConfLoaded){
             $this->loadAppConfigurationFiles();
         }
-
-        // registering the aplication namespace to SPL ClassLoader
-        $this['autoloader']->register(
-            $this['config']->get('app.name'),
-            $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
-            $this['config']->get('app.namespace')
-        );
 
         if (empty($request)) {
             $request = Request::createFromGlobals();

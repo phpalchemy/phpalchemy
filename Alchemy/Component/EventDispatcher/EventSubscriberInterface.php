@@ -20,7 +20,6 @@ namespace Alchemy\Component\EventDispatcher;
 /**
  * Class Event
  *
- * @package    IronG
  * @subpackage EventDispatcher
  * @author     Erik Amaru Ortiz <aortiz.erik@gmail.com>
  * @version    1.0

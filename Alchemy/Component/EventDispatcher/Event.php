@@ -13,7 +13,6 @@ namespace Alchemy\Component\EventDispatcher;
 /**
  * Class Event
  *
- * @package    IronG
  * @subpackage EventDispatcher
  * @author     Erik Amaru Ortiz <aortiz.erik@gmail.com>
  * @version    1.0
@@ -24,6 +23,11 @@ class Event
     protected $processed  = false;
     protected $name       = '';
     protected $parameters = array();
+
+    /**
+     * @var Boolean this flag indicate that all subsequent events shouldn't be triggered
+     */
+    protected $stopEventsPropagation = false;
 
     /**
      * Event Constructor.
@@ -94,5 +98,15 @@ class Event
     public function getParameters()
     {
         return $this->parameters;
+    }
+
+    public function stopPropagation()
+    {
+        $this->stopEventsPropagation = true;
+    }
+
+    public function isPropagationStopped()
+    {
+        return $this->stopEventsPropagation;
     }
 }

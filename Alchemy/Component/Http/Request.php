@@ -48,7 +48,7 @@ class Request
     public $method                 = null;
     public $cacheControl           = array();
 
-    public static $format = array(
+    public static $formats = array(
         'html' => array('text/html', 'application/xhtml+xml'),
         'txt'  => array('text/plain'),
         'js'   => array('application/javascript', 'application/x-javascript', 'text/javascript'),
@@ -319,7 +319,7 @@ class Request
 
         // Remove the query string from REQUEST_URI
         $pos = strpos($requestUri, '?');
-        
+
         if ($pos !== false) {
             $requestUri = substr($requestUri, 0, $pos);
         }
@@ -428,5 +428,56 @@ class Request
         }
 
         return $cacheControl;
+    }
+
+    /**
+     * Gets the request format.
+     *
+     * Here is the process to determine the format:
+     *
+     *  -> format defined by the user (with setRequestFormat())
+     *  -> _format request parameter
+     *  -> $default
+     *
+     * @param string  $default     The default format
+     * @return string The request format
+     */
+    public function getRequestFormat($default = 'html')
+    {
+        if (null === $this->format) {
+            $this->format = $this->get('_format', $default);
+        }
+
+        return $this->format;
+    }
+
+    /**
+     * Gets a "parameter" value.
+     *
+     * This method is mainly useful for libraries that want to provide some flexibility.
+     *
+     * Order of precedence: GET, PATH, POST, COOKIE
+     * Avoid using this method in controllers:
+     *  * slow
+     *  * prefer to get from a "named" source
+     *
+     * @param string    $key        the key
+     * @param mixed     $default    the default value
+     * @param type      $deep       is parameter deep in multidimensional array
+     *
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        return $this->query->get(
+            $key,
+            $this->attributes->get(
+                $key,
+                $this->request->get(
+                    $key,
+                    $default
+                )
+            )
+        );
     }
 }

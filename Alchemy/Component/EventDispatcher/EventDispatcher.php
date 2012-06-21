@@ -90,6 +90,10 @@ class EventDispatcher
         // execute all callbacks for a event given
         foreach ($this->getListeners($event->getName()) as $listener) {
             call_user_func($listener, $event);
+
+            if ($event->isPropagationStopped()) {
+                break;
+            }
         }
 
         return $event;

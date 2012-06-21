@@ -223,8 +223,6 @@ class Response
     // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isInvalid()
     {
@@ -233,8 +231,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isInformational()
     {
@@ -243,8 +239,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isSuccessful()
     {
@@ -253,8 +247,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isRedirection()
     {
@@ -263,8 +255,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isClientError()
     {
@@ -273,8 +263,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isServerError()
     {
@@ -283,8 +271,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isOk()
     {
@@ -293,8 +279,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isForbidden()
     {
@@ -303,8 +287,6 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isNotFound()
     {
@@ -315,8 +297,6 @@ class Response
      * @param string $location
      *
      * @return Boolean
-     *
-     * @api
      */
     public function isRedirect($location = null)
     {
@@ -325,11 +305,29 @@ class Response
 
     /**
      * @return Boolean
-     *
-     * @api
      */
     public function isEmpty()
     {
         return in_array($this->statusCode, array(201, 204, 304));
+    }
+
+    /**
+     * Retrieves the response charset.
+     *
+     * @return string Character set
+     */
+    public function getCharset()
+    {
+        return $this->charset;
+    }
+
+    /**
+     * Sets the response charset.
+     *
+     * @return string Character set
+     */
+    public function setCharset($charset)
+    {
+        $this->charset = $charset;
     }
 }
