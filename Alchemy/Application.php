@@ -86,8 +86,8 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
 
             // subscribing events
             $dispatcher->addSubscriber(new EventListener\ResponseListener($app['config']->get('templating.charset')));
-            $dispatcher->addSubscriber(new EventListener\ControllerListener());
-            $dispatcher->addSubscriber(new EventListener\ViewListener());
+            //$dispatcher->addSubscriber(new EventListener\ControllerListener());
+            //$dispatcher->addSubscriber(new EventListener\ViewListener());
 
             // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 

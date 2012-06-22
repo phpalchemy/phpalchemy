@@ -2,6 +2,7 @@
 namespace Alchemy\Kernel\Event;
 
 use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
 use Alchemy\Component\EventDispatcher\Event;
 use Alchemy\Kernel\KernelInterface;
 
@@ -9,18 +10,22 @@ class ControllerEvent extends KernelEvent
 {
     /**
      * The current controller
-     *
      * @var callable
      */
     private $controller = null;
+    private $response   = null;
     private $arguments  = array();
 
-    public function __construct(KernelInterface $kernel, $controller, $arguments, Request $request)
+    public function __construct(
+        KernelInterface $kernel, $controller, $arguments,
+        Request $request, Reesponse $response = null
+    )
     {
         parent::__construct($kernel, $request);
 
         $this->setController($controller);
-        $this->setArguments($arguments ? $arguments : array());
+        $this->arguments = $arguments;
+        $this->response  = $request;
     }
 
     /**
@@ -51,13 +56,18 @@ class ControllerEvent extends KernelEvent
         return $this->controller;
     }
 
-    public function setArguments($arguments)
-    {
-        $this->arguments = $arguments;
-    }
-
     public function getArguments()
     {
         return $this->arguments;
+    }
+
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
     }
 }

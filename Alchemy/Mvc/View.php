@@ -219,7 +219,7 @@ class View
      *
      * @param  array $data associative array conatining variables, the keys are used as variables names
      */
-    public function assignFromArray($data)
+    protected function assignFromArray($data)
     {
         if (!is_array($data)) {
             throw new \InvalidArgumentException("Invalid data type: argument should be array, '" .gettype($name) . "' given.");

@@ -61,7 +61,9 @@ final class KernelEvents
      *
      * @var string
      */
-    const CONTROLLER = 'events.controller';
+    const FILTER_CONTROLLER = 'events.filter_controller';
+    const BEFORE_CONTROLLER = 'events.before_controller';
+    const AFTER_CONTROLLER  = 'events.after_controller';
 
     /**
      * The RESPONSE event
