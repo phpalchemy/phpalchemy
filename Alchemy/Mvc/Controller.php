@@ -37,18 +37,4 @@ class Controller
     {
         return $this->request;
     }
-
-    public function getResponse()
-    {
-        if (empty($this->response)) {
-            $this->response = new Response();
-        }
-
-        return $this->response;
-    }
-
-    public function setResponse(Response $response)
-    {
-        $this->response = $response;
-    }
 }

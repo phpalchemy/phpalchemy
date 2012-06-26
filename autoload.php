@@ -18,6 +18,8 @@ require_once __DIR__ . '/Alchemy/Lib/Util/DependencyInjectionContainer.php';
 $classLoader = Alchemy\Lib\Util\ClassLoader::getInstance();
 $classLoader->register('Alchemy', __DIR__ . DIRECTORY_SEPARATOR);
 
+$classLoader->register('Notoj', __DIR__ . '/vendor/crodas/Notoj/lib/');
+
 // if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
 //     throw new Exception("Vendors for phpalchemy are missing, please execute:\n\$php composer.phar install");
 // }

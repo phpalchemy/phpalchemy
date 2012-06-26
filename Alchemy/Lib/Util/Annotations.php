@@ -10,6 +10,8 @@
 
 namespace Alchemy\Lib\Util;
 
+
+
 /**
  * Class Annotations
  *
@@ -19,16 +21,24 @@ namespace Alchemy\Lib\Util;
  * @copyright Copyright 2012 Erik Amaru Ortiz
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
+ * @depends   Notoj\*
  */
 class Annotations
 {
     private static $annotationCache;
 
-    public $defaultAnnotationNamespace = '';
+    public $defaultNamespace = '';
+
+    public function __construct($config = null)
+    {
+        if ($config instanceof \Alchemy\Config) {
+            //\Notoj\Notoj::enableCache($config->get('app.cache_dir') . DIRECTORY_SEPARATOR . "_annotations.php");
+        }
+    }
 
     public function setDefaultAnnotationNamespace($namespace)
     {
-        $this->defaultAnnotationNamespace = $namespace;
+        $this->defaultNamespace = $namespace;
     }
 
     public static function getClassAnnotations($className)
@@ -64,13 +74,19 @@ class Annotations
 
         foreach ($annotations as $annotationClass => $listParams) {
             $annotationClass = ucfirst($annotationClass);
-            $class = $this->defaultAnnotationNamespace . $annotationClass . 'Annotation';
+            $class = $this->defaultNamespace . $annotationClass . 'Annotation';
 
-            if (class_exists($class)) {
-                $objects[$annotationClass] = array();
+            if (empty($objects[$annotationClass])) {
+                if (!class_exists($class)) {
+                    throw new \Exception(sprintf('Annotation Class Not Found: %s', $class));
+                }
 
-                foreach ($listParams as $params) {
-                    $objects[$annotationClass][] = new $class($params);
+                $objects[$annotationClass] = new $class();
+            }
+
+            foreach ($listParams as $params) {
+                foreach ($params as $key => $value) {
+                    $objects[$annotationClass]->set($key, $value);
                 }
             }
         }
@@ -253,3 +269,15 @@ class Annotations
         return $val;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

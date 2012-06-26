@@ -30,6 +30,8 @@ use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 
 use Alchemy\Kernel\KernelEvents;
 
+use Alchemy\Lib\Util\NotojAnnotations;
+
 /**
  * Class Application
  *
@@ -71,8 +73,9 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             return new Yaml();
         });
 
-        $this['annotation'] = $this->share(function () {
-            return new Annotations();
+        $this['annotation'] = $this->share(function () use ($app) {
+            //return new NotojAnnotations($app['config']);
+            return new Annotations($app['config']);
         });
 
         $this['mapper'] = $this->share(function () use ($app){

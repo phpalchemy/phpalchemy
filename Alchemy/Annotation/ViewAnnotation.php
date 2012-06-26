@@ -1,27 +1,21 @@
 <?php
 namespace Alchemy\Annotation;
 
-class ViewAnnotation
+class ViewAnnotation extends Annotation
 {
     public $template = '';
     public $engine   = '';
 
-    public function __construct($param)
+    public function resolveTemplateName()
     {
-        if (is_string($param)) {
-            $this->template = $param;
-        } elseif (is_array($param)){
-            if (isset($param['template'])) { // long name
-                $this->template = $param['template'];
-            } elseif (isset($param['tpl'])) { // short name
-                $this->template = $param['tpl'];
-            } elseif (isset($param['file'])) { // short name
-                $this->template = $param['file'];
-            }
-
-            if (isset($param['engine'])) {
-                $this->engine = $param['engine'];
-            }
+        if ($this->exists('0')) {
+            $this->template = $this->get('0');
+        } elseif ($this->exists('file')) {
+            $this->template = $this->get('file');
+        } elseif ($this->exists('template')) {
+            $this->template = $this->get('template');
         }
+
+        $this->engine = $this->get('engine', '');
     }
 }

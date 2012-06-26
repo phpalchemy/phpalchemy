@@ -4,6 +4,7 @@ namespace Alchemy\Kernel\Event;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
+use Alchemy\Annotation\ResponseAnnotation;
 
 /**
  * Allows to filter a Response object
@@ -22,13 +23,16 @@ class FilterResponseEvent extends KernelEvent
      * The current response object
      * @var Alchemy\Component\Http\Response
      */
-    private $response;
+    private $response    = null;
+    private $annotations = null;
 
-    public function __construct(KernelInterface $kernel, Request $request, Response $response)
+    public function __construct(
+        KernelInterface $kernel, Request $request, Response $response, 
+        ResponseAnnotation $annotations = null)
     {
         parent::__construct($kernel, $request);
-
         $this->setResponse($response);
+        $this->annotations = $annotations;
     }
 
     /**
@@ -53,5 +57,10 @@ class FilterResponseEvent extends KernelEvent
     public function setResponse(Response $response)
     {
         $this->response = $response;
+    }
+
+    public function getAnnotations()
+    {
+        return $this->annotations;
     }
 }

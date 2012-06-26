@@ -25,6 +25,7 @@ use Alchemy\Kernel\KernelInterface;
 use Alchemy\Mvc\ControllerResolver;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
+use Alchemy\Component\Http\JsonResponse;
 use Alchemy\Lib\Util\Annotations;
 use Alchemy\Config;
 
@@ -74,6 +75,7 @@ class Kernel implements KernelInterface
         $this->annotation = $annotation;
 
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
+        defined('NS') || define('NS', '\\'); // NAMESPACE_SEPARATOR
     }
 
     /**
@@ -83,7 +85,7 @@ class Kernel implements KernelInterface
     public function handle(Request $request)
     {
         /*
-         * Trigger KernelEvents::REQUEST using GetResponse Event
+         * "EVENT" KernelEvents::REQUEST using GetResponse Event
          *
          * This event can be used by an application to filter a request before
          * ever all kernel logic being executed, listeners for this event should
@@ -99,10 +101,9 @@ class Kernel implements KernelInterface
 
                 return $event->getResponse();
             }
-            // end KernelEvents::REQUEST
         }
 
-        $viewAnnotations = array();
+        $annotatedObjects = array();
 
         try {
             /*
@@ -139,19 +140,14 @@ class Kernel implements KernelInterface
             }
 
 
-            //ANNOTATIONS, Getting controller annotations
-            $this->annotation->setDefaultAnnotationNamespace('\Alchemy\Annotation\\');
+            // ANNOTATIONS, Getting controller annotations
+            $this->annotation->setDefaultAnnotationNamespace(NS.'Alchemy'.NS.'Annotation'.NS);
 
-            // getting all annotations of controller's method
-            $annotationObjects = $this->annotation->getMethodAnnotationsObjects(
+            // getting all annotations objects of controller's method
+            $annotatedObjects = $this->annotation->getMethodAnnotationsObjects(
                 $params['_controllerClass'], $params['_controllerMethod']
             );
-
-            // check if a @view definition exists on method's annotations
-            if (!empty($annotationObjects['View'])) {
-                $viewAnnotations = $annotationObjects['View'];
-            }
-            //ANNOTATIONS END;
+            // ANNOTATIONS END;
 
             $arguments = $this->resolver->getArguments($request, $controller);
 
@@ -179,13 +175,20 @@ class Kernel implements KernelInterface
                 foreach ($response as $key => $value) {
                     $controller[0]->view->$key = $value;
                 }
-            } elseif ($response instanceof Response) {
-                $controller[0]->setResponse($response);
             }
 
-            // gets Response instance
-            $response = $controller[0]->getResponse();
+            // getting controller's data.
+            $controllerData = (array) $controller[0]->view; 
 
+            if (! ($response instanceof Response || $response instanceof JsonResponse)) {
+                if (isset($annotatedObjects['JsonResponse'])) {
+                    $response = new JsonResponse();
+                    $response->setData($controllerData);
+                } else {
+                    $response = new Response();
+                }
+            }
+            
             //"EVENT" AFTER_CONTROLLER
             if ($this->dispatcher->hasListeners(KernelEvents::AFTER_CONTROLLER)) {
                 if (!isset($event) || !($event instanceof ControllerEvent)) {
@@ -196,21 +199,22 @@ class Kernel implements KernelInterface
                 $this->dispatcher->dispatch(KernelEvents::AFTER_CONTROLLER, $event);
             }
 
-            // getting data for voew from ontroller.
-            $data = (array) $controller[0]->view;
-
             // gets View instance
+            $viewAnnotation = empty($annotatedObjects['View']) ? null : $annotatedObjects['View'];
             $view = $this->handleView(
                 $params['_controllerClass'], $params['_controllerMethod'],
-                $data, $viewAnnotations, $this->config
+                $controllerData, $viewAnnotation
             );
 
             // if there is a view adapter instance, get its contents and set to response content
             if (!empty($view)) {
-                $event = new ViewEvent($this, $view, $request);
-
                 //"EVENT" VIEW dispatch all KernelEvents::VIEW events
-                $this->dispatcher->dispatch(KernelEvents::VIEW, $event);
+                if ($this->dispatcher->hasListeners(KernelEvents::VIEW)) {
+                    $event = new ViewEvent();
+                    $this->dispatcher->dispatch(KernelEvents::VIEW, $event);
+
+                    $view = $event->getView();
+                }
 
                 $response->setContent($view->getOutput());
             }
@@ -221,10 +225,10 @@ class Kernel implements KernelInterface
             $response = new Response($e->getMessage(), 500);
         }
 
+        $responseAnnotation = empty($annotatedObjects['Response']) ? null : $annotatedObjects['Response'];
+
         // dispatch a response event
-        if ($this->dispatcher->hasListeners(KernelEvents::BEFORE_CONTROLLER)) {
-            $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response));
-        }
+        $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response, $responseAnnotation));
 
         return $response;
     }
@@ -236,14 +240,7 @@ class Kernel implements KernelInterface
             return null; // no @view annotation found, just return to break view handling
         }
 
-        if (count($annotation) > 1) {
-            throw new \Exception(sprintf(
-                "View Annotations Error: Just can define one @View annotation, (%s) annotations found.",
-                count($annotation)
-            ));
-        }
-
-        $annotation = $annotation[0];
+        $annotation->resolveTemplateName();
 
         // creating config obj and setting it with all defaults configurations
         $conf = new \StdClass();
@@ -267,7 +264,7 @@ class Kernel implements KernelInterface
         if (empty($conf->template)) { //that means it wasn't set on @view annotation
             // Then we compose a template filename using controller class and method names but
             // removing ...Controller & ..Action sufixes from those names
-            $nsSepPos        = strrpos($class, '\\');
+            $nsSepPos        = strrpos($class, NS);
             $conf->template  = substr($class, $nsSepPos + 1, -10) . DS;
             $conf->template .= substr($method, 0, -6);
         }
@@ -286,7 +283,7 @@ class Kernel implements KernelInterface
         }
 
         // composing the view class string
-        $viewClass = '\Alchemy\Adapter\\'.ucfirst($conf->engine).'View';
+        $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
 
         // check if view engine class exists
         if (!class_exists($viewClass)) { // does not exist, throw an exception
@@ -318,21 +315,29 @@ class Kernel implements KernelInterface
             $params = array_merge($params, $listParams);
         }
 
+        // verify controller's name is underscored or not
         if (strpos($params['_controller'], '_') === false) {
+            //just ensure first characted to uppercase
             $params['_controller'] = ucfirst($params['_controller']);
         } else {
+            // camelize the controller's name (to camelcase)
             $params['_controller'] = str_replace(
                 ' ', '', ucwords(str_replace('_', ' ', $params['_controller']))
             );
         }
 
+        // verify if action's name is underscored or not
         if (strpos($params['_action'], '_') !== false) {
+            // camileze the action's name (to camelcase)
             $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $params['_action'])));
+            // this is to ensure first charcater to lowercase,
+            // because by php standard coding says function name should starts with lowercase
             $params['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
             unset($tmp);
         }
 
-        $params['_controllerClass']  = '\\'.$namespace.'\\Controller\\'.$params['_controller'].'Controller';
+        // composing controller class & method real names
+        $params['_controllerClass']  = NS.$namespace.NS.'Controller'.NS.$params['_controller'].'Controller';
         $params['_controllerMethod'] = $params['_action'] . 'Action';
         $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
 

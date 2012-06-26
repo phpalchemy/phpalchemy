@@ -5,6 +5,7 @@ use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Kernel\Event\FilterResponseEvent;
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Component\Http\Response;
+use Alchemy\Annotation\ResponseAnnotation;
 
 class ResponseListener implements EventSubscriberInterface
 {
@@ -48,6 +49,18 @@ class ResponseListener implements EventSubscriberInterface
         if ($response->getCharset() === null) {
             $response->setCharset($this->charset);
         }
+
+        $annotations = $event->getAnnotations();
+        
+        // override headers from annotations
+        if ($annotations instanceof ResponseAnnotation) {
+            $annotatedHeaders = $annotations->getHeaders();
+
+            foreach ($annotatedHeaders as $key => $value) {
+                $response->headers->set($key, $value);            
+            }
+        }
+        // end annotated headers
 
         if ($response->headers->has('Content-Type')) {
             return;
