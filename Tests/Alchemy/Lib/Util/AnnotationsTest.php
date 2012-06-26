@@ -17,7 +17,7 @@ class AnnotationsTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->annotations = new Alchemy\Util\Annotations;
+        $this->annotations = new Alchemy\Lib\Util\Annotations;
     }
 
     /**
