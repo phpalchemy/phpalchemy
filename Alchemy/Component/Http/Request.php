@@ -324,13 +324,17 @@ class Request
             $requestUri = substr($requestUri, 0, $pos);
         }
 
-        $pathInfo = rtrim(substr(urldecode($requestUri), strlen(urldecode($baseUrl))), '/');
+        $pathInfo = substr(urldecode($requestUri), strlen(urldecode($baseUrl)));
 
         if ($baseUrl !== null && $pathInfo === false) {
             // If substr() returns false then PATH_INFO is set to an empty string
             return '/';
         } elseif ($baseUrl === null) {
-            return rtrim($requestUri, '/');
+            $pathInfo = $requestUri;
+        }
+
+        if (strlen($pathInfo) > 1 && substr($pathInfo, -1) === '/') {
+            $pathInfo = substr($pathInfo, 0, -1);
         }
 
         return $pathInfo;

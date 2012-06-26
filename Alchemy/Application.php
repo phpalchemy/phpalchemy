@@ -11,7 +11,7 @@
 namespace Alchemy;
 
 use Alchemy\Component\EventDispatcher\EventDispatcher;
-use Alchemy\Component\ClassLoader;
+use Alchemy\Lib\Util\ClassLoader;
 
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Kernel\EventListener;
@@ -42,8 +42,6 @@ use Alchemy\Kernel\KernelEvents;
  */
 class Application extends \DependencyInjectionContainer implements KernelInterface, EventSubscriberInterface
 {
-    private $appConfLoaded = false;
-
     /**
      * Construct application object
      * @param Config $config Contains all app configuration
@@ -56,9 +54,14 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
 
         $this['logger'] = null;
 
-        $this['config'] = $this->share(function () {
-            return new Config();
+        $this['config'] = $this->share(function () use ($conf){
+            $config = new Config();
+            $config->load($conf);
+
+            return $config;
         });
+
+        $this->loadAppConfigurationFiles();
 
         $this['autoloader'] = $this->share(function () {
             return new ClassLoader();
@@ -72,8 +75,42 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
             return new Annotations();
         });
 
-        $this['mapper'] = $this->share(function () {
-            return new Mapper();
+        $this['mapper'] = $this->share(function () use ($app){
+            $mapper = new Mapper();
+            $config = $app['config'];
+
+            if (file_exists($config->get('app.root_dir') . DS .'config' . DS . 'routes.php')) {
+                $routesInc = include $config->get('app.root_dir') . DS .'config' . DS . 'routes.php';
+
+                if ($routesInc instanceof Mapper) {
+                    $routesInc = $mapper;
+                } elseif ($routesInc instanceof \Closure) {
+                    $addRoutes($mapper);
+                } else {
+                    throw new \InvalidArgumentException("ERROR: file routes.php does not return valid data.");
+                }
+            } else if (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
+                $routesList = $this['yaml']->loadFile($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
+
+                foreach ($routesList as $rname => $rconf) {
+                    $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
+                    $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
+                    $options      = isset($rconf['options'])      ? $rconf['options']      : array();
+
+                    if (!isset($rconf['pattern'])) {
+                        throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $rname));
+                    }
+
+                    $mapper->connect($rname, new Route($rconf['pattern'], $defaults, $requirements, $options));
+                }
+            } else {
+                throw new \Exception(
+                    "Application Error: No routes found for this app.\n" .
+                    "You need create & configure 'config/routes.yaml'"
+                );
+            }
+
+            return $mapper;
         });
 
         // $this['exception_handler'] = $this->share(function () {
@@ -86,9 +123,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
 
             // subscribing events
             $dispatcher->addSubscriber(new EventListener\ResponseListener($app['config']->get('templating.charset')));
-            //$dispatcher->addSubscriber(new EventListener\ControllerListener());
-            //$dispatcher->addSubscriber(new EventListener\ViewListener());
-
             // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 
             return $dispatcher;
@@ -101,11 +135,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         $this['kernel'] = $this->share(function () use ($app) {
             return new Kernel($app['dispatcher'], $app['mapper'], $app['resolver'], $app['config'], $app['annotation']);
         });
-
-        if (isset($conf['__autoload__'])) {
-            unset($conf['__autoload__']);
-            $this->loadAppConfigurationFiles($conf);
-        }
 
         // registering the aplication namespace to SPL ClassLoader
         $this['autoloader']->register(
@@ -120,10 +149,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
      */
     public function run(Request $request = null)
     {
-        if (!$this->appConfLoaded){
-            $this->loadAppConfigurationFiles();
-        }
-
         if (empty($request)) {
             $request = Request::createFromGlobals();
         }
@@ -139,8 +164,6 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
 
         $this['request'] = $request;
 
-        $this->loadRoutes();
-
         $response = $this['kernel']->handle($request);
 
         //$this['request'] = $current;
@@ -148,39 +171,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         return $response;
     }
 
-    public function loadRoutes()
-    {
-        $config = $this['config'];
-
-        if (file_exists($config->get('app.root_dir') . DS .'config' . DS . 'routes.php')) {
-            $mapper = include $config->get('app.root_dir') . DS .'config' . DS . 'routes.php';
-
-            if (!($mapper instanceof Mapper)) {
-                throw new \InvalidArgumentException("Routing Mapper is missing.");
-            }
-        } else if (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
-            $routesList = $this['yaml']->loadFile($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
-
-            foreach ($routesList as $rname => $rconf) {
-                $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
-                $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
-                $options      = isset($rconf['options'])      ? $rconf['options']      : array();
-
-                if (!isset($rconf['pattern'])) {
-                    throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $rname));
-                }
-
-                $this['mapper']->connect($rname, new Route($rconf['pattern'], $defaults, $requirements, $options));
-            }
-        } else {
-            throw new \Exception(
-                "Application Error: No routes found for this app.\n" .
-                "You need create & configure 'config/routes.yaml'"
-            );
-        }
-    }
-
-    public function loadAppConfigurationFiles($conf = array())
+    public function loadAppConfigurationFiles()
     {
         if (isset($conf['phpalchemy']['root_dir'])) {
             $this['config']->set('phpalchemy.root_dir', $conf['phpalchemy']['root_dir']);
@@ -204,13 +195,11 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         $this['config']->load($this['config']->get('phpalchemy.root_dir').DS.'config'.DS.'defaults.application.ini');
 
         //load app. configuration ini file
-        empty($conf) ? $this['config']->load($this->getAppIniFile()) : $this['config']->load($conf);
+        $this['config']->load($this->getAppIniFile());
 
 
         //load env. configuration ini file
         $this['config']->load($this->getEnvIniFile());
-
-        $this->appConfLoaded = true;
     }
 
     public function setAppIniFile($filename)

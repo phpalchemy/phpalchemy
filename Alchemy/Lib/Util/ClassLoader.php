@@ -1,5 +1,5 @@
 <?php
-namespace Alchemy\Component;
+namespace Alchemy\lib\Util;
 
 /**
  * Class Route
@@ -19,7 +19,7 @@ class ClassLoader
     /**
      * Hold single object
      *
-     * @var Your_Registry
+     * @var ClassLoader
      */
     protected static $_instance = null;
 

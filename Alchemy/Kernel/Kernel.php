@@ -89,16 +89,18 @@ class Kernel implements KernelInterface
          * ever all kernel logic being executed, listeners for this event should
          * be registered outside framework logic (should be on application logic).
          */
-        $event = new GetResponseEvent($this, $request);
-        $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
+        if ($this->dispatcher->hasListeners(KernelEvents::REQUEST)) {
+            $event = new GetResponseEvent($this, $request);
+            $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
 
-        if ($event->hasResponse()) {
-            $event = new FilterResponseEvent($this, $request, $event->getResponse());
-            $this->dispatcher->dispatch(KernelEvents::RESPONSE, $event);
+            if ($event->hasResponse()) {
+                $event = new FilterResponseEvent($this, $request, $event->getResponse());
+                $this->dispatcher->dispatch(KernelEvents::RESPONSE, $event);
 
-            return $event->getResponse();
+                return $event->getResponse();
+            }
+            // end KernelEvents::REQUEST
         }
-        // end KernelEvents::REQUEST
 
         $viewAnnotations = array();
 
@@ -154,15 +156,19 @@ class Kernel implements KernelInterface
             $arguments = $this->resolver->getArguments($request, $controller);
 
             //"EVENT" FILTER_CONTROLLER
-            $event = new FilterControllerEvent($this, $controller, $request);
-            $this->dispatcher->dispatch(KernelEvents::FILTER_CONTROLLER, $event);
+            if ($this->dispatcher->hasListeners(KernelEvents::FILTER_CONTROLLER)) {
+                $event = new FilterControllerEvent($this, $controller, $request);
+                $this->dispatcher->dispatch(KernelEvents::FILTER_CONTROLLER, $event);
 
-            // getting controller; this can be the same or other filtered controller
-            $controller = $event->getController();
+                // getting controller; this can be the same or other filtered controller
+                $controller = $event->getController();
+            }
 
             //"EVENT" BEFORE_CONTROLLER
-            $event = new ControllerEvent($this, $controller, $arguments, $request);
-            $this->dispatcher->dispatch(KernelEvents::BEFORE_CONTROLLER, $event);
+            if ($this->dispatcher->hasListeners(KernelEvents::BEFORE_CONTROLLER)) {
+                $event = new ControllerEvent($this, $controller, $arguments, $request);
+                $this->dispatcher->dispatch(KernelEvents::BEFORE_CONTROLLER, $event);
+            }
 
             // Execute controller action
             $response = call_user_func_array($controller, $arguments);
@@ -180,10 +186,15 @@ class Kernel implements KernelInterface
             // gets Response instance
             $response = $controller[0]->getResponse();
 
-            $event->setResponse($response);
-
             //"EVENT" AFTER_CONTROLLER
-            $this->dispatcher->dispatch(KernelEvents::AFTER_CONTROLLER, $event);
+            if ($this->dispatcher->hasListeners(KernelEvents::AFTER_CONTROLLER)) {
+                if (!isset($event) || !($event instanceof ControllerEvent)) {
+                    $event = new ControllerEvent($this, $controller, $arguments, $request);
+                }
+                $event->setResponse($response);
+
+                $this->dispatcher->dispatch(KernelEvents::AFTER_CONTROLLER, $event);
+            }
 
             // getting data for voew from ontroller.
             $data = (array) $controller[0]->view;
@@ -211,7 +222,9 @@ class Kernel implements KernelInterface
         }
 
         // dispatch a response event
-        $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response));
+        if ($this->dispatcher->hasListeners(KernelEvents::BEFORE_CONTROLLER)) {
+            $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response));
+        }
 
         return $response;
     }

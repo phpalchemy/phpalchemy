@@ -12,16 +12,16 @@
 
 /* PHPALCHEMY FRAMEWORK AUTOLOADER */
 
-require_once __DIR__ . '/Alchemy/Component/ClassLoader/ClassLoader.php';
+require_once __DIR__ . '/Alchemy/Lib/Util/ClassLoader.php';
 require_once __DIR__ . '/Alchemy/Lib/Util/DependencyInjectionContainer.php';
 
-$classLoader = Alchemy\Component\ClassLoader::getInstance();
+$classLoader = Alchemy\Lib\Util\ClassLoader::getInstance();
 $classLoader->register('Alchemy', __DIR__ . DIRECTORY_SEPARATOR);
 
 // if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
 //     throw new Exception("Vendors for phpalchemy are missing, please execute:\n\$php composer.phar install");
 // }
-
 // require_once __DIR__ . '/vendor/autoload.php';
 
-set_include_path(__DIR__.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR . get_include_path());
+//var_dump(__DIR__.DIRECTORY_SEPARATOR.'vendor' .PATH_SEPARATOR. get_include_path()); die;
+set_include_path(__DIR__.DIRECTORY_SEPARATOR.'vendor' .PATH_SEPARATOR. get_include_path());
