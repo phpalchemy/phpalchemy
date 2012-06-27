@@ -1,8 +1,9 @@
 README
 =========================
+[![Build Status](https://secure.travis-ci.org/eriknyk/phpalchemy.png?branch=master)](http://travis-ci.org/eriknyk/phpalchemy)
+
 PHP Alchemy Framework
 ------------
-[![Build Status](https://secure.travis-ci.org/eriknyk/phpalchemy.png?branch=master)](http://travis-ci.org/eriknyk/phpalchemy)
  
 
 Phpalchemy is a PHP 5.3 full-stack web framework. It is a lightweight, faster and flexibility framework written in php. It allows you build better and easy to maintain your php applications.
