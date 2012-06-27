@@ -1,3 +1,6 @@
+PhpAlchemy [![Build Status](https://secure.travis-ci.org/eriknyk/phpalchemy.png?branch=master)](http://travis-ci.org/eriknyk/phpalchemy)
+=========================
+
 README
 ======
 
