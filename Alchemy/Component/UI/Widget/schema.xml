@@ -1,0 +1,16 @@
+<ui>
+    <section name="textbox">
+        <template>
+            <![CDATA[<input type="{{type}}" id="{{id}}" @attributes(assignation="=", separator=" ")/>]]>
+        </template>
+        <javascript>
+            <![CDATA[ //some javascript ]]>
+        </javascript>
+    </section>
+</ui>
+
+[secion name="textbox"]
+[template <input type="{{type}}" id="{{id}}" @attributes(assignation="=", separator=" ")/>]
+[javascript
+$('#{{ id }}').validate()
+]
