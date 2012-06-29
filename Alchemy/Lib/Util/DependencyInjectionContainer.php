@@ -184,4 +184,9 @@ class DependencyInjectionContainer implements \ArrayAccess
     {
         return array_keys($this->container);
     }
+
+    function all()
+    {
+        return $this->container;
+    }
 }
