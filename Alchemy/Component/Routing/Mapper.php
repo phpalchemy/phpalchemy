@@ -24,29 +24,74 @@ namespace Alchemy\Component\Routing;
  */
 class Mapper
 {
+    /**
+     * Contains routes collection
+     *
+     * @var array
+     */
     public $routes = array();
+
+    /**
+     * Flag to enable sort routes or not, false by default
+     *
+     * @var boolean
+     */
+    public $sortRoutesEnabled = false;
 
     public function __construct()
     {
     }
 
+    /**
+     * Enable sort routes before matching
+     *
+     * @param  bool   $value boolean value to enable or not sort routes
+     */
+    public function enableSortRoutes(bool $value)
+    {
+        $this->sortRoutesEnabled = $value;
+    }
+
+    public function getRoutes()
+    {
+        return $this->routes;
+    }
+
+    /**
+     * Connect a route to mapper
+     *
+     * @param  string $name  name for connecting route
+     * @param  Route  $route route object to connect to mapper
+     */
     public function connect($name, Route $route)
     {
         $this->routes[$name] = $route;
     }
 
-    public function match($urlString)
+    /**
+     * Match
+     * @param  string $url    url string to try map with a availables routes
+     * @return array  $params if the url was matched all routed params will be returned
+     *                        if it doesn't match a ResourceNotFoundException will thrown
+     */
+    public function match($url)
     {
+        if ($this->sortRoutesEnabled) {
+            $this->sortRoutes();
+        }
         foreach ($this->routes as $name => $route) {
-            if (($params = $route->match($urlString)) !== false) {
+            if (($params = $route->match($url)) !== false) {
                 return $params;
             }
         }
 
-        throw new Exception\ResourceNotFoundException($urlString);
+        throw new Exception\ResourceNotFoundException($url);
     }
 
-    public function preOrder()
+    /**
+     * This method sorts all raoutes connected to the mapper
+     */
+    protected function sortRoutes()
     {
         //TODO store the first preordering set in cache, it need to order just one time
         foreach ($this->routes as $i => $item) {
@@ -68,7 +113,7 @@ class Mapper
         for($i = 1; $i < $n; $i++) {
             $j= $i - 1;
             while ($j>=0 && $list[$j]['patCount'] == $list[$i]['patCount'] && $list[$j]['varCount'] > $list[$i]['varCount']) {
-                $this->swap_values($list[$j+1],$list[$j]);
+                $this->swapValues($list[$j+1],$list[$j]);
                 $j--;
             }
         }
@@ -76,7 +121,7 @@ class Mapper
         for($i = 1; $i < $n; $i++) {
             $j= $i - 1;
             while ($j>=0 && $list[$j]['patCount'] == $list[$i]['patCount'] && $list[$j]['varCount'] >= $list[$i]['varCount'] && $list[$j]['reqCount'] < $list[$i]['reqCount']) {
-                $this->swap_values($list[$j+1],$list[$j]);
+                $this->swapValues($list[$j+1],$list[$j]);
                 $j--;
             }
         }
@@ -84,7 +129,12 @@ class Mapper
         $this->routes = $list;
     }
 
-    public function swap_values(&$a, &$b)
+    /**
+     * This method swap values from two params passed by reference
+     * @param  string &$a value to swap
+     * @param  string &$b value to swap
+     */
+    protected function swapValues(&$a, &$b)
     {
         $x = $a;
         $a = $b;
