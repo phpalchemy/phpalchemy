@@ -3,7 +3,6 @@
         "crodas/Haanga"   : "*",
         "crodas/Notoj"    : "*",
         "3rd-party/smarty": "3.1.8",
-        "3rd-party/Yaml"  : "1.0",
         "twig/twig"       : "1.8.2"
     }
 }
