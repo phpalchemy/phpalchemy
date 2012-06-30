@@ -70,7 +70,8 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         });
 
         $this['yaml'] = $this->share(function () {
-            return new Yaml();
+            //include 'Yaml/Yaml.php';
+            return new \Yaml();
         });
 
         $this['annotation'] = $this->share(function () use ($app) {
@@ -93,7 +94,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
                     throw new \InvalidArgumentException("ERROR: file routes.php does not return valid data.");
                 }
             } else if (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
-                $routesList = $this['yaml']->loadFile($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
+                $routesList = $this['yaml']->load($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
 
                 foreach ($routesList as $rname => $rconf) {
                     $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();

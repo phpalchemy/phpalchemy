@@ -178,7 +178,7 @@ class Kernel implements KernelInterface
             }
 
             // getting controller's data.
-            $controllerData = (array) $controller[0]->view; 
+            $controllerData = (array) $controller[0]->view;
 
             if (! ($response instanceof Response || $response instanceof JsonResponse)) {
                 if (isset($annotatedObjects['JsonResponse'])) {
@@ -188,7 +188,7 @@ class Kernel implements KernelInterface
                     $response = new Response();
                 }
             }
-            
+
             //"EVENT" AFTER_CONTROLLER
             if ($this->dispatcher->hasListeners(KernelEvents::AFTER_CONTROLLER)) {
                 if (!isset($event) || !($event instanceof ControllerEvent)) {
@@ -287,7 +287,7 @@ class Kernel implements KernelInterface
 
         // check if view engine class exists
         if (!class_exists($viewClass)) { // does not exist, throw an exception
-            throw new Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
+            throw new \Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
         }
 
         // create view object
