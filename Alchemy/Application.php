@@ -11,26 +11,24 @@
 namespace Alchemy;
 
 use Alchemy\Component\EventDispatcher\EventDispatcher;
-use Alchemy\Lib\Util\ClassLoader;
+use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
+use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
+use Alchemy\Component\Routing\Mapper;
+use Alchemy\Component\Routing\Route;
+use Alchemy\Component\Yaml\Yaml;
 
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Kernel\EventListener;
 use Alchemy\Kernel\Kernel;
 
 use Alchemy\Mvc\ControllerResolver;
-use Alchemy\Component\Http\Request;
-use Alchemy\Component\Http\Response;
-use Alchemy\Lib\Util\Yaml;
+
 use Alchemy\Lib\Util\Annotations;
-
-use Alchemy\Component\Routing\Mapper;
-use Alchemy\Component\Routing\Route;
-
-use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
+use Alchemy\Lib\Util\ClassLoader;
+use Alchemy\Lib\Util\NotojAnnotations;
 
 use Alchemy\Kernel\KernelEvents;
-
-use Alchemy\Lib\Util\NotojAnnotations;
 
 /**
  * Class Application
@@ -70,8 +68,7 @@ class Application extends \DependencyInjectionContainer implements KernelInterfa
         });
 
         $this['yaml'] = $this->share(function () {
-            include '3rd-party/Yaml/Yaml.php';
-            return new \Yaml();
+            return new Yaml();
         });
 
         $this['annotation'] = $this->share(function () use ($app) {
