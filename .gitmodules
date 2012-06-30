@@ -10,3 +10,6 @@
 [submodule "Alchemy/Component/UI"]
 	path = Alchemy/Component/UI
 	url = git@github.com:eriknyk/UI
+[submodule "Alchemy/Component/Routing"]
+	path = Alchemy/Component/Routing
+	url = git@github.com:eriknyk/Routing
