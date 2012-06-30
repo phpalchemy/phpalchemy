@@ -1,0 +1,9 @@
+{% if element.type == "textbox" %}
+<input {%for attribute in element.attributes%}attribute.name="attribute.value" {%endfor%}/>
+{% else if element.type == "textarea" %}
+<textarea {%for attribute in element.attributes%}attribute.name="attribute.value" {%endfor%}>
+    {{element.value}}
+</textarea>
+{% else %}
+<input {%for attribute in element.attributes%}attribute.name="attribute.value" {%endfor%}/>
+{% endif %}
