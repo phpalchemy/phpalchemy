@@ -7,3 +7,6 @@
 [submodule "Alchemy/Component/Http"]
 	path = Alchemy/Component/Http
 	url = git@github.com:eriknyk/Http
+[submodule "Alchemy/Component/UI"]
+	path = Alchemy/Component/UI
+	url = git@github.com:eriknyk/UI
