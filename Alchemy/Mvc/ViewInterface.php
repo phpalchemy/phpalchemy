@@ -3,18 +3,19 @@ namespace Alchemy\Mvc;
 
 interface ViewInterface
 {
-    function setTpl($template);
-    function getTpl();
-    function setTemplateDir($path);
-    function getTemplateDir();
-    function setCacheDir($dir);
-    function getCacheDir();
-    function enableCache($value);
-    function enableDebug($value);
-    function setCharset($charset);
-    function getCharset();
-    function assing($name, $value);
-    function get();
-    function getOutput();
-    function render();
+    public function setTpl($template);
+    public function getTpl();
+    public function setTemplateDir($path);
+    public function getTemplateDir();
+    public function setCacheDir($dir);
+    public function getCacheDir();
+    public function enableCache($value);
+    public function enableDebug($value);
+    public function setCharset($charset);
+    public function getCharset();
+    public function assing($name, $value);
+    public function get();
+    public function getOutput();
+    public function render();
 }
+

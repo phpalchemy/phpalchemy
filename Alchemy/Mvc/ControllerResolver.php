@@ -73,7 +73,9 @@ class ControllerResolver
         list($controller, $method) = $this->createController($controller);
 
         if (!method_exists($controller, $method)) {
-            throw new \InvalidArgumentException(sprintf('Method "%s::%s" does not exist.', get_class($controller), $method));
+            throw new \InvalidArgumentException(sprintf(
+                'Method "%s::%s" does not exist.', get_class($controller), $method
+            ));
         }
 
         return array($controller, $method);
@@ -95,8 +97,7 @@ class ControllerResolver
         elseif (is_object($controller) && !$controller instanceof \Closure) {
             $r = new \ReflectionObject($controller);
             $r = $r->getMethod('__invoke');
-        }
-        else {
+        } else {
             $r = new \ReflectionFunction($controller);
         }
 
@@ -118,25 +119,24 @@ class ControllerResolver
         foreach ($parameters as $param) {
             if (array_key_exists($param->getName(), $attributes)) {
                 $arguments[] = $attributes[$param->getName()];
-            }
-            elseif ($param->getClass() && $param->getClass()->isInstance($request)) {
+            } elseif ($param->getClass() && $param->getClass()->isInstance($request)) {
                 $arguments[] = $request;
-            }
-            elseif ($param->isDefaultValueAvailable()) {
+            } elseif ($param->isDefaultValueAvailable()) {
                 $arguments[] = $param->getDefaultValue();
-            }
-            else {
+            } else {
                 if (is_array($controller)) {
                     $repr = sprintf('%s::%s()', get_class($controller[0]), $controller[1]);
-                }
-                elseif (is_object($controller)) {
+                } elseif (is_object($controller)) {
                     $repr = get_class($controller);
-                }
-                else {
+                } else {
                     $repr = $controller;
                 }
 
-                throw new \RuntimeException(sprintf('Controller "%s" requires that you provide a value for the "$%s" argument (because there is no default value or because there is a non optional argument after this one).', $repr, $param->getName()));
+                throw new \RuntimeException(sprintf(
+                    'Controller "%s" requires that you provide a value for the "$%s" argument ' .
+                    '(because there is no default value or because there is a non optional argument after this one).',
+                    $repr, $param->getName()
+                ));
             }
         }
 
@@ -165,3 +165,4 @@ class ControllerResolver
         return array(new $class(), $method);
     }
 }
+

@@ -1,7 +1,9 @@
 <?php
 namespace Alchemy\Adapter;
 
-class TwigView extends \Alchemy\Mvc\View
+use \Alchemy\Mvc\View;
+
+class TwigView extends View
 {
     protected $twig   = null;
     protected $loader = null;

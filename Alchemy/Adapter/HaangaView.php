@@ -1,7 +1,9 @@
 <?php
 namespace Alchemy\Adapter;
 
-class HaangaView extends \Alchemy\Mvc\View
+use \Alchemy\Mvc\View;
+
+class HaangaView extends View
 {
     public function __construct($tpl = '')
     {
@@ -32,5 +34,4 @@ class HaangaView extends \Alchemy\Mvc\View
         \Haanga::Load($this->getTpl(), $this->data);
     }
 }
-
 

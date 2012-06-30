@@ -127,7 +127,7 @@ class View
     {
         $this->cacheDir = $dir;
 
-        if  (!is_dir($this->cacheDir)) {
+        if (!is_dir($this->cacheDir)) {
             if (!@mkdir($this->cacheDir)) {
                 throw new \Exception("Could't create template engine cache directory: '$dir'");
             }
@@ -222,7 +222,9 @@ class View
     protected function assignFromArray($data)
     {
         if (!is_array($data)) {
-            throw new \InvalidArgumentException("Invalid data type: argument should be array, '" .gettype($name) . "' given.");
+            throw new \InvalidArgumentException(
+                "Invalid data type: argument should be array, '" .gettype($name) . "' given."
+            );
         }
 
         foreach ($data as $key => $value) {
@@ -268,3 +270,4 @@ class View
     {
     }
 }
+

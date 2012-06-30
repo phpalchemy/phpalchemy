@@ -38,3 +38,4 @@ class NotojAnnotations extends Annotations
         return $objects;
     }
 }
+

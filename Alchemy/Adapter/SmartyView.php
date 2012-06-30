@@ -1,7 +1,9 @@
 <?php
 namespace Alchemy\Adapter;
 
-class SmartyView extends \Alchemy\Mvc\View
+use \Alchemy\Mvc\View;
+
+class SmartyView extends View
 {
     protected $smarty;
 
@@ -25,13 +27,13 @@ class SmartyView extends \Alchemy\Mvc\View
         $this->smarty->compile_dir = $path . 'compiled' . DS;
         $this->smarty->cache_dir   = $path . 'cache' . DS;
 
-        if  (!is_dir($this->smarty->compile_dir)) {
+        if (!is_dir($this->smarty->compile_dir)) {
             if (!@mkdir($this->smarty->compile_dir)) {
                 throw new \Exception("Could't create smarty compile directory {$this->smarty->compile_dir}");
             }
         }
 
-        if  (!is_dir($this->smarty->cache_dir)) {
+        if (!is_dir($this->smarty->cache_dir)) {
             if (!@mkdir($this->smarty->cache_dir)) {
                 throw new \Exception("Could't create smarty cache directory {$this->smarty->cache_dir}");
             }
@@ -86,5 +88,4 @@ class SmartyView extends \Alchemy\Mvc\View
         $this->smarty->display($this->getTpl());
     }
 }
-
 
