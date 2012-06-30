@@ -85,8 +85,12 @@ class Annotations
             }
 
             foreach ($listParams as $params) {
-                foreach ($params as $key => $value) {
-                    $objects[$annotationClass]->set($key, $value);
+                if (is_array($params)) {
+                    foreach ($params as $key => $value) {
+                        $objects[$annotationClass]->set($key, $value);
+                    }
+                } else {
+                    $objects[$annotationClass]->set(0, $params);
                 }
             }
         }
