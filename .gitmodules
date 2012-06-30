@@ -1,3 +1,6 @@
 [submodule "Alchemy/Component/Yaml"]
 	path = Alchemy/Component/Yaml
 	url = git@github.com:eriknyk/Yaml
+[submodule "Alchemy/Component/EventDispatcher"]
+	path = Alchemy/Component/EventDispatcher
+	url = git@github.com:eriknyk/EventDispatcher
