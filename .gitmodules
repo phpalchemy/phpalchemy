@@ -4,3 +4,6 @@
 [submodule "Alchemy/Component/EventDispatcher"]
 	path = Alchemy/Component/EventDispatcher
 	url = git@github.com:eriknyk/EventDispatcher
+[submodule "Alchemy/Component/Http"]
+	path = Alchemy/Component/Http
+	url = git@github.com:eriknyk/Http
