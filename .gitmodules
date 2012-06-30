@@ -1,0 +1,3 @@
+[submodule "Alchemy/Component/Yaml"]
+	path = Alchemy/Component/Yaml
+	url = git@github.com:eriknyk/Yaml
