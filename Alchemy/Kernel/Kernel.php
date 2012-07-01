@@ -26,7 +26,7 @@ use Alchemy\Mvc\ControllerResolver;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 use Alchemy\Component\Http\JsonResponse;
-use Alchemy\Lib\Util\Annotations;
+use Alchemy\Component\Annotations\Annotations;
 use Alchemy\Config;
 
 use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
