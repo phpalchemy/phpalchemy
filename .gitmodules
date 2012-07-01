@@ -13,3 +13,12 @@
 [submodule "Alchemy/Component/Routing"]
 	path = Alchemy/Component/Routing
 	url = git@github.com:eriknyk/Routing
+[submodule "Alchemy/Component/Annotations"]
+	path = Alchemy/Component/Annotations
+	url = git@github.com:eriknyk/Annotations
+[submodule "Alchemy/Component/ClassLoader"]
+	path = Alchemy/Component/ClassLoader
+	url = git@github.com:eriknyk/ClassLoader
+[submodule "Alchemy/Component/DiContainer"]
+	path = Alchemy/Component/DiContainer
+	url = git@github.com:eriknyk/DiContainer
