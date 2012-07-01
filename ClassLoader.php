@@ -1,11 +1,13 @@
 <?php
-namespace Alchemy\lib\Util;
+namespace Alchemy\Component\ClassLoader;
 
 /**
  * Class Route
  *
  * SplClassLoader implementation that implements the technical interoperability
  * standards for PHP 5.3 namespaces and class names.
+ *
+ * Singleton Class
  *
  * @version   1.0
  * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
@@ -17,21 +19,12 @@ namespace Alchemy\lib\Util;
 class ClassLoader
 {
     /**
-     * Hold single object
+     * Holds singleton object
      *
      * @var ClassLoader
      */
-    protected static $_instance = null;
-
-
-    private $_namespace   = '';
-    private $_includePaths = array();
-    private $_includeVirtualPaths = array();
-
-    private static $_nsSep  = '\\';
-    private static $_dirSep = DIRECTORY_SEPARATOR;
-
-    private static $_fileExtension = '.php';
+    protected static $instance = null;
+    protected $includePaths = array();
 
     /**
      * Creates a new SplClassLoader and installs the class on the SPL autoload stack
@@ -40,35 +33,19 @@ class ClassLoader
      */
     public function __construct()
     {
+        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
+        defined('NS') || define('NS', '\\');
+
         spl_autoload_register(array($this, 'loadClass'));
     }
 
     public static function getInstance()
     {
-        if (is_null(self::$_instance)) {
-            self::$_instance = new self;
+        if (is_null(self::$instance)) {
+            self::$instance = new self;
         }
-        return self::$_instance;
-    }
 
-    /**
-     * Sets the namespace separator used by classes in the namespace of this class loader.
-     *
-     * @param string $sep The separator to use.
-     */
-    public function setNamespaceSeparator($sep)
-    {
-        $this->_namespaceSeparator = $sep;
-    }
-
-    /**
-     * Gets the namespace seperator used by classes in the namespace of this class loader.
-     *
-     * @return void
-     */
-    public function getNamespaceSeparator()
-    {
-        return $this->_namespaceSeparator;
+        return self::$instance;
     }
 
     /**
@@ -76,29 +53,9 @@ class ClassLoader
      *
      * @return string $includePath
      */
-    public function getIncludePath()
+    public function getIncludePaths()
     {
-        return $this->_includePath;
-    }
-
-    /**
-     * Sets the file extension of class files in the namespace of this class loader.
-     *
-     * @param string $fileExtension
-     */
-    public function setFileExtension($fileExtension)
-    {
-        $this->_fileExtension = $fileExtension;
-    }
-
-    /**
-     * Gets the file extension of class files in the namespace of this class loader.
-     *
-     * @return string $fileExtension
-     */
-    public function getFileExtension()
-    {
-        return $this->_fileExtension;
+        return $this->includePaths;
     }
 
     /**
@@ -114,7 +71,7 @@ class ClassLoader
             $namespace .= ',' . $excludeNsPart;
         }
 
-        $this->includePaths[$namespace] = rtrim($includePath, self::$_dirSep) . self::$_dirSep;
+        $this->includePaths[$namespace] = rtrim($includePath, DS) . DS;
     }
 
     /**
@@ -131,28 +88,24 @@ class ClassLoader
      * @param string $className The name of the class to load.
      * @return void
      */
-    public function loadClass($className)
+    protected function loadClass($className)
     {
-        if (class_exists($className)) {
-            return true;
+        if (strpos($className, NS) !== false) {
+            $className = str_replace(NS, DS, ltrim($className, NS));
         }
 
-        if (false !== strpos($className, '\\')) {
-            $className = str_replace(self::$_nsSep, self::$_dirSep, ltrim($className, '\\'));
-        }
-
-        $filename = str_replace('_', self::$_dirSep, $className) . self::$_fileExtension;
+        $filename = str_replace('_', DS, $className) . '.php';
 
         foreach ($this->includePaths as $namespace => $includePath) {
             if (strpos($namespace, ',') !== false) {
                 list($namespace, $excludeNsPart) = explode(',', $namespace);
-
-                $nsDirMapped = str_replace(self::$_nsSep, self::$_dirSep, $excludeNsPart);
+                $nsDirMapped = str_replace(NS, DS, $excludeNsPart);
                 $filename    = str_replace($nsDirMapped, '', $filename);
             }
 
             if (file_exists($includePath . $filename)) {
                 require_once $includePath . $filename;
+
                 return true;
             }
         }
@@ -160,3 +113,4 @@ class ClassLoader
         return false;
     }
 }
+
