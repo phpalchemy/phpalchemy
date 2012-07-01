@@ -12,8 +12,8 @@
 
 /* PHPALCHEMY FRAMEWORK AUTOLOADER */
 
-require_once __DIR__ . '/Alchemy/Lib/Util/ClassLoader.php';
-require_once __DIR__ . '/Alchemy/Lib/Util/DependencyInjectionContainer.php';
+require_once __DIR__ . '/Alchemy/Component/ClassLoader/ClassLoader.php';
+require_once __DIR__ . '/Alchemy/Lib/Util/DiContainer.php';
 
 $classLoader = Alchemy\Lib\Util\ClassLoader::getInstance();
 $classLoader->register('Alchemy', __DIR__ . DIRECTORY_SEPARATOR);
