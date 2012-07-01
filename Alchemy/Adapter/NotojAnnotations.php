@@ -1,5 +1,5 @@
 <?php
-namespace Alchemy\Lib\Util;
+namespace Alchemy\Adapter;
 
 use Notoj\ReflectionMethod;
 
