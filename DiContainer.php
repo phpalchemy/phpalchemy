@@ -1,14 +1,12 @@
 <?php
-/*
+/**
+ * Class DiContainer
+ *
+ * Simplest Dependency injection container (fork of Pimple)
+ *
  * This Class is a adapted version of \Pimple
  * Code subject to the MIT license
  * Copyright (c) 2009 Fabien Potencier
- */
-
-/**
- * Class Dic
- *
- * Simplest Dependency injection container (fork of pimple)
  *
  * @version   1.0
  * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
@@ -17,7 +15,7 @@
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
  */
-class DependencyInjectionContainer implements \ArrayAccess
+class DiContainer implements \ArrayAccess
 {
     private $container;
 
