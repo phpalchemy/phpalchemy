@@ -13,11 +13,10 @@
 /* PHPALCHEMY FRAMEWORK AUTOLOADER */
 
 require_once __DIR__ . '/Alchemy/Component/ClassLoader/ClassLoader.php';
-require_once __DIR__ . '/Alchemy/Lib/Util/DiContainer.php';
+require_once __DIR__ . '/Alchemy/Component/DiContainer/DiContainer.php';
 
-$classLoader = Alchemy\Lib\Util\ClassLoader::getInstance();
+$classLoader = Alchemy\Component\ClassLoader\ClassLoader::getInstance();
 $classLoader->register('Alchemy', __DIR__ . DIRECTORY_SEPARATOR);
-
 $classLoader->register('Notoj', __DIR__ . '/vendor/crodas/Notoj/lib/');
 
 // if (!file_exists(__DIR__ . '/vendor/autoload.php')) {

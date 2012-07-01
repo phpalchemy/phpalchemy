@@ -24,9 +24,9 @@ use Alchemy\Kernel\Kernel;
 
 use Alchemy\Mvc\ControllerResolver;
 
-use Alchemy\Lib\Util\Annotations;
-use Alchemy\Lib\Util\ClassLoader;
-use Alchemy\Lib\Util\NotojAnnotations;
+use Alchemy\Component\Annotations\Annotations;
+use Alchemy\Component\ClassLoader\ClassLoader;
+use Alchemy\Adapter\NotojAnnotations;
 
 use Alchemy\Kernel\KernelEvents;
 
@@ -40,7 +40,7 @@ use Alchemy\Kernel\KernelEvents;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
  */
-class Application extends \DependencyInjectionContainer implements KernelInterface, EventSubscriberInterface
+class Application extends \DiContainer implements KernelInterface, EventSubscriberInterface
 {
     /**
      * Construct application object
