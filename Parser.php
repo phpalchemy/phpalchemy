@@ -127,14 +127,12 @@ class Parser
                                 $this->defs[$type][$defName][$defProp] = $value;
                             }
                             break;
-
                         default:
                             throw new \Exception(sprintf(
                                 'Parse Error: unknow definition type: "%s" on line %s.', $type, $lineCount
                             ));
                     }
                     break;
-
                 case Parser::T_BLOCK:
                     $pattern = '/'.$kwPattern.'\s+(?<block>[\w]+)/';
 
@@ -155,7 +153,6 @@ class Parser
 
                     $nextToken = Parser::T_END;
                     break;
-
                 case Parser::T_END:
                     if (empty($nextToken)) {
                         throw new \Exception(sprintf(
@@ -171,7 +168,6 @@ class Parser
 
                     $nextToken = '';
                     break;
-
                 case Parser::T_VAR:
                     $pattern = '/'.$kwPattern.'\s+(?<name>[\w]+)\s+(?<value>.+)/';
 
@@ -208,7 +204,6 @@ class Parser
                         $stringComposing = true;
                     }
                     break;
-
                 default:
                     throw new \Exception(sprintf(
                         'Parse Error: unknow definition type: %s, on line %s', $type, $lineCount
@@ -265,7 +260,9 @@ class Parser
     public function setDefaultBlock($block)
     {
         if (!isset($this->blocks[$block])) {
-            throw new \InvalidArgumentException(sprintf('Error: trying set as default to undefined block: "%s"', $block));
+            throw new \InvalidArgumentException(sprintf(
+                'Error: trying set as default to undefined block: "%s"', $block
+            ));
         }
 
         $this->defaultBlock = $block;
@@ -377,3 +374,4 @@ class Parser
         return $template;
     }
 }
+
