@@ -26,7 +26,7 @@ class DiContainer implements \ArrayAccess
      *
      * @param array $container The parameters or objects.
      */
-    function __construct (array $container = array())
+    public function __construct (array $container = array())
     {
         $this->container = $container;
     }
@@ -37,13 +37,13 @@ class DiContainer implements \ArrayAccess
      * Objects must be defined as Closures.
      *
      * Allowing any PHP callable leads to difficult to debug problems
-     * as function names (strings) are callable (creating a function with
+     * as public function names (strings) are callable (creating a public function with
      * the same a name as an existing parameter would break your container).
      *
      * @param string $id    The unique identifier for the parameter or object
      * @param mixed  $value The value of the parameter or a closure to defined an object
      */
-    function offsetSet($id, $value)
+    public function offsetSet($id, $value)
     {
         $this->container[$id] = $value;
     }
@@ -57,7 +57,7 @@ class DiContainer implements \ArrayAccess
      *
      * @throws InvalidArgumentException if the identifier is not defined
      */
-    function offsetGet($id)
+    public function offsetGet($id)
     {
         if (!array_key_exists($id, $this->container)) {
             throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $id));
@@ -73,7 +73,7 @@ class DiContainer implements \ArrayAccess
      *
      * @return Boolean
      */
-    function offsetExists($id)
+    public function offsetExists($id)
     {
         return array_key_exists($id, $this->container);
     }
@@ -83,7 +83,7 @@ class DiContainer implements \ArrayAccess
      *
      * @param  string $id The unique identifier for the parameter or object
      */
-    function offsetUnset($id)
+    public function offsetUnset($id)
     {
         unset($this->container[$id]);
     }
@@ -96,7 +96,7 @@ class DiContainer implements \ArrayAccess
      *
      * @return Closure The wrapped closure
      */
-    function share(Closure $callable)
+    public function share(Closure $callable)
     {
         return function ($c) use ($callable) {
             static $object;
@@ -118,7 +118,7 @@ class DiContainer implements \ArrayAccess
      *
      * @return Closure The protected closure
      */
-    function protect(Closure $callable)
+    public function protect(Closure $callable)
     {
         return function ($c) use ($callable) {
             return $callable;
@@ -134,7 +134,7 @@ class DiContainer implements \ArrayAccess
      *
      * @throws InvalidArgumentException if the identifier is not defined
      */
-    function raw($id)
+    public function raw($id)
     {
         if (!array_key_exists($id, $this->container)) {
             throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $id));
@@ -156,7 +156,7 @@ class DiContainer implements \ArrayAccess
      *
      * @throws InvalidArgumentException if the identifier is not defined
      */
-    function extend($id, Closure $callable)
+    public function extend($id, Closure $callable)
     {
         if (!array_key_exists($id, $this->container)) {
             throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $id));
@@ -178,13 +178,19 @@ class DiContainer implements \ArrayAccess
      *
      * @return array An array of value names
      */
-    function keys()
+    public function keys()
     {
         return array_keys($this->container);
     }
 
-    function all()
+    /**
+     * Get all elements.
+     *
+     * @return array/mixed contained items
+     */
+    public function all()
     {
         return $this->container;
     }
 }
+
