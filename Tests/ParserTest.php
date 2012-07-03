@@ -99,4 +99,35 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $result = $parser->generate('checkbox', $data);
         $this->assertEquals($expected, $result);
     }
+
+    /**
+     * @covers Alchemy\Component\UI\Parser::setDefaultBlock
+     * @depends testConstructor
+     */
+    public function testGenerate($parser)
+    {
+        $data = array(
+            'id'    => 'my_select_id',
+            'name'  => 'my_select',
+            'xtype' => 'slect',
+            'attributes' => array(
+                'value' => 'some_choise'
+            ),
+            'options' => array(
+                array('name' => 'one',   'value' => '1'),
+                array('name' => 'two',   'value' => '2'),
+                array('name' => 'three', 'value' => '3')
+            )
+        );
+        $expected = <<<EOT
+<select type="slect" id="my_select_id" value="some_choise">
+    <option name="one">1</option>
+    <option name="two">2</option>
+    <option name="three">3</option>
+</select>
+EOT;
+        $result = $parser->generate('select', $data);
+
+        $this->assertEquals($expected, $result);
+    }
 }

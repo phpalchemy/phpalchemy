@@ -17,6 +17,9 @@ class Parser
     protected $defs   = array();
     protected $blocks = array();
     protected $defaultBlock = '';
+    protected $currentBlock = array();
+
+    protected $data = array();
 
     const T_DEF      = 'def';
     const T_VAR      = 'var';
@@ -53,7 +56,7 @@ class Parser
 
             if ($stringComposing) {
                 if (substr($line, 0, 3) === '>>>') {
-                    $this->blocks[$block][$name] = $value;
+                    $this->blocks[$block][$name] = rtrim($value);
                     $block = '';
                     $value = '';
                     $stringComposing = false;
@@ -110,6 +113,10 @@ class Parser
                                 $value = trim($value, '"');
                             } elseif (substr($value, 0, 1) == "'" && substr($value, -1) == "'") {
                                 $value = trim($value, "'");
+                            }
+
+                            if ($value === '\n' || $value === '\r\n') {
+                                $value = "\n";
                             }
 
                             $value = self::castValue($value);
@@ -266,10 +273,10 @@ class Parser
 
     public function generate($name, $data)
     {
-        $block = $this->getBlock($name);
-        $template = $block['template'];
+        $this->currentBlock = $this->getBlock($name);
+        $this->data = $data;
 
-        $content = $this->buildIterators($template, $data);
+        $content = $this->buildIterators($this->currentBlock['template']);
         $content = $this->replaceData($content, $data);
 
         return $content;
@@ -298,44 +305,71 @@ class Parser
         return $val;
     }
 
-    protected function buildIterators($template, $data)
+    protected function buildIterators($template)
     {
-        $pattern    = '/@@(?<iterator>\w+)\(\{(?<var>\w+)\}\)/';
-        $iterators  = $this->getIterators();
-
-        $result = preg_replace_callback(
+        $pattern = '/@@(?<iterator>\w+)\(\{(?<var>\w+)\}\)/';
+        $result  = preg_replace_callback(
             $pattern,
-            function($matches) use ($data, $iterators) {
-                if (!isset($iterators[$matches['iterator']])) {
-                    throw new Exception(sprintf(
-                        'Parse Error: Trying to use undefinded iterator "%s"',
-                        $matches['iterator']
-                    ));
-                }
-
-                $iterator = $iterators[$matches['iterator']];
-
-                $composed = array();
-                $data = $data[$matches['var']];
-
-                foreach ($data as $key => $value) {
-                    $str = str_replace('{_key}', $key, $iterator['tpl']);
-                    $str = str_replace('{_value}', $value, $str);
-                    $composed[] = $str;
-                }
-
-                return implode($iterator['sep'], $composed);
-            },
+            array($this, 'parseTemplate'),
             $template
         );
 
         return $result;
     }
 
+    protected function parseTemplate($matches)
+    {
+        $iterators  = $this->getIterators();
+
+        if (!isset($iterators[$matches['iterator']])) {
+            throw new Exception(sprintf(
+                'Parse Error: Trying to use undefinded iterator "%s"',
+                $matches['iterator']
+            ));
+        }
+
+        $iterator = $iterators[$matches['iterator']];
+        $composed = array();
+        $data     = $this->data[$matches['var']];
+        $indent   = '';
+
+        // verify if the template is multiline
+        if ($iterator['sep'] === "\n") {
+            $tplLines = explode("\n", $this->currentBlock['template']);
+
+            foreach ($tplLines as $tplLine) {
+                if (($pos = strpos($tplLine, $matches[0])) !== false) {
+                    $indent = str_repeat(' ', $pos);
+                    break;
+                }
+            }
+        }
+
+        foreach ($data as $key => $value) {
+            $strComposed = '';
+
+            if (!is_array($value)) {
+                $value = array(
+                    '_key'   => $key,
+                    '_value' => $value
+                );
+            }
+
+            if (!empty($indent) && count($composed) !== 0) {
+                $strComposed .= $indent;
+            }
+
+            $strComposed .=  $this->replaceData($iterator['tpl'], $value);
+            $composed[]   = $strComposed;
+        }
+
+        return implode($iterator['sep'], $composed);
+    }
+
     protected function replaceData($template, $data)
     {
         foreach ($data as $key => $value) {
-            if (is_string($value)) {
+            if (!is_array($value)) {
                 $template = str_replace('{'.$key.'}', $value, $template);
             }
         }

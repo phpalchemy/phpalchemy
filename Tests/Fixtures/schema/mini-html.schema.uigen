@@ -8,9 +8,9 @@
 @def global html5 true
 
 @def iterator attributes.tpl {_key}="{_value}"
-@def iterator attributes.sep ' '
+@def iterator attributes.sep " "
 
-@def iterator options.tpl <option name="{_key}">{_value}</option>
+@def iterator options.tpl <option name="{name}">{value}</option>
 @def iterator options.sep "\n"
 
 # END ITERATORS DEF
@@ -21,7 +21,7 @@
 
     @var template <<<
 <select type="{xtype}" id="{id}" @@attributes({attributes})>
-    @options({options})
+    @@options({options})
 </select>
 >>>
 
