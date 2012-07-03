@@ -271,6 +271,7 @@ class Parser
     public function generate($name, $data)
     {
         $this->currentBlock = $this->getBlock($name);
+        $this->currentBlock['_name'] = $name;
         $this->data = $data;
 
         $content = $this->buildIterators($this->currentBlock['template']);
@@ -325,10 +326,16 @@ class Parser
             ));
         }
 
+        if (!array_key_exists($matches['var'], $this->data)) {
+            throw new \InvalidArgumentException(sprintf(
+                "Compile Error: Undefined variable '%s' for block: '%s'", $matches['var'], $this->currentBlock['_name']
+            ));
+        }
+
         $iterator = $iterators[$matches['iterator']];
         $composed = array();
-        $data     = $this->data[$matches['var']];
         $indent   = '';
+        $data     = $this->data[$matches['var']];
 
         // verify if the template is multiline
         if ($iterator['sep'] === "\n") {
