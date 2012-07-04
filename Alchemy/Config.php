@@ -71,7 +71,12 @@ class Config
 
     public function exists($name)
     {
-        return isset($this->config[$name]);
+        return array_key_exists($name, $this->config);
+    }
+
+    public function isEmpty($name)
+    {
+        return empty($this->config[$name]);
     }
 
     /**

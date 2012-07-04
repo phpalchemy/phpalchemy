@@ -28,15 +28,11 @@ class SmartyView extends View
         $this->smarty->cache_dir   = $path . 'cache' . DS;
 
         if (!is_dir($this->smarty->compile_dir)) {
-            if (!@mkdir($this->smarty->compile_dir)) {
-                throw new \Exception("Could't create smarty compile directory {$this->smarty->compile_dir}");
-            }
+            $this->createDir($this->smarty->compile_dir);
         }
 
         if (!is_dir($this->smarty->cache_dir)) {
-            if (!@mkdir($this->smarty->cache_dir)) {
-                throw new \Exception("Could't create smarty cache directory {$this->smarty->cache_dir}");
-            }
+            $this->createDir($this->smarty->cache_dir);
         }
     }
 

@@ -128,9 +128,7 @@ class View
         $this->cacheDir = $dir;
 
         if (!is_dir($this->cacheDir)) {
-            if (!@mkdir($this->cacheDir)) {
-                throw new \Exception("Could't create template engine cache directory: '$dir'");
-            }
+            $this->createDir($this->cacheDir);
         }
     }
 
@@ -215,24 +213,6 @@ class View
     }
 
     /**
-     * Multiple variable assignment
-     *
-     * @param  array $data associative array conatining variables, the keys are used as variables names
-     */
-    protected function assignFromArray($data)
-    {
-        if (!is_array($data)) {
-            throw new \InvalidArgumentException(
-                "Invalid data type: argument should be array, '" .gettype($name) . "' given."
-            );
-        }
-
-        foreach ($data as $key => $value) {
-            $this->assign($key, $value);
-        }
-    }
-
-    /**
      * Gets a variable that was previously assigned
      *
      * @param  string $name  name or key to store teh value passed
@@ -268,6 +248,49 @@ class View
      */
     public function render()
     {
+    }
+
+
+        /**
+     * Multiple variable assignment
+     *
+     * @param  array $data associative array conatining variables, the keys are used as variables names
+     */
+    protected function assignFromArray($data)
+    {
+        if (!is_array($data)) {
+            throw new \InvalidArgumentException(
+                "Invalid data type: argument should be array, '" .gettype($name) . "' given."
+            );
+        }
+
+        foreach ($data as $key => $value) {
+            $this->assign($key, $value);
+        }
+    }
+
+    protected function createDir($strPath, $rights = 0777)
+    {
+        $folderPath = array($strPath);
+        $oldumask    = umask(0);
+
+        while(!@is_dir(dirname(end($folderPath)))
+            && dirname(end($folderPath)) != '/'
+            && dirname(end($folderPath)) != '.'
+            && dirname(end($folderPath)) != ''
+        ) {
+            array_push($folderPath, dirname(end($folderPath)));
+        }
+
+        while($parentFolderPath = array_pop($folderPath)) {
+            if(!@is_dir($parentFolderPath)) {
+                if(!@mkdir($parentFolderPath, $rights)) {
+                    throw new \Exception("Templating Engine Error: Can't create folder '$parentFolderPath'");
+                }
+            }
+        }
+
+        umask($oldumask);
     }
 }
 

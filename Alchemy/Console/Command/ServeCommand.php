@@ -5,10 +5,13 @@ use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console;
 
+use Alchemy\Config;
+
 /**
  * Task for executing projects serve
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @link    www.phpalchemy.org
  * @since   1.0
  * @version $Revision$
@@ -16,19 +19,22 @@ use Symfony\Component\Console\Input\InputArgument,
  */
 class ServeCommand extends Console\Command\Command
 {
+    protected $config = null;
+
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+        parent::__construct();
+    }
+
     /**
      * @see Console\Command\Command
      */
     protected function configure()
     {
-        $this
-        ->setName('serve')
+        $this->setName('serve')
         ->setDescription('Serve project over http')
         ->setDefinition(array(
-            /*new InputArgument(
-                'port', InputArgument::OPTIONAL,
-                'a alternative port.'
-            ),*/
             new InputArgument(
                 'environment', InputArgument::OPTIONAL,
                 'Environment to startup', 'development'
@@ -50,60 +56,57 @@ class ServeCommand extends Console\Command\Command
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
-        $lighttpdCmd = false;
-        $cgiBinPath  = false;
-        $socketPath  = false;
+        $host = $input->getOption('host') ? $this->config->get('dev_server.host') : $input->getOption('host');
+        $port = $input->getOption('port') ? $this->config->get('dev_server.port') : $input->getOption('port');
+        $env  = $input->getArgument('environment');
 
-        $soTmpDir = \Alchemy\Common\Alchemist::basepath(sys_get_temp_dir());
-        $hostOpt     = $input->getOption('host');
-        $portOpt     = $input->getOption('port'); //$port = $input->getArgument('port');
-        $env         = $input->getArgument('environment');
-        $binaries    = self::resolveBinaries();
-        //var_dump($port); die;
-        // Setting defaults.
-        $env           = $env != '' ? $env : 'development';
-        $lighttpd_bin  = $binaries['lighttpd_bin'] ? $binaries['lighttpd_bin'] : null;
-        $host = 'localhost';
-        $port = '3000';
-        $phpcgi_bin    = $binaries['phpcgi_bin'] ? $binaries['phpcgi_bin'] : null;
+        $devServer  = $this->config->get('dev_server.name');
+        $cgiBinPath = '';
+        $socketPath = '';
+        $homeDir    = $this->config->get('phpalchemy.root_dir');
+        $appName    = $this->config->get('app.name');
+        $appRootDir = $this->config->get('app.root_dir');
+        $tmpDir     = $this->config->isEmpty('app.cache_dir') ?
+                       rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR :
+                       $this->config->get('app.cache_dir') . DIRECTORY_SEPARATOR;
 
-        //if (PHP_OS == 'Darwin' || PHP_OS == 'Linux') {  //macos & linux $tmpPath = '/tmp/';}
+        $phpCgiBin = $this->config->isEmpty('dev_server.php-cgi_bin') ?
+                     $this->resolveBin('php-cgi') : $this->config->get('dev_server.php-cgi_bin');
 
-        // Getting environment configuration.
-        LazyLoad::object('Bootstrap')->setEnvironment($env);
-        LazyLoad::object('Bootstrap')->loadingConfiguration();
+        switch ($devServer) {
+            case 'lighttpd':
+                $devServerBin = $this->config->isEmpty('dev_server.lighttpd_bin') ?
+                                $this->resolveBin($devServer) : $this->config->get('dev_server.lighttpd_bin');
 
-        // Getting configuration.
-        $envConfig     = Registry::get('env.config');
-        $projectConfig = Registry::get('project.config');
+                //setting lighttpd configuration variables
+                $config = array();
+                $config['doc_root']    = PHP_OS == 'WINNT' ? self::convertPathToPosix(SYS_DIR) :
+                                         $this->config->get('app.root_dir');
+                $config['host']        = $host;
+                $config['port']        = $port;
+                $config['tmp_dir']     = $tmpDir;
+                $config['bin_path']    = $phpCgiBin;
+                $config['socket_path'] = $tmpDir . "php.socket";
+                $config['environment'] = $env;
 
-        // Setting configurations.
-        $tmpDir = $envConfig['app']['main']['tmp_dir'];
-        $lighttpdTmpConfFile = $tmpDir . '.lighttpd.conf';
+                // load the lighttpd.conf template with the configurations
+                $lighttpdTmpConfFile = $tmpDir . '.lighttpd.conf';
+                $lighttpdConfContent = $this->loadTemplate(
+                    $homeDir . DIRECTORY_SEPARATOR . 'templates'.DIRECTORY_SEPARATOR.'lighttpd.conf.tpl', $config
+                );
 
-        // overwrite default conf
-        if (isset($envConfig['server']['lighttpd']['daemon_bin'])) {
-            $lighttpd_bin = $envConfig['server']['lighttpd']['bin'];
+                if (@file_put_contents($lighttpdTmpConfFile, $lighttpdConfContent) === false) {
+                    throw new Exception ("Error while creating the lighttpd configuration file!");
+                }
+
+                $command = "$devServerBin -f $lighttpdTmpConfFile -D";
+                break;
+            case 'built-in':
+                $devServerBin = '';
+                break;
+            default:
+                throw new \Exception('Error: Dev-server is not configurated yet.');
         }
-
-        if (isset($envConfig['server']['main']['host'])) {
-            $host = $envConfig['server']['main']['host'];
-        }
-
-        if (isset($envConfig['server']['main']['port'])) {
-            $port = $envConfig['server']['main']['port'];
-        }
-        //end overwrite default conf
-
-        // overwrite previous conf with teh args passed
-        if (!empty($hostOpt)) {
-            $host = $hostOpt;
-        }
-
-        if (!empty($portOpt)) {
-            $port = $portOpt;
-        }
-
 
         // if (PHP_OS == 'WINNT') {
         //     $iniConfig['phpcgi_bin'] = self::convertPathToPosix($iniConfig['phpcgi_bin']);
@@ -111,100 +114,85 @@ class ServeCommand extends Console\Command\Command
         //     $iniConfig['tmp_path'] = self::convertPathToPosix($tmpPath);
         // }
 
-        // Making validations.
-        if (empty($lighttpd_bin)) {
+        // Binary files validations.
+        if (empty($devServerBin)) {
             throw new \Exception("Seems Lighttpd is not installed!");
         }
-
-        if (empty($phpcgi_bin)) {
+        if (empty($phpCgiBin)) {
             throw new \Exception("php-cgi binary not found!");
         }
 
-        //setting lighttpd configuration variables
-        $config['doc_root']    = PHP_OS == 'WINNT' ? self::convertPathToPosix(SYS_DIR) : SYS_DIR;
-        $config['host']        = $host;
-        $config['port']        = $port;
-        $config['tmp_dir']     = $tmpDir;
-        $config['bin_path']    = $phpcgi_bin;
-        $config['socket_path'] = $soTmpDir . "php.socket";
-        $config['environment'] = $env;
-
-        // load the lighttpd.conf template with the configurations
-        $lighttpdConf = Alchemist::loadTemplate(ALCHEMY_TEMPLATES_DIR . 'lighttpd.conf.tpl', $config);
-
-        if (file_put_contents($lighttpdTmpConfFile, $lighttpdConf) === false) {
-            throw new Exception ("Error while creating the lighttpd configuration file!");
-        }
-
-        $output->writeln(PHP_EOL . '--= PhpAlchemy Framework ver. 0.7 ('.PHP_OS.')=--'.PHP_EOL);
-        $output->writeln('<comment>Using "'.$env.'" environment.</comment>');
-        $output->writeln(PHP_EOL . sprintf('* The Project "<info>%s</info>" is running on port: <info>%s</info>', SYS_NAME, $port));
+        $output->writeln(PHP_EOL . '--= PhpAlchemy Framework Cli / running on '.PHP_OS.')=--'.PHP_EOL);
+        //$output->writeln('<comment>Using "'.$env.'" environment.</comment>');
+        $output->writeln(PHP_EOL . sprintf('* The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port));
         $output->writeln("* URL: <info>http://$host:$port</info>");
 
         $lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 
-        $command = "$lighttpd_bin -f $lighttpdTmpConfFile -D";
-
         system($command);
     }
 
-    static function resolveBinaries()
+    protected function resolveBin($name)
     {
-        //setting defaults
-        $phpcgiBin   = false;
-        $lighttpdBin = false;
+        $paths = array();
+        $names = array();
 
-        $cgiBinPathList   = array();
-        $lighttpdPathList = array(
-            '/usr/sbin/lighttpd', //for linux
-            '/usr/bin/lighttpd',
-            '/usr/local/sbin/lighttpd'  //macos
-        );
-        $cgiBinPathList = array(
-            '/usr/bin/php5-cgi',  //linux
-            '/opt/local/bin/php-cgi' //macos
-        );
-
-        if (isset($_SERVER['PATH'])) {
-            $cgiBinRelativePathList = explode(PATH_SEPARATOR, $_SERVER['PATH']);
-
-            //TODO we need to improve this
-            foreach ($cgiBinRelativePathList as $envpath) {
-                $cgiBinPathList[] = $envpath . DS . 'php5-cgi';
-                $cgiBinPathList[] = $envpath . DS . 'php-cgi';
-                $cgiBinPathList[] = $envpath . DS . 'php5-cgi.exe';
-                $cgiBinPathList[] = $envpath . DS . 'php-cgi.exe';
-                $lighttpdPathList[] = $envpath . DS . 'lighttpd';
-                $lighttpdPathList[] = $envpath . DS . 'lighttpd.exe';
-                $lighttpdPathList[] = $envpath . DS . 'LightTPD.exe'; //alternative non standard
-            }
+        if (array_key_exists('PATH', $_SERVER)) {
+            $paths = explode(PATH_SEPARATOR, $_SERVER['PATH']);
         }
 
-        foreach ($lighttpdPathList as $filepath) {
-            if (is_file($filepath)) {
-                $lighttpdBin = $filepath;
+        switch ($name) {
+            case 'lighttpd':
+                $paths[] = '/usr/local/sbin/lighttpd'; //for osx installed with mac ports
+                $paths[] = '/usr/bin/lighttpd';  //for linux
+                $paths[] = '/usr/sbin/lighttpd'; //for linux
+                $names = array('lighttpd', 'lighttpd.exe', 'LightTPD.exe');
                 break;
-            }
-        }
-
-        foreach ($cgiBinPathList as $cgiBin) {
-            if (is_file($cgiBin)) {
-                $phpcgiBin = $cgiBin;
+            case 'php-cgi':
+                $paths[] = '/usr/bin/php5-cgi';  // for linux
+                $paths[] = '/opt/local/bin/php-cgi'; // for osx installed with mac ports
+                $names = array('php5-cgi', 'php-cgi', 'php5-cgi.exe', 'php-cgi.exe');
                 break;
+        }
+
+        $paths = array_reverse($paths);
+
+        foreach ($paths as $path) {
+            foreach ($names as $name) {
+                $binFile = $path . DIRECTORY_SEPARATOR . $name;
+                if (file_exists($binFile)) {
+                    return $binFile;
+                }
             }
         }
 
-        return array(
-            'lighttpd_bin' => $lighttpdBin,
-            'phpcgi_bin'   => $phpcgiBin
-        );
+        return '';
     }
 
-    static function convertPathToPosix($path)
+    protected static function convertPathToPosix($path)
     {
         $r = '/cygdrive/' . preg_replace(array('/(?):/', '/\\\/', '/\s/'), array('${1}', '/', '\ '), $path);
         $r = str_replace('/cygdrive/C', '/cygdrive/c', $r);
         $r = str_replace('/cygdrive/D', '/cygdrive/d', $r);
+
         return $r;
+    }
+
+    protected function loadTemplate($tplFile, $vars)
+    {
+        if (! is_file($tplFile)) {
+            throw new \Exception("The file $tplFile doesn't exist!");
+        }
+
+        $patterns     = array();
+        $replacements = array();
+        $content      = file_get_contents($tplFile);
+
+        foreach ($vars as $varName => $varValue) {
+            array_push($patterns, '/{' . $varName . '}/');
+            array_push($replacements, $varValue);
+        }
+
+        return preg_replace($patterns, $replacements, $content);
     }
 }

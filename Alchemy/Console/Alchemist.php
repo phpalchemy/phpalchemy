@@ -2,16 +2,18 @@
 namespace Alchemy\Console;
 
 use Alchemy\Config;
-use Symfony\Component\Console\Application;
 
-class Alchemist
+use Symfony\Component\Console\Application,
+    Application\Cli\Command;
+
+class Alchemist extends Application
 {
     protected $homeDir    = '';
     protected $currentDir = '';
     protected $config     = array();
     protected $app        = null;
 
-    public function __construct(Config $config = null, Application $app)
+    public function __construct(Config $config)
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
         defined('NS') || define('NS', '\\');
@@ -21,14 +23,18 @@ class Alchemist
         $this->currentDir = $this->config->get('app.root_dir');
 
         $this->config->load($this->homeDir . DS . 'config' . DS . 'defaults.application.ini');
-        $this->config->set('phpalchemy.root_dir', $this->currentDir);
 
-        $this->app = $app;
-    }
+        if (file_exists($this->currentDir . DS . 'application.ini')) {
+            $this->config->load($this->currentDir . DS . 'application.ini');
+        }
 
-    public function setCurrentDir($path)
-    {
-        $this->currentDir = rtrim($path, DS) . DS;
+        $this->config->set('phpalchemy.root_dir', $this->homeDir);
+
+        $title    = "\nPHPAlchemy Framework Cli.";
+        $version  = '1.0';
+
+        parent::__construct('Welcome to Umpirsky CLI Calculator', '1.0');
+        $this->setCatchExceptions(true);
     }
 
     public function isAppDirectory()
@@ -50,35 +56,29 @@ class Alchemist
         return true;
     }
 
-    protected function prepareApp()
+    protected function prepare()
     {
-        $title    = ' -= PHPAlchemy Framework =-';
-        $version  = '1.0';
+
         $helpers  = array();
         $commands = array();
 
-        $this->app->setName($title);
-        $this->app->setVersion($version);
-        $this->app->setCatchExceptions(true);
-
         // adding command for a project environment
         if ($this->isAppDirectory()) {
-            array_push($commands, new \Alchemy\Console\Command\ServeCommand());
+            $commands[] = new \Alchemy\Console\Command\ServeCommand($this->config);
         }
 
-        $helperSet = $this->app->getHelperSet();
+        $helperSet = $this->getHelperSet();
 
         foreach ($helpers as $name => $helper) {
             $helperSet->set($helper, $name);
         }
 
-        $this->app->addCommands($commands);
+        $this->addCommands($commands);
     }
 
     public function run()
     {
-        $this->prepareApp();
-
-        $this->app->run();
+        $this->prepare();
+        parent::run();
     }
 }
