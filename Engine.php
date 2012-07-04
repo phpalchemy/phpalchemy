@@ -2,6 +2,7 @@
 namespace Alchemy\Component\UI;
 
 use Alchemy\Component\UI\Widget\WidgetInterface;
+use Alchemy\Component\UI\ReaderFactory;
 
 /**
  * Class Parser
@@ -15,12 +16,32 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  */
 class Engine
 {
-    protected static $schema = 'html';
-    protected static $cacheDir = './';
+    protected $schema = 'html';
+    protected $cacheDir = './';
+    protected $engine = '';
 
-    public function __construct()
+    public function __construct($bundle, $targetFile)
     {
+        $this->bundle  = $bundle;
 
+        if (!is_dir('bundle/' . $bundle))
+            throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $bundle));
+        }
+
+        $genscriptFilename = 'bundle/' . $bundle . '/components.genscript';
+        $mappingFilename    = 'bundle/' . $bundle . '/mapping.xml';
+
+        //verify if the bundle is registered
+        if (!file_exists($schemaPath)) {
+            throw new \Exception("Framework Bundle '".$this->frameworkBundle."' is not registered.");
+        }
+
+        if (!file_exists($genscriptPath)) {
+            throw new \Exception("Genscript for Framework Bundle '".$this->frameworkBundle."' is not present.");
+        }
+
+        // load the web ui (xml file)
+        $this->reader = ReaderFactory::loadReader($targetFile);
     }
 
     public static function setSchema($schema)

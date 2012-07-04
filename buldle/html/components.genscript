@@ -1,0 +1,54 @@
+###
+## HTML Components generator script
+#
+
+# Iterators definition
+
+@def global version 1.0
+@def global html5 true
+
+@def iterator attributes.tpl {_key}="{_value}"
+@def iterator attributes.sep " "
+
+@def iterator options.tpl <option name="{name}">{value}</option>
+@def iterator options.sep "\n"
+
+@def iterator form_items.tpl {_value}
+@def iterator form_items.sep "\n"
+
+# end iterators def
+
+# Components blocks
+
+### TEXTBOX
+@block textbox
+    @var template <input type="text" id="{id}" name="{name}" value="{value}" @@attributes({attributes})/>
+    @var javascript alert('{id}')
+@end
+
+### SELECT
+@block select
+
+@var template <<<
+<select type="{xtype}" id="{id}" @@attributes({attributes})>
+  @@options({options})
+</select>
+>>>
+
+@end
+
+### FORM
+@block form
+
+@var template <<<
+<form @@attributes({attributes})>
+@@form_items({items})
+</form>
+>>>
+
+@end
+
+## DEFAULT BLOCK
+@block _default
+    @var template <input type="{xtype}" id="{id}" name="{name}" @@attributes({attributes})/>
+@end

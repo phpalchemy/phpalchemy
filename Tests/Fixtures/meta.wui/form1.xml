@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form id="myForm" title="first test" width="350">
+  <textbox id="name" fieldLabel="Name" width="50" />
+  <textbox id="lastname" fieldLabel="Last Name X" name="two" />
+  <checkbox id="civil_state" fieldLabel="Civil State" label="married" />
+  <textarea id="skills" fieldLabel="Skills" />
+</form>

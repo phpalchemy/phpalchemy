@@ -13,22 +13,28 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   Alchemy/Component/Routing
  */
-class Textbox extends Widget
+class Menulist extends Widget
 {
     public $disabled = false;
     public $editable  = true;
     public $emptytext = '';
-    public $maxlength = '';
-    public $multiline = false;
-    public $placeholder = '';
     public $readonly = '';
-    public $size = '20';
-    public $type = '';
-    public $wrap = false;
+
+    protected $items = array();
 
     public function __construct(array $attributes = array())
     {
+        // call parent constructor
         parent::__construct($attributes);
-        $this->setXtype('textbox');
+    }
+
+    public function setItems(array $items)
+    {
+        $this->items = $items;
+    }
+
+    public function getItems()
+    {
+        return $this->items;
     }
 }

@@ -5,15 +5,29 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
 
 class WidgetCollection
 {
-    protected $items = array();
+    private $items = array();
 
-    public function add(WidgetInterface $w)
+    public function add(WidgetInterface $widget)
     {
-        $this->items[] = $w;
+        array_push($this->items, $widget);
     }
 
-    public function all()
+    public function next()
     {
-        return $this->items;
+        /**
+         * This function 'next()' may return Boolean FALSE, but may also return a non-Boolean
+         * value which evaluates to FALSE, such as 0 or ""
+         */
+        return next($this->items) ? true : false;
+    }
+
+    public function get($index=null)
+    {
+        return current($this->items);
+    }
+
+    public function reset()
+    {
+        reset($this->items);
     }
 }
