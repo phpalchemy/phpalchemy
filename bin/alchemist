@@ -6,6 +6,10 @@ $conf['app']['root_dir']        = realpath(getcwd());
 
 include_once $conf['phpalchemy']['root_dir'] . DIRECTORY_SEPARATOR . 'autoload.php';
 
-$alchemist = new Alchemy\Console\Alchemist(new Alchemy\Config($conf));
+$alchemist = new Alchemy\Console\Alchemist(
+    new Alchemy\Config($conf),
+    new Symfony\Component\Console\Application()
+);
+
 $alchemist->run();
 

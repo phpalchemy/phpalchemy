@@ -2,14 +2,16 @@
 namespace Alchemy\Console;
 
 use Alchemy\Config;
+use Symfony\Component\Console\Application;
 
 class Alchemist
 {
     protected $homeDir    = '';
     protected $currentDir = '';
     protected $config     = array();
+    protected $app        = null;
 
-    public function __construct(Config $config = null)
+    public function __construct(Config $config = null, Application $app)
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
         defined('NS') || define('NS', '\\');
@@ -20,6 +22,8 @@ class Alchemist
 
         $this->config->load($this->homeDir . DS . 'config' . DS . 'defaults.application.ini');
         $this->config->set('phpalchemy.root_dir', $this->currentDir);
+
+        $this->app = $app;
     }
 
     public function setCurrentDir($path)
@@ -46,13 +50,35 @@ class Alchemist
         return true;
     }
 
+    protected function prepareApp()
+    {
+        $title    = ' -= PHPAlchemy Framework =-';
+        $version  = '1.0';
+        $helpers  = array();
+        $commands = array();
+
+        $this->app->setName($title);
+        $this->app->setVersion($version);
+        $this->app->setCatchExceptions(true);
+
+        // adding command for a project environment
+        if ($this->isAppDirectory()) {
+            array_push($commands, new \Alchemy\Console\Command\ServeCommand());
+        }
+
+        $helperSet = $this->app->getHelperSet();
+
+        foreach ($helpers as $name => $helper) {
+            $helperSet->set($helper, $name);
+        }
+
+        $this->app->addCommands($commands);
+    }
+
     public function run()
     {
-        if ($this->isAppDirectory())
-            echo 'is an app dir.';
-        else
-            echo 'is not an app dir.';
+        $this->prepareApp();
 
-        echo "\n";
+        $this->app->run();
     }
 }

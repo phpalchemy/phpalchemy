@@ -1,10 +1,6 @@
 <?php
 namespace Alchemy\Console\Command;
 
-use Alchemy\Common\Registry,
-    Alchemy\Common\Alchemist,
-    Alchemy\Common\LazyLoad;
-
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console;
@@ -70,8 +66,8 @@ class ServeCommand extends Console\Command\Command
         $host = 'localhost';
         $port = '3000';
         $phpcgi_bin    = $binaries['phpcgi_bin'] ? $binaries['phpcgi_bin'] : null;
-        
-        //if (PHP_OS == 'Darwin' || PHP_OS == 'Linux') {  //macos & linux $tmpPath = '/tmp/';}        
+
+        //if (PHP_OS == 'Darwin' || PHP_OS == 'Linux') {  //macos & linux $tmpPath = '/tmp/';}
 
         // Getting environment configuration.
         LazyLoad::object('Bootstrap')->setEnvironment($env);
@@ -80,7 +76,7 @@ class ServeCommand extends Console\Command\Command
         // Getting configuration.
         $envConfig     = Registry::get('env.config');
         $projectConfig = Registry::get('project.config');
-        
+
         // Setting configurations.
         $tmpDir = $envConfig['app']['main']['tmp_dir'];
         $lighttpdTmpConfFile = $tmpDir . '.lighttpd.conf';
@@ -93,7 +89,7 @@ class ServeCommand extends Console\Command\Command
         if (isset($envConfig['server']['main']['host'])) {
             $host = $envConfig['server']['main']['host'];
         }
-        
+
         if (isset($envConfig['server']['main']['port'])) {
             $port = $envConfig['server']['main']['port'];
         }
@@ -107,7 +103,7 @@ class ServeCommand extends Console\Command\Command
         if (!empty($portOpt)) {
             $port = $portOpt;
         }
-        
+
 
         // if (PHP_OS == 'WINNT') {
         //     $iniConfig['phpcgi_bin'] = self::convertPathToPosix($iniConfig['phpcgi_bin']);
@@ -140,7 +136,7 @@ class ServeCommand extends Console\Command\Command
             throw new Exception ("Error while creating the lighttpd configuration file!");
         }
 
-        $output->writeln(PHP_EOL . '--= PhpAlchemy Framework ver. 0.7 ('.PHP_OS.')=--'.PHP_EOL);        
+        $output->writeln(PHP_EOL . '--= PhpAlchemy Framework ver. 0.7 ('.PHP_OS.')=--'.PHP_EOL);
         $output->writeln('<comment>Using "'.$env.'" environment.</comment>');
         $output->writeln(PHP_EOL . sprintf('* The Project "<info>%s</info>" is running on port: <info>%s</info>', SYS_NAME, $port));
         $output->writeln("* URL: <info>http://$host:$port</info>");
@@ -148,7 +144,7 @@ class ServeCommand extends Console\Command\Command
         $lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 
         $command = "$lighttpd_bin -f $lighttpdTmpConfFile -D";
-        
+
         system($command);
     }
 
@@ -197,7 +193,7 @@ class ServeCommand extends Console\Command\Command
                 break;
             }
         }
-        
+
         return array(
             'lighttpd_bin' => $lighttpdBin,
             'phpcgi_bin'   => $phpcgiBin
