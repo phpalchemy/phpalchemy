@@ -17,11 +17,11 @@ use Alchemy\Component\UI\ElementInterface;
 abstract class Widget implements WidgetInterface
 {
     public $name  = '';
-    public $label = '';
 
     protected $id    = '';
     protected $value = '';
     protected $xtype = '';
+    protected $fieldLabel = '';
 
     public function __construct(array $attributes = array())
     {
@@ -62,6 +62,16 @@ abstract class Widget implements WidgetInterface
         return $this->xtype;
     }
 
+    public function setFieldLabel($fieldLabel)
+    {
+        $this->fieldLabel = $fieldLabel;
+    }
+
+    public function getFieldLabel()
+    {
+        return $this->fieldLabel;
+    }
+
     public function setAttribute($name, $value = '')
     {
         if (is_array($name)) {
@@ -80,19 +90,29 @@ abstract class Widget implements WidgetInterface
         }
     }
 
-    public function getInfo()
+    public function getData()
     {
         $result = array();
         $refl   = new \ReflectionObject($this);
         $attributes  = $refl->getProperties(\ReflectionProperty::IS_PUBLIC);
 
         foreach ($attributes as $att) {
-            $result['attributes'][$att->getName()] = $att->getValue($this);
+            $value = $att->getValue($this);
+
+            if (! empty($value)) {
+                $result['attributes'][$att->getName()] = $att->getValue($this);
+            }
         }
 
         $properties  = $refl->getProperties(\ReflectionProperty::IS_PROTECTED);
         foreach ($properties as $pro) {
-            $result[$pro->getName()] = $pro->getValue($this);
+            $pro->setAccessible(true);
+            $value = $pro->getValue($this);
+            $pro->setAccessible(false);
+
+            if (! empty($value)) {
+                $result[$pro->getName()] = $value;
+            }
         }
 
         return $result;

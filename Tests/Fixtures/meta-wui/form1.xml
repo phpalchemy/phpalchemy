@@ -3,5 +3,6 @@
   <textbox id="name" fieldLabel="Name" width="50" />
   <textbox id="lastname" fieldLabel="Last Name X" name="two" />
   <checkbox id="civil_state" fieldLabel="Civil State" label="married" />
+  <checkbox name="graduated" fieldLabel="Gratuated?" label="gratuated?" />
   <textbox id="skills" fieldLabel="Skills" multiline="true"/>
 </form>

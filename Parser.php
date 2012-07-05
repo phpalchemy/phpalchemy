@@ -27,6 +27,7 @@ class Parser
     const T_END      = 'end';
     const T_ITERATOR = 'iterator';
     const T_GLOBAL   = 'global';
+    const T_SETCONF  = 'setconf';
 
     public function __construct($file = '')
     {
@@ -35,6 +36,8 @@ class Parser
             $this->file = $file;
             $this->parse();
         }
+
+
     }
 
     public function setScriptFile($file)
@@ -75,11 +78,20 @@ class Parser
 
     public function getDef($name)
     {
-        if (!isset($this->defs[$name])) {
-            return false;
+        if (! array_key_exists($name, $this->defs)) {
+            return '';
         }
 
         return $this->defs[$name];
+    }
+
+    public function getDefConf($name)
+    {
+        if (empty($this->defs[Parser::T_SETCONF]) || ! array_key_exists($name, $this->defs[Parser::T_SETCONF])) {
+            return '';
+        }
+
+        return $this->defs[Parser::T_SETCONF][$name];
     }
 
     public function getBlock($name)
@@ -97,6 +109,10 @@ class Parser
 
     public function generate($name, $data)
     {
+        $default = $this->getDefConf('default_block');
+
+        $this->setDefaultBlock($default);
+
         $this->currentBlock     = $this->getBlock($name);
         $this->currentBlockName = $name;
         $this->data = $data;
@@ -115,7 +131,7 @@ class Parser
      * PRIVATE/PROTECTED METHODS
      */
 
-    protected function parse()
+    public function parse()
     {
         if (!is_file($this->file)) {
             throw new \Exception(sprintf(
@@ -130,6 +146,7 @@ class Parser
         $block           = '';
         $currentValue    = '';
         $stringComposing = false;
+        $skipMultilineComment = false;
 
         while (($line = fgets($fp)) !== false) {
             $lineCount++;
@@ -149,8 +166,21 @@ class Parser
 
             $line = trim($line);
 
-            if (substr(trim($line), 0, 1) == '#' || $line === '') {
-                continue; //skip comments
+            if (substr($line, 0, 1) === '#' || $line === '' || substr($line, 0, 2) === '//') {
+                continue; // skip single comments or empty lines
+            } elseif (substr($line, 0, 2) === '/*') { // start multiline comment
+                if (strpos($line, '*/') === false) {
+                    $skipMultilineComment = true; // activate multiline comments skipping
+                } else {
+                    continue; // just skip this line, it has the form: /* ... */
+                }
+            } elseif (strpos($line, '*/') !== false) { // end multiline comment
+                $skipMultilineComment = false;
+                continue; // just skip the end multiline comment
+            }
+
+            if ($skipMultilineComment) {
+                continue; //skip multiline comments segment
             }
 
             $kwPattern = '^@(?<keyword>\w+)';
@@ -188,7 +218,7 @@ class Parser
                     switch ($type) {
                         case Parser::T_GLOBAL:
                         case Parser::T_ITERATOR:
-
+                        case Parser::T_SETCONF:
                             if (substr($value, 0, 1) == '"' && substr($value, -1) == '"') {
                                 $value = trim($value, '"');
                             } elseif (substr($value, 0, 1) == "'" && substr($value, -1) == "'") {

@@ -1,6 +1,8 @@
 <?php
 
 use Alchemy\Component\UI\Engine;
+use Alchemy\Component\UI\ReaderFactory;
+use Alchemy\Component\UI\Parser;
 
 /**
  * Alchemy\Component\UI\Engine - Unit Test File
@@ -24,7 +26,16 @@ class EngineTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorWithHtml()
     {
-        $this->engine = new Engine('html', __DIR__ . '/Fixtures/meta-wui/form1.xml');
+        $engine = new Engine(
+            'html',
+            ReaderFactory::loadReader(__DIR__ . '/Fixtures/meta-wui/form1.xml'),
+            new Parser()
+        );
+
+        $engine->build();
+        print_r($engine->getWidgetsCollection());
+
+        return $engine;
     }
 
     /**
@@ -33,7 +44,6 @@ class EngineTest extends \PHPUnit_Framework_TestCase
      */
     public function testSingle(Engine $engine)
     {
-        $result = $parser->getIterators();
-        $this->assertCount(3, $result);
+
     }
 }

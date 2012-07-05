@@ -15,7 +15,7 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  */
 class Textbox extends Widget
 {
-    public $disabled = false;
+    public $disabled  = false;
     public $editable  = true;
     public $emptytext = '';
     public $maxlength = '';
@@ -24,7 +24,9 @@ class Textbox extends Widget
     public $readonly = '';
     public $size = '20';
     public $type = '';
-    public $wrap = false;
+    public $wrap = '';
+    public $rows = '';
+    public $cols = '';
 
     public function __construct(array $attributes = array())
     {

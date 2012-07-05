@@ -21,7 +21,7 @@
 ## SELECT
 @block select
 
-@var javascript alert('{id}')
+@var javascript alert('{id}');
 
 @var template <<<
 <select type="{xtype}" id="{id}" @@attributes({attributes})>

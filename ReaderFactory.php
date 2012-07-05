@@ -9,11 +9,11 @@ class ReaderFactory
     static function loadReader($file)
     {
         if (!file_exists($file)) {
-            throw new \Exception("Error: Meta WUI File '$file' does not exist.");
+            throw new \Exception("Error: Meta Web UI File '$file' does not exist.");
         }
 
         if (!is_readable($file)) {
-            throw new \Exception("Error: Meta WUI File '$file' is not readable.");
+            throw new \Exception("Error: Meta Web File '$file' is not readable.");
         }
 
         $reader = null;
@@ -26,12 +26,10 @@ class ReaderFactory
             case 'yaml': case 'yml':
                 $reader = new YamlReader($file);
                 break;
-            default:
-                throw new \Exception("Unsupported filw extension to UI Reader.");
         }
 
         if (!isset($reader)) {
-            throw new \Exception("Couldn't resolve a reader for $file file extension.");
+            throw new \Exception("Error: Couldn't resolve a reader for $file file extension.");
         }
 
         return $reader;

@@ -12,9 +12,9 @@ class XmlReader extends Reader
     public function __construct($filepath)
     {
         $this->dom      = new \DOMDocument();
-        $this->widgets  = new WidgetCollection();
+        $this->widgets  = array();
         $this->filepath = $filepath;
-        $this->attributes  = Array();
+        $this->attributes = Array();
 
         $this->xmlnsPrefix = 'ui';
 
@@ -92,7 +92,7 @@ class XmlReader extends Reader
                 // at the end create the type attribute, override if was defined by user
                 ////////erik $widget->attributes['type'] = $childNode->nodeName;
 
-                $this->widgets->add($widget);
+                $this->widgets[] = $widget;
             }
         }
     }
