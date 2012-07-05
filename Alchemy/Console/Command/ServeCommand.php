@@ -56,11 +56,11 @@ class ServeCommand extends Console\Command\Command
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
-        $host = $input->getOption('host') ? $this->config->get('dev_server.host') : $input->getOption('host');
-        $port = $input->getOption('port') ? $this->config->get('dev_server.port') : $input->getOption('port');
+        $host = $input->getOption('host') ? $this->config->get('dev_appserver.host') : $input->getOption('host');
+        $port = $input->getOption('port') ? $this->config->get('dev_appserver.port') : $input->getOption('port');
         $env  = $input->getArgument('environment');
 
-        $devServer  = $this->config->get('dev_server.name');
+        $devServer  = $this->config->get('dev_appserver.name');
         $cgiBinPath = '';
         $socketPath = '';
         $homeDir    = $this->config->get('phpalchemy.root_dir');
@@ -70,13 +70,13 @@ class ServeCommand extends Console\Command\Command
                        rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR :
                        $this->config->get('app.cache_dir') . DIRECTORY_SEPARATOR;
 
-        $phpCgiBin = $this->config->isEmpty('dev_server.php-cgi_bin') ?
-                     $this->resolveBin('php-cgi') : $this->config->get('dev_server.php-cgi_bin');
+        $phpCgiBin = $this->config->isEmpty('dev_appserver.php-cgi_bin') ?
+                     $this->resolveBin('php-cgi') : $this->config->get('dev_appserver.php-cgi_bin');
 
         switch ($devServer) {
             case 'lighttpd':
-                $devServerBin = $this->config->isEmpty('dev_server.lighttpd_bin') ?
-                                $this->resolveBin($devServer) : $this->config->get('dev_server.lighttpd_bin');
+                $devServerBin = $this->config->isEmpty('dev_appserver.lighttpd_bin') ?
+                                $this->resolveBin($devServer) : $this->config->get('dev_appserver.lighttpd_bin');
 
                 //setting lighttpd configuration variables
                 $config = array();
@@ -105,7 +105,7 @@ class ServeCommand extends Console\Command\Command
                 $devServerBin = '';
                 break;
             default:
-                throw new \Exception('Error: Dev-server is not configurated yet.');
+                throw new \Exception('Error: "dev_appserver" is not configurated yet.');
         }
 
         // if (PHP_OS == 'WINNT') {
