@@ -23,25 +23,28 @@ class Engine
     public function __construct($bundle, $targetFile)
     {
         $this->bundle  = $bundle;
+        $bundleDir = __DIR__ . DIRECTORY_SEPARATOR . 'bundle' . DIRECTORY_SEPARATOR . $bundle . DIRECTORY_SEPARATOR;
 
-        if (!is_dir('bundle/' . $bundle))
+        if (!is_dir($bundleDir)) {
             throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $bundle));
         }
 
-        $genscriptFilename = 'bundle/' . $bundle . '/components.genscript';
-        $mappingFilename    = 'bundle/' . $bundle . '/mapping.xml';
+        $genscriptFilename = $bundleDir . '/components.genscript';
+        $mappingFilename   = $bundleDir . '/mapping.xml';
 
         //verify if the bundle is registered
-        if (!file_exists($schemaPath)) {
-            throw new \Exception("Framework Bundle '".$this->frameworkBundle."' is not registered.");
+        if (!file_exists($genscriptFilename)) {
+            throw new \Exception(sprintf("Error: genscript file for '%s' bundle is missing.", $bundle));
         }
 
-        if (!file_exists($genscriptPath)) {
-            throw new \Exception("Genscript for Framework Bundle '".$this->frameworkBundle."' is not present.");
+        if (!file_exists($genscriptFilename)) {
+            throw new \Exception(sprintf("Error: mapping file for '%s' bundle is missing.", $bundle));
         }
 
         // load the web ui (xml file)
         $this->reader = ReaderFactory::loadReader($targetFile);
+
+        print_r($this->reader->getWidgets());
     }
 
     public static function setSchema($schema)
@@ -51,34 +54,7 @@ class Engine
 
     public function buildWidget(WidgetInterface $widget)
     {
-        //$content = file_get_contents($this->schema.'.ui');
-        $tpl   = self::$schema . '.schema.djt';
-        $cache = true;
-        $debug = true;
 
-        $config = array(
-            'template_dir' => __DIR__ . '/schema/',
-            'cache_dir' => self::$cacheDir,
-            'debug' => $debug,
-        );
-
-        if ($cache && is_callable('xcache_isset')) {
-            /* don't check for changes in the template for the next 5 min */
-            $config['check_ttl'] = 300;
-            $config['check_get'] = 'xcache_get';
-            $config['check_set'] = 'xcache_set';
-        }
-
-        $data = array('element' => $widget->getProperties());
-
-        \Haanga::configure($config);
-        $output = '';
-        \ob_start();
-        \Haanga::Load($tpl, $data);
-        $output = \ob_get_contents();
-        \ob_end_clean();
-
-        return $output;
     }
 
     public static function setCacheDir($path)

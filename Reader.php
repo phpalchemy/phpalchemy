@@ -1,10 +1,20 @@
 <?php
-namespace Alchemy\UI;
+namespace Alchemy\Component\UI;
 
-class Reader
+abstract class Reader
 {
-    public function load()
+    protected $widgets = null;
+    protected $attributes = array();
+
+    abstract public function parse();
+
+    public function getWidgets()
     {
-        
+        return $this->widgets;
+    }
+
+    public function getAttributes()
+    {
+        return $this->attributes;
     }
 }

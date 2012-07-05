@@ -1,6 +1,9 @@
 <?php
 namespace Alchemy\Component\UI;
 
+use Alchemy\Component\UI\XmlReader;
+use Alchemy\Component\UI\YamlReader;
+
 class ReaderFactory
 {
     static function loadReader($file)
@@ -18,15 +21,13 @@ class ReaderFactory
 
         switch ($fileExtension) {
             case 'xml':
-                $reader = new \Alchemy\UI\XmlReader($file);
+                $reader = new XmlReader($file);
                 break;
             case 'yaml': case 'yml':
-                $reader = new \Alchemy\UI\YamlReader($file);
+                $reader = new YamlReader($file);
                 break;
-
             default:
                 throw new \Exception("Unsupported filw extension to UI Reader.");
-
         }
 
         if (!isset($reader)) {

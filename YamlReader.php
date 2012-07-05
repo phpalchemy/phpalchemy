@@ -1,9 +1,9 @@
 <?php
-namespace Alchemy\UI;
+namespace Alchemy\Component\UI;
 
-use \Symfony\Component\Yaml\Yaml;
+use \Alchemy\Component\Yaml\Yaml;
 
-class YamlReader extends Reader
+class YamlReader extends ReaderInterface
 {
     public $widgets;
     public $attributes;
@@ -18,7 +18,7 @@ class YamlReader extends Reader
         $this->widgets  = new WidgetCollection();
         $this->filepath = $filepath;
         $this->attributes  = Array();
-        
+
         $this->parse();
         //var_dump($this->attributes); die;
     }
@@ -56,14 +56,14 @@ class YamlReader extends Reader
         if (isset($data['items']) && is_array($data['items'])) {
             $data = $data['items'];
         }
-        
+
         foreach ($data as $item) {
             if (!is_array($item)) {
                 continue;
             }
 
             list($type) = array_keys($item);
-            
+
             $widget = new WidgetBase();
             $widget->type = $type;
             $widget->attributes = $item[$type];

@@ -28,14 +28,13 @@
 
 ### SELECT
 @block select
-
-@var template <<<
+    @var template <<<
 <select type="{xtype}" id="{id}" @@attributes({attributes})>
   @@options({options})
 </select>
 >>>
-
 @end
+
 
 ### FORM
 @block form

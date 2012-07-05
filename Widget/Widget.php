@@ -27,9 +27,7 @@ abstract class Widget implements WidgetInterface
     {
         if (!empty($attributes)) {
             foreach ($attributes as $key => $value) {
-                if (property_exists($this, $key)) {
-                    $this->{$key} = $value;
-                }
+                $this->setAttribute($key, $value);
             }
         }
     }
@@ -62,6 +60,24 @@ abstract class Widget implements WidgetInterface
     public function getXtype()
     {
         return $this->xtype;
+    }
+
+    public function setAttribute($name, $value = '')
+    {
+        if (is_array($name)) {
+            return $this->setAttributesFromArray($name);
+        }
+
+        if (property_exists($this, $name)) {
+            return $this->{$name} = $value;
+        }
+    }
+
+    protected function setAttributesFromArray(array $attributes)
+    {
+        foreach ($attributes as $name => $value) {
+            $this->setAttribute($name, $value);
+        }
     }
 
     public function getInfo()
