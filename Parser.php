@@ -28,14 +28,94 @@ class Parser
     const T_ITERATOR = 'iterator';
     const T_GLOBAL   = 'global';
 
-    public function __construct($file)
+    public function __construct($file = '')
     {
-        $this->file = $file;
-
-        $this->load();
+        // set this->file property and parse genscript file
+        if (! empty($file)) {
+            $this->file = $file;
+            $this->parse();
+        }
     }
 
-    protected function load()
+    public function setScriptFile($file)
+    {
+        $this->file = $file;
+    }
+
+    public function getScriptFile()
+    {
+        return $this->file;
+    }
+
+    public function setDefaultBlock($block)
+    {
+        if (!isset($this->blocks[$block])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Error: trying set as default to undefined block: "%s"', $block
+            ));
+        }
+
+        $this->defaultBlock = $block;
+    }
+
+    public function getGlobals()
+    {
+        return $this->defs[Parser::T_GLOBAL];
+    }
+
+    public function getIterators()
+    {
+        return $this->defs[Parser::T_ITERATOR];
+    }
+
+    public function getBlocks()
+    {
+        return $this->blocks;
+    }
+
+    public function getDef($name)
+    {
+        if (!isset($this->defs[$name])) {
+            return false;
+        }
+
+        return $this->defs[$name];
+    }
+
+    public function getBlock($name)
+    {
+        if (isset($this->blocks[$name])) {
+            return $this->blocks[$name];
+        }
+
+        if (!empty($this->defaultBlock)) {
+            return $this->blocks[$this->defaultBlock];
+        }
+
+        throw new \InvalidArgumentException(sprintf('Error: Undefined template block: "%s"', $name));
+    }
+
+    public function generate($name, $data)
+    {
+        $this->currentBlock     = $this->getBlock($name);
+        $this->currentBlockName = $name;
+        $this->data = $data;
+        $generated  = array();
+
+        foreach ($this->currentBlock as $varName => $template) {
+            $content = $this->buildIterators($template);
+            $content = $this->replaceData($content, $data);
+            $generated[$varName] = $content;
+        }
+
+        return $generated;
+    }
+
+    /*
+     * PRIVATE/PROTECTED METHODS
+     */
+
+    protected function parse()
     {
         if (!is_file($this->file)) {
             throw new \Exception(sprintf(
@@ -220,70 +300,6 @@ class Parser
         }
     }
 
-    public function getGlobals()
-    {
-        return $this->defs[Parser::T_GLOBAL];
-    }
-
-    public function getIterators()
-    {
-        return $this->defs[Parser::T_ITERATOR];
-    }
-
-    public function getBlocks()
-    {
-        return $this->blocks;
-    }
-
-    public function getDef($name)
-    {
-        if (!isset($this->defs[$name])) {
-            return false;
-        }
-
-        return $this->defs[$name];
-    }
-
-    public function getBlock($name)
-    {
-        if (isset($this->blocks[$name])) {
-            return $this->blocks[$name];
-        }
-
-        if (!empty($this->defaultBlock)) {
-            return $this->blocks[$this->defaultBlock];
-        }
-
-        throw new \InvalidArgumentException(sprintf('Error: Undefined template block: "%s"', $name));
-    }
-
-    public function setDefaultBlock($block)
-    {
-        if (!isset($this->blocks[$block])) {
-            throw new \InvalidArgumentException(sprintf(
-                'Error: trying set as default to undefined block: "%s"', $block
-            ));
-        }
-
-        $this->defaultBlock = $block;
-    }
-
-    public function generate($name, $data)
-    {
-        $this->currentBlock = $this->getBlock($name);
-        $this->currentBlock['_name'] = $name;
-        $this->data = $data;
-
-        $content = $this->buildIterators($this->currentBlock['template']);
-        $content = $this->replaceData($content, $data);
-
-        return $content;
-    }
-
-    /*
-     * PRIVATE/PROTECTED METHODS
-     */
-
     private static function castValue($val)
     {
         if (is_array($val)) {
@@ -328,7 +344,7 @@ class Parser
 
         if (!array_key_exists($matches['var'], $this->data)) {
             throw new \InvalidArgumentException(sprintf(
-                "Compile Error: Undefined variable '%s' for block: '%s'", $matches['var'], $this->currentBlock['_name']
+                "Compile Error: Undefined variable '%s' for block: '%s'", $matches['var'], $this->currentBlockName
             ));
         }
 
