@@ -19,3 +19,4 @@ class ViewAnnotation extends Annotation
         $this->engine = $this->get('engine', '');
     }
 }
+

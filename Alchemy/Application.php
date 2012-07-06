@@ -92,7 +92,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
                 } else {
                     throw new \InvalidArgumentException("ERROR: file routes.php does not return valid data.");
                 }
-            } else if (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
+            } elseif (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
                 $routesList = $app['yaml']->load($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
 
                 foreach ($routesList as $rname => $rconf) {
@@ -257,3 +257,4 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         );
     }
 }
+

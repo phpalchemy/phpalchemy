@@ -68,4 +68,3 @@ class TwigView extends View
     }
 }
 
-

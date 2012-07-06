@@ -88,3 +88,4 @@ final class KernelEvents
      */
     const TERMINATE = 'events.terminate';
 }
+

@@ -74,3 +74,4 @@ class GetResponseEvent extends KernelEvent
         return $this->response !== null;
     }
 }
+

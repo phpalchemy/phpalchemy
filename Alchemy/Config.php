@@ -35,7 +35,7 @@ class Config
         if (is_string($value) && preg_match('/.*\%(.+\..+)\%.*/', $value, $match)) {
             try {
                 $value = str_replace("%{$match[1]}%", $this->get($match[1]), $value);
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 throw new \Exception(
                     "Configuration Missing for %" . $match[1] . "% for " .
                     "key: '$name', with value: '$value'"
@@ -117,7 +117,7 @@ class Config
         }
     }
 
-    public function load($value=null)
+    public function load($value = null)
     {
         if (is_array($value)) {
             $this->loadFromArray($value);
@@ -136,3 +136,4 @@ class Config
         return $this->getAll();
     }
 }
+

@@ -29,3 +29,4 @@ class ViewEvent extends KernelEvent
         $this->view = $view;
     }
 }
+

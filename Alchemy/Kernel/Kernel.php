@@ -64,10 +64,12 @@ class Kernel implements KernelInterface
      * @param Config              $config     Configuration object.
      */
     public function __construct(
-        EventDispatcher $dispatcher, Mapper $matcher, ControllerResolver $resolver,
-        Config $config, Annotations $annotation
-    )
-    {
+        EventDispatcher $dispatcher,
+        Mapper $matcher,
+        ControllerResolver $resolver,
+        Config $config,
+        Annotations $annotation
+    ) {
         $this->matcher    = $matcher;
         $this->resolver   = $resolver;
         $this->dispatcher = $dispatcher;
@@ -169,8 +171,8 @@ class Kernel implements KernelInterface
             // Execute controller action
             $response = call_user_func_array($controller, $arguments);
 
-            // check returned value by method
-            if (is_array($response)) { // if it returns a array
+            // check returned value by method is a array
+            if (is_array($response)) {
                 // set controller view data object
                 foreach ($response as $key => $value) {
                     $controller[0]->view->$key = $value;
@@ -228,7 +230,10 @@ class Kernel implements KernelInterface
         $responseAnnotation = empty($annotatedObjects['Response']) ? null : $annotatedObjects['Response'];
 
         // dispatch a response event
-        $this->dispatcher->dispatch(KernelEvents::RESPONSE, new FilterResponseEvent($this, $request, $response, $responseAnnotation));
+        $this->dispatcher->dispatch(
+            KernelEvents::RESPONSE,
+            new FilterResponseEvent($this, $request, $response, $responseAnnotation)
+        );
 
         return $response;
     }
@@ -261,7 +266,8 @@ class Kernel implements KernelInterface
         }
 
         // check if template filename is empty
-        if (empty($conf->template)) { //that means it wasn't set on @view annotation
+        if (empty($conf->template)) {
+            // that means it wasn't set on @view annotation
             // Then we compose a template filename using controller class and method names but
             // removing ...Controller & ..Action sufixes from those names
             $nsSepPos        = strrpos($class, NS);
@@ -276,17 +282,20 @@ class Kernel implements KernelInterface
         }
 
         // check if template file exists
-        if (file_exists($conf->templateDir . $conf->template)) { // if relative path was given
-        } elseif (file_exists($conf->template)) { // if absolute path was given
-        } else { // file doesn't exist, throw error
+        if (file_exists($conf->templateDir . $conf->template)) {
+            // if relative path was given
+        } elseif (file_exists($conf->template)) {
+            // if absolute path was given
+        } else {
+            // file doesn't exist, throw error
             throw new \Exception("Error, File Not Found: template file doesn't exist: '{$conf->template}'");
         }
 
         // composing the view class string
         $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
 
-        // check if view engine class exists
-        if (!class_exists($viewClass)) { // does not exist, throw an exception
+        // check if view engine class exists, if does not exist throw an exception
+        if (!class_exists($viewClass)) {
             throw new \Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
         }
 
@@ -344,3 +353,4 @@ class Kernel implements KernelInterface
         return $params;
     }
 }
+

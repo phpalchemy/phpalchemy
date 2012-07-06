@@ -47,3 +47,4 @@ class Handler
         $view->render();
     }
 }
+

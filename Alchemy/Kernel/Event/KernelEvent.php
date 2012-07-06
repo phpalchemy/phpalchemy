@@ -49,3 +49,4 @@ class KernelEvent extends Event
         return $this->request;
     }
 }
+

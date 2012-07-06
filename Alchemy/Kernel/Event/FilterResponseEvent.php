@@ -27,9 +27,11 @@ class FilterResponseEvent extends KernelEvent
     private $annotations = null;
 
     public function __construct(
-        KernelInterface $kernel, Request $request, Response $response, 
-        ResponseAnnotation $annotations = null)
-    {
+        KernelInterface $kernel,
+        Request $request,
+        Response $response,
+        ResponseAnnotation $annotations = null
+    ) {
         parent::__construct($kernel, $request);
         $this->setResponse($response);
         $this->annotations = $annotations;
@@ -64,3 +66,4 @@ class FilterResponseEvent extends KernelEvent
         return $this->annotations;
     }
 }
+

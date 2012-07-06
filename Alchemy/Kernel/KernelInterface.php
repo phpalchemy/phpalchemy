@@ -18,5 +18,6 @@ interface KernelInterface
      * @return Response A Response instance
      * @throws \Exception When an Exception occurs during processing
      */
-    function handle(Request $request);
+    public function handle(Request $request);
 }
+

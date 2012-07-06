@@ -3,7 +3,7 @@ namespace Alchemy\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputOption,
-    Symfony\Component\Console;
+    Symfony\Component\Console\Command\Command;
 
 use Alchemy\Config;
 
@@ -17,7 +17,7 @@ use Alchemy\Config;
  * @version $Revision$
  * @author  Erik Amaru Ortiz <aortiz.erik@gmail.com>
  */
-class ServeCommand extends Console\Command\Command
+class ServeCommand extends Command
 {
     protected $config = null;
 
@@ -124,7 +124,9 @@ class ServeCommand extends Console\Command\Command
 
         $output->writeln(PHP_EOL . '--= PhpAlchemy Framework Cli / running on '.PHP_OS.')=--'.PHP_EOL);
         //$output->writeln('<comment>Using "'.$env.'" environment.</comment>');
-        $output->writeln(PHP_EOL . sprintf('* The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port));
+        $output->writeln(sprintf(
+            '\n* The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port
+        ));
         $output->writeln("* URL: <info>http://$host:$port</info>");
 
         $lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
@@ -196,3 +198,4 @@ class ServeCommand extends Console\Command\Command
         return preg_replace($patterns, $replacements, $content);
     }
 }
+

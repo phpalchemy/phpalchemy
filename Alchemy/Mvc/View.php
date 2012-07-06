@@ -271,7 +271,7 @@ abstract class View implements ViewInterface
         $folderPath = array($strPath);
         $oldumask    = umask(0);
 
-        while(!@is_dir(dirname(end($folderPath)))
+        while (!@is_dir(dirname(end($folderPath)))
             && dirname(end($folderPath)) != '/'
             && dirname(end($folderPath)) != '.'
             && dirname(end($folderPath)) != ''
@@ -279,9 +279,9 @@ abstract class View implements ViewInterface
             array_push($folderPath, dirname(end($folderPath)));
         }
 
-        while($parentFolderPath = array_pop($folderPath)) {
-            if(!@is_dir($parentFolderPath)) {
-                if(!@mkdir($parentFolderPath, $rights)) {
+        while ($parentFolderPath = array_pop($folderPath)) {
+            if (!@is_dir($parentFolderPath)) {
+                if (!@mkdir($parentFolderPath, $rights)) {
                     throw new \Exception("Templating Engine Error: Can't create folder '$parentFolderPath'");
                 }
             }

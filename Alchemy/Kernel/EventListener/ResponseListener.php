@@ -51,13 +51,13 @@ class ResponseListener implements EventSubscriberInterface
         }
 
         $annotations = $event->getAnnotations();
-        
+
         // override headers from annotations
         if ($annotations instanceof ResponseAnnotation) {
             $annotatedHeaders = $annotations->getHeaders();
 
             foreach ($annotatedHeaders as $key => $value) {
-                $response->headers->set($key, $value);            
+                $response->headers->set($key, $value);
             }
         }
         // end annotated headers
@@ -85,7 +85,4 @@ class ResponseListener implements EventSubscriberInterface
         );
     }
 }
-
-
-
 

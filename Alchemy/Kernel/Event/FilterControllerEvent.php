@@ -62,3 +62,4 @@ class FilterControllerEvent extends KernelEvent
         $this->controller = $controller;
     }
 }
+

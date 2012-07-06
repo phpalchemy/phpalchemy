@@ -13,3 +13,4 @@ interface ExceptionInterface
     public function __toString();       // formated string for display
     public function __construct($message = null, $code = 0);
 }
+

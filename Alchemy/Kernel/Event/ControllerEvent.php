@@ -17,10 +17,12 @@ class ControllerEvent extends KernelEvent
     private $arguments  = array();
 
     public function __construct(
-        KernelInterface $kernel, $controller, $arguments,
-        Request $request, Reesponse $response = null
-    )
-    {
+        KernelInterface $kernel,
+        $controller,
+        $arguments,
+        Request $request,
+        Reesponse $response = null
+    ) {
         parent::__construct($kernel, $request);
 
         $this->setController($controller);
@@ -71,3 +73,4 @@ class ControllerEvent extends KernelEvent
         return $this->response;
     }
 }
+

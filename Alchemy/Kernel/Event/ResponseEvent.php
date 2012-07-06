@@ -28,3 +28,4 @@ class ResponseEvent extends KernelEvent
         return $this->request;
     }
 }
+
