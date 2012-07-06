@@ -23,8 +23,8 @@ set_exception_handler(array(new Alchemy\Exception\Handler(), 'handle'));
 
 if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
     throw new Exception(sprintf(
-        "Vendors for phpalchemy are missing.\nPlease execute:\n" .
-        "\$>curl -s http://getcomposer.org/installer | php\n\$>php composer.phar install"
+        "Vendors for phpalchemy are missing.\nPlease execute those commands on phpalchemy home dir.:\n" .
+        "\$>cd /path/to/phpalchemy\n\$>curl -s http://getcomposer.org/installer | php\n\$>php composer.phar install"
     ));
 }
 require_once __DIR__ . '/vendor/autoload.php';
