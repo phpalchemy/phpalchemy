@@ -33,3 +33,4 @@ class Sample2Listener implements EventSubscriberInterface
         );
     }
 }
+

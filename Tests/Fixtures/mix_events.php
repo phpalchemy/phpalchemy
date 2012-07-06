@@ -26,3 +26,4 @@ function onBeforeLogin3(Event $event)
 {
     echo 'executed before login #3';
 }
+

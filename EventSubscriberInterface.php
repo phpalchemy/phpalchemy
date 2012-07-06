@@ -38,3 +38,4 @@ interface EventSubscriberInterface
      */
     public static function getSubscribedEvents();
 }
+

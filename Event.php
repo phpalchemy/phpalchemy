@@ -110,3 +110,4 @@ class Event
         return $this->stopEventsPropagation;
     }
 }
+

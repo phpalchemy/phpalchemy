@@ -11,3 +11,4 @@ class SampleListener
         echo "exec: SampleListener::onAction($params)";
     }
 }
+

@@ -145,7 +145,11 @@ class EventDispatcherTest extends PHPUnit_Framework_TestCase
         ob_end_clean();
 
         $this->assertEquals('executed before login', $obtained1, 'Fatal!!! basic test is not working');
-        $this->assertEquals('executed after login, with params: value1, value2', $obtained2, 'Fatal!!! basic test is not working');
+        $this->assertEquals(
+            'executed after login, with params: value1, value2',
+            $obtained2,
+            'Fatal!!! basic test is not working'
+        );
     }
 
     public function testCompleteCallingClassFunc()
@@ -158,8 +162,10 @@ class EventDispatcherTest extends PHPUnit_Framework_TestCase
         $event = new Event();
         $event->setParameters(array('param1' => 'value1', 'param2' => 'value2'));
 
-        $expected  = 'executed before login'; // result of onBeforeLogin callback func.
-        $expected .= 'exec: SampleListener::onAction(value1, value2)'; // result of SampleListener::onAction() callback func.
+        // result of onBeforeLogin callback func.
+        $expected  = 'executed before login';
+        // result of SampleListener::onAction() callback func.
+        $expected .= 'exec: SampleListener::onAction(value1, value2)';
 
         ob_start();
         $dispatcher->dispatch('system.before_login', $event);
@@ -190,14 +196,4 @@ class EventDispatcherTest extends PHPUnit_Framework_TestCase
         $this->dispatcher->dispatch('system.after_login', new Event(array(1, 2, 3)));
     }
 }
-
-
-
-
-
-
-
-
-
-
 

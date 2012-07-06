@@ -27,7 +27,7 @@ namespace Alchemy\Component\EventDispatcher;
 
 class EventDispatcher
 {
-    protected $_listeners = array();
+    protected $listeners = array();
 
     /**
      * Add a listener for a given event name.
@@ -37,11 +37,11 @@ class EventDispatcher
      */
     public function addListener($eventName, $listener)
     {
-        if (!isset($this->_listeners[$eventName])) {
-          $this->_listeners[$eventName] = array();
+        if (!isset($this->listeners[$eventName])) {
+            $this->listeners[$eventName] = array();
         }
 
-        $this->_listeners[$eventName][] = $listener;
+        $this->listeners[$eventName][] = $listener;
     }
 
     /**
@@ -54,20 +54,20 @@ class EventDispatcher
      */
     public function removeListener($eventName, $listener)
     {
-        if (!isset($this->_listeners[$eventName])) {
-          return false;
+        if (!isset($this->listeners[$eventName])) {
+            return false;
         }
 
         // removing listeners for a given event
-        foreach ($this->_listeners[$eventName] as $i => $callback) {
+        foreach ($this->listeners[$eventName] as $i => $callback) {
             if ($listener === $callback) {
-                unset($this->_listeners[$eventName][$i]);
+                unset($this->listeners[$eventName][$i]);
             }
         }
 
         // cleaning listener container if there is not more listeners on it
-        if (count($this->_listeners[$eventName]) == 0) {
-            unset($this->_listeners[$eventName]);
+        if (count($this->listeners[$eventName]) == 0) {
+            unset($this->listeners[$eventName]);
         }
     }
 
@@ -142,10 +142,9 @@ class EventDispatcher
         $count = 0;
 
         if (empty($eventName)) {
-            $count = count($this->_listeners);
-        }
-        else if (isset($this->_listeners[$eventName])) {
-            $count = count($this->_listeners[$eventName]);
+            $count = count($this->listeners);
+        } elseif (isset($this->listeners[$eventName])) {
+            $count = count($this->listeners[$eventName]);
         }
 
         return (boolean) $count;
@@ -161,14 +160,14 @@ class EventDispatcher
     public function getListeners($name = null)
     {
         if (empty($name)) {
-            return $this->_listeners;
+            return $this->listeners;
         }
 
-        if (!isset($this->_listeners[$name])) {
+        if (!isset($this->listeners[$name])) {
             return array();
         }
 
-        return $this->_listeners[$name];
+        return $this->listeners[$name];
     }
 
     public function addSubscriber(EventSubscriberInterface $subscriber)
@@ -182,12 +181,10 @@ class EventDispatcher
                 foreach ($params as $listener) {
                     $this->addListener($eventName, array($subscriber, $listener));
                 }
-            }
-            else {
+            } else {
                 throw new Exception("Invalid listener type, given: '".gettype($params)."'.");
             }
         }
     }
 }
-
 
