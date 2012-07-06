@@ -1,0 +1,59 @@
+<?php use Alchemy\Adapter\PhtmlView; ?>
+<?php PhtmlView::extend('MasterLayout')?>
+
+<?php PhtmlView::block('title', function () {?>Exception<?php }) ?>
+
+<?php PhtmlView::block('body', function () use ($baseurl, $message, $line, $file, $trace, $query){?>
+<div class="commit-view">
+    <div class="commit-header">
+        <img src="<?php echo $baseurl?>assets/framework/img/i.png" class="pull-left space-right" />
+        <h3>Application Exception</h3>
+    </div>
+    <div class="commit-body">
+        <span>
+            <div class="tabbable">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#1" data-toggle="tab">Message</a></li>
+                    <li><a href="#2" data-toggle="tab">Information</a></li>
+                    <li><a href="#3" data-toggle="tab">Stack trace</a></li>
+                    <li><a href="#4" data-toggle="tab">Request Parameters</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="1">
+                        <div class="alert alert-error">
+                            <pre><?php echo $message?></pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="2">
+                        <div class="well">
+                            <h3 class="alert-heading">Exception information:</h3><br/>
+                            <p>
+                                <b>Message:</b> <?php echo $message ?> <br/>
+                                <b>File:</b> <?php echo $file ?> <br/>
+                                <b>Line:</b> <?php echo $line ?>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="3">
+                        <div class="well">
+                            <h3>Stack trace:</h3>
+                            <pre><?php echo $trace ?></pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="4">
+                        <div class="well">
+                            <h3>Request Parameters:</h3>
+                            <pre><?php echo $query?></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </span>
+    </div>
+</div>
+<?php }) ?>
+

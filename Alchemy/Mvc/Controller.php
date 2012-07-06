@@ -17,7 +17,7 @@ use Alchemy\Component\Http\Response;
  * @package   phpalchemy
  */
 
-class Controller
+abstract class Controller
 {
     /**
      * Meta object to store all data that will use on templates

@@ -30,6 +30,8 @@ use Alchemy\Adapter\NotojAnnotations;
 
 use Alchemy\Kernel\KernelEvents;
 
+use Alchemy\Exception\Handler;
+
 /**
  * Class Application
  *
@@ -143,6 +145,10 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
             $this['config']->get('app.namespace')
         );
+
+        $this['exception_handler'] = $this->share(function() use ($app) {
+            return new ExceptionHandler;
+        });
     }
 
     /**

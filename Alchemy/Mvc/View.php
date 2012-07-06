@@ -13,7 +13,7 @@ namespace Alchemy\Mvc;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
  */
-class View
+abstract class View implements ViewInterface
 {
     /**
      * Contains all variables that are available on template file
@@ -246,12 +246,9 @@ class View
     /**
      * Render the output string (To override by child class)
      */
-    public function render()
-    {
-    }
+    abstract public function render();
 
-
-        /**
+    /**
      * Multiple variable assignment
      *
      * @param  array $data associative array conatining variables, the keys are used as variables names

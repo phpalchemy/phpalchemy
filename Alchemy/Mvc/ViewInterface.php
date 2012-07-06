@@ -13,8 +13,8 @@ interface ViewInterface
     public function enableDebug($value);
     public function setCharset($charset);
     public function getCharset();
-    public function assing($name, $value);
-    public function get();
+    public function assign($name, $value);
+    public function get($name);
     public function getOutput();
     public function render();
 }
