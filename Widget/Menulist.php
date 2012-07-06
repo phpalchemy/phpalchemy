@@ -38,3 +38,4 @@ class Menulist extends Widget
         return $this->items;
     }
 }
+

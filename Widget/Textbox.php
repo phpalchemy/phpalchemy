@@ -34,3 +34,4 @@ class Textbox extends Widget
         $this->setXtype('textbox');
     }
 }
+

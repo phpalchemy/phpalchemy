@@ -32,8 +32,7 @@ class XmlReader extends Reader
             // filtering by xmlns
             if (preg_match('/' . $this->xmlnsPrefix . ':(.+)/', $attribute->nodeName, $match)) {
                 $this->attributes[$match[1]] = $attribute->nodeValue;
-            }
-            else {
+            } else {
                 $this->attributes[$attribute->nodeName] = $attribute->nodeValue;
             }
         }
@@ -51,8 +50,7 @@ class XmlReader extends Reader
                     // filtering by xmlns
                     if (preg_match('/' . $this->xmlnsPrefix . ':(.+)/', $attribute->nodeName, $match)) {
                         $widget->setAttribute($match[1], $attribute->nodeValue);
-                    }
-                    else {
+                    } else {
                         $widget->setAttribute($attribute->nodeName, $attribute->nodeValue);
                     }
                 }
@@ -61,7 +59,7 @@ class XmlReader extends Reader
                 $attributes = array();
                 $attributesNodeList = $childNode->getElementsByTagName('attribute');
 
-                for($i = 0; $i < $attributesNodeList->length; $i++) {
+                for ($i = 0; $i < $attributesNodeList->length; $i++) {
                     $attributeNode  = $attributesNodeList->item($i);
                     $attributeName  = $attributeNode->getAttribute('name');
                     $attributeValue = $attributeNode->getAttribute('value');
@@ -75,8 +73,7 @@ class XmlReader extends Reader
                     if ($attributeName != '' && $attributeValue != '') {
                         if (preg_match('/' . $this->xmlnsPrefix . ':(.+)/', $attribute->nodeName, $match)) {
                             $attributes[$match[1]] = $attributeValue;
-                        }
-                        else {
+                        } else {
                             $attributes[$attributeName] = $attributeValue;
                         }
                     }
@@ -97,3 +94,4 @@ class XmlReader extends Reader
         }
     }
 }
+

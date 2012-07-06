@@ -6,7 +6,7 @@ use Alchemy\Component\UI\YamlReader;
 
 class ReaderFactory
 {
-    static function loadReader($file)
+    public static function loadReader($file)
     {
         if (!file_exists($file)) {
             throw new \Exception("Error: Meta Web UI File '$file' does not exist.");
@@ -23,7 +23,8 @@ class ReaderFactory
             case 'xml':
                 $reader = new XmlReader($file);
                 break;
-            case 'yaml': case 'yml':
+            case 'yaml':
+            case 'yml':
                 $reader = new YamlReader($file);
                 break;
         }
@@ -35,3 +36,4 @@ class ReaderFactory
         return $reader;
     }
 }
+

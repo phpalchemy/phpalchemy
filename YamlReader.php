@@ -42,8 +42,7 @@ class YamlReader extends ReaderInterface
         if (isset($data['attributes']) && is_array($data['attributes'])) {
             $this->attributes = array_merge($this->attributes, $data['attributes']);
             unset($data['attributes']);
-        }
-        else {
+        } else {
             foreach ($data as $key => $value) {
                 if (!is_numeric($key) && is_string($key) && !is_array($value)) {
                     $this->attributes[$key] = $value;
@@ -72,3 +71,4 @@ class YamlReader extends ReaderInterface
         }
     }
 }
+

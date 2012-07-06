@@ -122,3 +122,4 @@ abstract class Widget implements WidgetInterface
     {
     }
 }
+

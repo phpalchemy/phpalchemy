@@ -15,3 +15,4 @@ interface WidgetInterface
 {
     public function prepare();
 }
+

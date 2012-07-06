@@ -37,3 +37,4 @@ class Checkbox extends Widget
         return $this->checked;
     }
 }
+

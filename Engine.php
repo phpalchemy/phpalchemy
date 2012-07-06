@@ -105,9 +105,11 @@ class Engine
             }
 
             foreach ($overrides as $key => $value) {
-                if (array_key_exists($key, $data)) { // find on properties
+                if (array_key_exists($key, $data)) {
+                    // find on properties
                     $data[$key] = $value;
-                } elseif (array_key_exists($key, $data['attributes'])) { // find on attributes
+                } elseif (array_key_exists($key, $data['attributes'])) {
+                    // find on attributes
                     $data['attributes'][$key] = $value;
                 }
             }
@@ -127,5 +129,4 @@ class Engine
         return $class;
     }
 }
-
 

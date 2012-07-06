@@ -74,7 +74,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
 
         $expected = array();
-        $expected['template'] = '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="write your text here!"/>';
+        $expected['template'] = '<input type="text" id="my_text_id" name="my_text" ' .
+                                'size="25" emptyText="write your text here!"/>';
 
         $result = $parser->generate('textbox', $data);
         $this->assertEquals($expected, $result);
@@ -223,3 +224,4 @@ EOT;
         $this->assertEquals($expected, $result['template']);
     }
 }
+

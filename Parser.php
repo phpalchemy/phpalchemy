@@ -427,3 +427,4 @@ class Parser
         return $template;
     }
 }
+
