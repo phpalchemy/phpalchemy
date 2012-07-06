@@ -72,3 +72,4 @@ class ClassLoaderTest extends PHPUnit_Framework_TestCase
         $this->assertFalse(class_exists('\Lib\Util\Net\Pop3'));
     }
 }
+

@@ -4,3 +4,4 @@ namespace Bin;
 class ConsoleApp
 {
 }
+
