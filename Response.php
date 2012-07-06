@@ -103,7 +103,10 @@ class Response
         $charset = $this->charset ?: 'UTF-8';
         if (!$this->headers->has('Content-Type')) {
             $this->headers->set('Content-Type', 'text/html; charset='.$charset);
-        } elseif (0 === strpos($this->headers->get('Content-Type'), 'text/') && false === strpos($this->headers->get('Content-Type'), 'charset')) {
+        } elseif (
+            0 === strpos($this->headers->get('Content-Type'), 'text/') &&
+            false === strpos($this->headers->get('Content-Type'), 'charset')
+        ) {
             // add the charset
             $this->headers->set('Content-Type', $this->headers->get('Content-Type').'; charset='.$charset);
         }
@@ -148,7 +151,8 @@ class Response
 
         // cookies
         // foreach ($this->headers->getCookies() as $cookie) {
-        //     setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
+        //     setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $
+        //     cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
         // }
     }
 
@@ -175,8 +179,16 @@ class Response
 
     public function setContent($content)
     {
-        if (null !== $content && !is_string($content) && !is_numeric($content) && !is_callable(array($content, '__toString'))) {
-            throw new \UnexpectedValueException('The Response content must be a string or object implementing __toString(), "'.gettype($content).'" given.');
+        if (
+            null !== $content &&
+            !is_string($content) &&
+            !is_numeric($content) &&
+            !is_callable(array($content, '__toString'))
+        ) {
+            throw new \UnexpectedValueException(sprintf(
+                'The Response content must be a string or object implementing __toString(), "%s" given.',
+                gettype($content)
+            ));
         }
 
         $this->content = (string) $content;
@@ -208,7 +220,10 @@ class Response
         $notModified = false;
 
         if ($etags = $request->getEtags()) {
-            $notModified = (in_array($this->getEtag(), $etags) || in_array('*', $etags)) && (!$lastModified || $this->headers->get('Last-Modified') == $lastModified);
+            $notModified = (
+                in_array($this->getEtag(), $etags) ||
+                in_array('*', $etags)) &&
+                (!$lastModified || $this->headers->get('Last-Modified') == $lastModified);
         } elseif ($lastModified) {
             $notModified = $lastModified == $this->headers->get('Last-Modified');
         }
@@ -300,7 +315,10 @@ class Response
      */
     public function isRedirect($location = null)
     {
-        return in_array($this->statusCode, array(201, 301, 302, 303, 307)) && (null === $location ?: $location == $this->headers->get('Location'));
+        return in_array(
+            $this->statusCode,
+            array(201, 301, 302, 303, 307)) && (null === $location ?: $location == $this->headers->get('Location')
+        );
     }
 
     /**
@@ -331,3 +349,4 @@ class Response
         $this->charset = $charset;
     }
 }
+

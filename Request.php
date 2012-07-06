@@ -59,16 +59,27 @@ class Request
         'atom' => array('application/atom+xml'),
     );
 
-    public function __construct(array $query = array(), array $request = array(), array $attributes = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null)
-    {
+    public function __construct(
+        array $query = array(),
+        array $request = array(),
+        array $attributes = array(),
+        array $cookies = array(),
+        array $files = array(),
+        array $server = array(),
+        $content = null
+    ) {
         $this->init($query, $request, $attributes, $cookies, $files, $server, $content);
     }
 
     public function init(
-        array $query = array(), array $request = array(), array $attributes = array(),
-        array $cookies = array(), array $files = array(), array $server = array(), $content = null
-    )
-    {
+        array $query = array(),
+        array $request = array(),
+        array $attributes = array(),
+        array $cookies = array(),
+        array $files = array(),
+        array $server = array(),
+        $content = null
+    ) {
         $this->request    = new Collection($request);
         $this->query      = new Collection($query);
         $this->attributes = new Collection($attributes);
@@ -163,7 +174,10 @@ class Request
         // If using mod_rewrite or ISAPI_Rewrite strip the script filename
         // out of baseUrl. $pos !== 0 makes sure it is not matching a value
         // from PATH_INFO or QUERY_STRING
-        if ((strlen($requestUri) >= strlen($baseUrl)) && ((false !== ($pos = strpos($requestUri, $baseUrl))) && ($pos !== 0))) {
+        if (
+            strlen($requestUri) >= strlen($baseUrl) &&
+            ((false !== ($pos = strpos($requestUri, $baseUrl))) && ($pos !== 0))
+        ) {
             $baseUrl = substr($requestUri, 0, $pos + strlen($baseUrl));
         }
 
@@ -178,7 +192,10 @@ class Request
             $this->method = strtoupper($this->server->get('REQUEST_METHOD', 'GET'));
 
             if ('POST' === $this->method) {
-                $this->method = strtoupper($this->headers->get('X-HTTP-METHOD-OVERRIDE', $this->request->get('_method', 'POST')));
+                $this->method = strtoupper(
+                    $this->headers->get('X-HTTP-METHOD-OVERRIDE',
+                    $this->request->get('_method', 'POST'))
+                );
             }
         }
 
@@ -202,7 +219,11 @@ class Request
     {
         return (
             (strtolower($this->server->get('HTTPS')) == 'on' || $this->server->get('HTTPS') == 1) ||
-            (self::$trustProxy && strtolower($this->headers->get('SSL_HTTPS')) == 'on' || $this->headers->get('SSL_HTTPS') == 1) ||
+            (
+                self::$trustProxy &&
+                strtolower($this->headers->get('SSL_HTTPS')) == 'on' ||
+                $this->headers->get('SSL_HTTPS') == 1
+            ) ||
             (self::$trustProxy && strtolower($this->headers->get('X_FORWARDED_PROTO')) == 'https')
         );
     }
@@ -407,7 +428,7 @@ class Request
         return $this->content;
     }
 
-    public function getETags()
+    public function getEtags()
     {
         return preg_split('/\s*,\s*/', $this->headers->get('if_none_match'), null, PREG_SPLIT_NO_EMPTY);
     }
@@ -428,7 +449,8 @@ class Request
         preg_match_all('#([a-zA-Z][a-zA-Z_-]*)\s*(?:=(?:"([^"]*)"|([^ \t",;]*)))?#', $header, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
-            $cacheControl[strtolower($match[1])] = isset($match[2]) && $match[2] ? $match[2] : (isset($match[3]) ? $match[3] : true);
+            $cacheControl[strtolower($match[1])] = isset($match[2]) && $match[2] ?
+                                                   $match[2] : (isset($match[3]) ? $match[3] : true);
         }
 
         return $cacheControl;
@@ -485,3 +507,4 @@ class Request
         );
     }
 }
+

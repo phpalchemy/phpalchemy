@@ -24,22 +24,22 @@ class Collection
 {
     public $data = array();
 
-    function __construct($data)
+    public function __construct($data)
     {
         $this->data = $data;
     }
 
-    function get($key, $default = null)
+    public function get($key, $default = null)
     {
         return array_key_exists($key, $this->data) ? $this->data[$key] : $default;
     }
 
-    function all()
+    public function all()
     {
         return $this->data;
     }
 
-    function has($key)
+    public function has($key)
     {
         return isset($this->data[$key]);
     }
@@ -54,3 +54,4 @@ class Collection
         $this->data[$key] = $value;
     }
 }
+

@@ -56,3 +56,4 @@ class JsonResponse extends Response
         parent::send();
     }
 }
+
