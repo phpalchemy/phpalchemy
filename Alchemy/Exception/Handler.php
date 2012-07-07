@@ -41,8 +41,9 @@ class Handler
         $view->assign('file', $exception->getLine());
         $view->assign('trace', $exception->getTraceAsString());
         $view->assign('query', print_r($this->request->query->all(), true));
-
-        $view->assign('baseurl', $this->request->getBaseUrl() . '/../');
+        $baseurl = $this->request->getBaseUrl();
+        $baseurl .= $baseurl == '' || $baseurl == '/' ? '' : '/../';
+        $view->assign('baseurl', $baseurl);
 
         $view->render();
     }

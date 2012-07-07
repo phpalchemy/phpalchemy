@@ -83,7 +83,7 @@ class ServeCommand extends Command
                 //setting lighttpd configuration variables
                 $config = array();
                 $config['doc_root']    = PHP_OS == 'WINNT' ? self::convertPathToPosix(SYS_DIR) :
-                                         $this->config->get('app.root_dir');
+                                         $this->config->get('app.root_dir') . '/web';
                 $config['host']        = $host;
                 $config['port']        = $port;
                 $config['tmp_dir']     = $tmpDir;
@@ -92,7 +92,7 @@ class ServeCommand extends Command
                 $config['environment'] = $env;
 
                 // load the lighttpd.conf template with the configurations
-                $lighttpdTmpConfFile = $tmpDir . '.lighttpd.conf';
+                $lighttpdTmpConfFile = $tmpDir . '_lighttpd.conf';
                 $lighttpdConfContent = $this->loadTemplate(
                     $homeDir . DIRECTORY_SEPARATOR . 'templates'.DIRECTORY_SEPARATOR.'lighttpd.conf.tpl', $config
                 );
