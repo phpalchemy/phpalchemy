@@ -198,6 +198,7 @@ EOT;
 
         $result = $parser->generate('select', $data);
         $formItems[] = $result['template'];
+
         $data = array(
             'attributes' => array(
                 'id'    => 'my_form_id',
@@ -208,6 +209,7 @@ EOT;
             'items' => $formItems
         );
 
+        $expected = array();
         $expected = <<<EOT
 <form id="my_form_id" name="my_form" action="process.php" method="POST">
 <input type="text" id="my_text_id" name="my_text" size="25" emptyText="write your text here!"/>
@@ -219,9 +221,60 @@ EOT;
 </select>
 </form>
 EOT;
+
         $result = $parser->generate('form', $data);
 
         $this->assertEquals($expected, $result['template']);
+    }
+
+    /**
+     * @covers Alchemy\Component\UI\Parser::generate
+     * @depends testConstructor
+     * @expectedException RuntimeException
+     */
+    public function testGenerate1(Parser $parser)
+    {
+        $expected = array(
+            'template' => '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="empty text"/>'
+        );
+
+        // this array intentionally has not attribute: 'name'
+        $data = array(
+            'id' => 'my_text_id',
+            'attributes' => array(
+                'size' => 25,
+                'emptyText' => 'empty text'
+            )
+        );
+
+        //So, when trying the textbox generation an exception (RuntimeException) will trown
+        $result = $parser->generate('textbox', $data);
+    }
+
+    /**
+     * @covers Alchemy\Component\UI\Parser::generate
+     * @depends testConstructor
+     */
+    public function testGenerate2(Parser $parser)
+    {
+        $expected = array(
+            'template' => '<input type="text" id="my_text_id" name="" size="25" emptyText="empty text"/>'
+        );
+
+        // this array intentionally has not attribute: 'name'
+        $data = array(
+            'id' => 'my_text_id',
+            'attributes' => array(
+                'size' => 25,
+                'emptyText' => 'empty text'
+            )
+        );
+
+        // disabling strict variables.
+        $parser->setStrictVariables(false);
+
+        //So, when trying the textbox generation an exception (RuntimeException) will trown
+        $result = $parser->generate('textbox', $data);
     }
 }
 

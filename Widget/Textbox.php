@@ -22,7 +22,7 @@ class Textbox extends Widget
     public $multiline = false;
     public $placeholder = '';
     public $readonly = '';
-    public $size = '20';
+    public $size = 20;
     public $type = '';
     public $wrap = '';
     public $rows = '';

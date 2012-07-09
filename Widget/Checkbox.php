@@ -15,9 +15,9 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  */
 class Checkbox extends Widget
 {
-    public $disabled = false;
-    public $editable = true;
-    public $readonly = '';
+    public $disabled;
+    public $editable;
+    public $readonly;
 
     protected $checked = false;
 

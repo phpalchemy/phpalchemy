@@ -47,7 +47,7 @@
 
 @end
 
-## _DEFAIULT
+## _DEFAULT
 @block _default
     @var template <input type="{xtype}" id="{id}" name="{name}" @@attributes({attributes})/>
 @end

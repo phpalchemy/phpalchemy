@@ -90,7 +90,7 @@ abstract class Widget implements WidgetInterface
         }
     }
 
-    public function getData()
+    public function getInfo()
     {
         $result = array();
         $refl   = new \ReflectionObject($this);
@@ -99,7 +99,7 @@ abstract class Widget implements WidgetInterface
         foreach ($attributes as $att) {
             $value = $att->getValue($this);
 
-            if (! empty($value)) {
+            if ($value !== null) {
                 $result['attributes'][$att->getName()] = $att->getValue($this);
             }
         }
@@ -110,7 +110,7 @@ abstract class Widget implements WidgetInterface
             $value = $pro->getValue($this);
             $pro->setAccessible(false);
 
-            if (! empty($value)) {
+            if ($value !== null) {
                 $result[$pro->getName()] = $value;
             }
         }
@@ -120,6 +120,17 @@ abstract class Widget implements WidgetInterface
 
     public function prepare()
     {
+    }
+
+    private function toString($val)
+    {
+        if ($val === true) {
+            return 'true';
+        } elseif ($val === false) {
+            return 'false';
+        } else {
+            return (string) $val;
+        }
     }
 }
 

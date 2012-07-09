@@ -18,6 +18,7 @@ class Parser
     protected $blocks = array();
     protected $defaultBlock = '';
     protected $currentBlock = array();
+    protected $strictVariables = true;
 
     protected $data = array();
 
@@ -109,9 +110,9 @@ class Parser
 
     public function generate($name, $data)
     {
-        $default = $this->getDefConf('default_block');
-
-        $this->setDefaultBlock($default);
+        if (($default = $this->getDefConf('default_block')) !== '') {
+            $this->setDefaultBlock($default);
+        }
 
         $this->currentBlock     = $this->getBlock($name);
         $this->currentBlockName = $name;
@@ -125,6 +126,11 @@ class Parser
         }
 
         return $generated;
+    }
+
+    public function setStrictVariables($value)
+    {
+        $this->strictVariables = (bool) $value;
     }
 
     /*
@@ -372,10 +378,23 @@ class Parser
             ));
         }
 
-        if (!array_key_exists($matches['var'], $this->data)) {
-            throw new \InvalidArgumentException(sprintf(
-                "Compile Error: Undefined variable '%s' for block: '%s'", $matches['var'], $this->currentBlockName
+        if (! is_array($this->data)) {
+            throw new \RuntimeException(sprintf(
+                "Compile Error: Data for var. '%s' is empty!.", $matches['var']
             ));
+        }
+
+        if (!array_key_exists($matches['var'], $this->data)) {
+            // if strict variables is  If set to false, Parser will silently ignore invalid variables
+            // that do not exist and replace them with a empty value.
+            if ($this->strictVariables === false) {
+                return '';
+            } else {
+                // When set to true, Parser throws an exception instead
+                throw new \RuntimeException(sprintf(
+                    "Compile Error: Undefined variable '%s' for block: '%s'", $matches['var'], $this->currentBlockName
+                ));
+            }
         }
 
         $iterator = $iterators[$matches['iterator']];
@@ -418,9 +437,26 @@ class Parser
 
     protected function replaceData($template, $data)
     {
-        foreach ($data as $key => $value) {
-            if (!is_array($value)) {
-                $template = str_replace('{'.$key.'}', $value, $template);
+        if (!preg_match_all('/\{(?<varname>\w+)\}/', $template, $matches)) {
+            return $template;
+        }
+
+        foreach ($matches['varname'] as $key) {
+            // verify if the varname on template is in data array
+            // if not, verify on configuration if strict_variables is enbabled or not
+            if (array_key_exists($key, $data)) {
+                $template = str_replace('{' . $key . '}', $data[$key], $template);
+            } else {
+                // if strict variables is  If set to false, Parser will silently ignore invalid variables
+                // that do not exist and replace them with a empty value.
+                if ($this->strictVariables === false) {
+                    $template = str_replace('{' . $key . '}', '', $template);
+                } else {
+                    // When set to true, Parser throws an exception instead
+                    throw new \RuntimeException(sprintf(
+                        'Runtime Error: Undefined variable: "%s"', $key
+                    ));
+                }
             }
         }
 
