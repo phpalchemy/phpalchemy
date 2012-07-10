@@ -26,17 +26,32 @@ class EngineTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorWithHtml()
     {
-        $engine = new Engine(
-            'html',
-            ReaderFactory::loadReader(__DIR__ . '/Fixtures/meta-wui/form1.xml'),
-            new Parser()
-        );
+        $engine = new Engine(new ReaderFactory(), new Parser());
 
+        $engine->setTargetBundle('html');
+        $engine->setMetaFile(__DIR__ . '/Fixtures/meta-wui/form1.xml');
         $engine->build();
+
+        //$engine->build('html', __DIR__ . '/Fixtures/meta-wui/form1.xml');
+
         print_r($engine->getWidgetsCollection());
 
         return $engine;
     }
+
+    // public function testConstructorWithHtml()
+    // {
+    //     $engine = new Engine(
+    //         'html',
+    //         ReaderFactory::loadReader(__DIR__ . '/Fixtures/meta-wui/form1.xml'),
+    //         new Parser()
+    //     );
+
+    //     $engine->build();
+    //     print_r($engine->getWidgetsCollection());
+
+    //     return $engine;
+    // }
 
     /**
      * @covers Alchemy\Component\UI\Parser::generate

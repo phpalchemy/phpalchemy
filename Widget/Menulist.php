@@ -15,10 +15,10 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  */
 class Menulist extends Widget
 {
-    public $disabled = false;
-    public $editable  = true;
-    public $emptytext = '';
-    public $readonly = '';
+    public $disabled;
+    public $editable;
+    public $emptytext;
+    public $readonly;
 
     protected $items = array();
 

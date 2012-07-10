@@ -6,6 +6,11 @@ use Alchemy\Component\UI\YamlReader;
 
 class ReaderFactory
 {
+    public function load($file)
+    {
+        return self::loadReader($file);
+    }
+
     public static function loadReader($file)
     {
         if (!file_exists($file)) {

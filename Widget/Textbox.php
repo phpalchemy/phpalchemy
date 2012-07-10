@@ -15,18 +15,19 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  */
 class Textbox extends Widget
 {
-    public $disabled  = false;
-    public $editable  = true;
-    public $emptytext = '';
-    public $maxlength = '';
-    public $multiline = false;
-    public $placeholder = '';
-    public $readonly = '';
+    public $disabled;
+    public $editable;
+    public $emptytext;
+    public $maxlength;
+    public $multiline;
+    public $placeholder;
+    public $readonly;
+    public $type;
+    public $wrap;
+    public $rows;
+    public $cols;
+
     public $size = 20;
-    public $type = '';
-    public $wrap = '';
-    public $rows = '';
-    public $cols = '';
 
     public function __construct(array $attributes = array())
     {

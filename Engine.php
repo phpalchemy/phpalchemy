@@ -3,6 +3,7 @@ namespace Alchemy\Component\UI;
 
 use Alchemy\Component\UI\Widget\WidgetInterface;
 use Alchemy\Component\UI\ReaderFactory;
+use Alchemy\Component\UI\Parser;
 
 /**
  * Class Parser
@@ -18,8 +19,12 @@ class Engine
 {
     protected $schema   = 'html';
     protected $cacheDir = './';
-    protected $bundle   = '';
+    protected $targetBundle = '';
+    protected $metaFile = '';
     protected $mapping  = array();
+    protected $readerFactory = null;
+    protected $reader = null;
+    protected $parser = null;
 
     protected $widgetsCollection = array();
 
@@ -30,33 +35,51 @@ class Engine
      * @param Reader $reader meta file source reader
      * @param Parser $parser metafile source parser
      */
-    public function __construct($bundle, Reader $reader, Parser $parser)
+    public function __construct(ReaderFactory $readerFactory, Parser $parser)
     {
-        $this->bundle = $bundle;
-        $bundleDir    = __DIR__ . DIRECTORY_SEPARATOR . 'bundle' . DIRECTORY_SEPARATOR . $bundle . DIRECTORY_SEPARATOR;
+        $this->readerFactory = $readerFactory;
+        $this->parser = $parser;
+    }
+
+    /**
+     * Prepare all engine dependencies
+     */
+    public function prepare()
+    {
+        if (empty($this->targetBundle)) {
+            throw new \RuntimeException(sprintf(
+                "Runtime Error: Any Bundle was selected for ui generation."
+            ));
+        }
+
+        $bundleDir = __DIR__ . DIRECTORY_SEPARATOR . 'bundle' . DIRECTORY_SEPARATOR . $this->targetBundle . DIRECTORY_SEPARATOR;
 
         if (!is_dir($bundleDir)) {
-            throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $bundle));
+            throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $this->targetBundle));
         }
 
         $genscriptFilename = $bundleDir . DIRECTORY_SEPARATOR . 'components.genscript';
         $mappingFilename   = $bundleDir . DIRECTORY_SEPARATOR . 'mapping.php';
 
         //verify if the bundle is registered
-        if (!file_exists($genscriptFilename)) {
-            throw new \Exception(sprintf("Error: genscript file for '%s' bundle is missing.", $bundle));
+        if (! file_exists($genscriptFilename)) {
+            throw new \Exception(sprintf("Error: genscript file for '%s' bundle is missing.", $this->targetBundle));
         }
 
-        if (!file_exists($genscriptFilename)) {
-            throw new \Exception(sprintf("Error: mapping file for '%s' bundle is missing.", $bundle));
+        if (! file_exists($genscriptFilename)) {
+            throw new \Exception(sprintf("Error: mapping file for '%s' bundle is missing.", $this->targetBundle));
         }
 
-        $this->reader = $reader;
-        $this->parser = $parser;
+        if (! file_exists($this->metaFile)) {
+            throw new \Exception(sprintf("Error: meta file '%' does not exist.", $this->metaFile));
+        }
+
         $this->parser->setScriptFile($genscriptFilename);
         $this->parser->parse();
-
         $this->mapping = include($mappingFilename);
+
+        // load reader from factory
+        $this->reader = $this->readerFactory->load($this->metaFile);
     }
 
     /**
@@ -67,6 +90,16 @@ class Engine
     public static function setCacheDir($path)
     {
         self::$cacheDir = $path;
+    }
+
+    public function setTargetBundle($bundleName)
+    {
+        $this->targetBundle = $bundleName;
+    }
+
+    public function setMetaFile($metaFile)
+    {
+        $this->metaFile = $metaFile;
     }
 
     /**
@@ -82,8 +115,18 @@ class Engine
     /**
      * Build Web UI
      */
-    public function build()
+    public function build($targetBundle = '', $metaFile = '')
     {
+        if (! empty($targetBundle)) {
+            $this->setTargetBundle($targetBundle);
+        }
+
+        if (! empty($metaFile)) {
+            $this->setMetaFile($metaFile);
+        }
+
+        $this->prepare();
+
         $widgestWithoutIdCounter = 0;
 
         foreach ($this->reader->getWidgets() as $widget) {
@@ -220,17 +263,6 @@ class Engine
         } else {
             return (string) $val;
         }
-    }
-
-    protected function getClass($obj, $trimWorkspace = true)
-    {
-        $class = get_class($obj);
-
-        if ($trimWorkspace) {
-            $class = substr($class, strpos(strrev($class), '\\') * -1);
-        }
-
-        return $class;
     }
 }
 
