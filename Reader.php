@@ -3,19 +3,13 @@ namespace Alchemy\Component\UI;
 
 abstract class Reader
 {
-    protected $widgets = null;
-    protected $attributes = array();
+    protected $element = null;
+
+    public function getElement()
+    {
+        return $this->element;
+    }
 
     abstract public function parse();
-
-    public function getWidgets()
-    {
-        return $this->widgets;
-    }
-
-    public function getAttributes()
-    {
-        return $this->attributes;
-    }
 }
 

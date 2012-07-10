@@ -13,7 +13,7 @@ return array(
         "textbox" => array(
             "xtype" => array(
                 "value" => function($widget) {
-                    return $widget->multiline ? 'input' : 'textarea';
+                    return $widget->multiline ? 'textarea' : 'input';
                 }
             )
         ),

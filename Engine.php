@@ -2,6 +2,7 @@
 namespace Alchemy\Component\UI;
 
 use Alchemy\Component\UI\Widget\WidgetInterface;
+use Alchemy\Component\UI\Element\Element;
 use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Parser;
 
@@ -17,7 +18,6 @@ use Alchemy\Component\UI\Parser;
  */
 class Engine
 {
-    protected $schema   = 'html';
     protected $cacheDir = './';
     protected $targetBundle = '';
     protected $metaFile = '';
@@ -26,12 +26,13 @@ class Engine
     protected $reader = null;
     protected $parser = null;
 
-    protected $widgetsCollection = array();
+    protected $generated = array();
+    protected $build = array();
 
     /**
      * UI\Engine Constructor
      *
-     * @param string $bundle bundle name to generate a its output based in its generation script and mapping rules
+     * @param string $bundle bundle name to generate a its output based on its generation script and mapping rules
      * @param Reader $reader meta file source reader
      * @param Parser $parser metafile source parser
      */
@@ -103,13 +104,13 @@ class Engine
     }
 
     /**
-     * Stores a array containing all widgets collection
+     * Stores a array containing the generated output element and widgets
      *
-     * @return array widgets collection
+     * @return array generated output
      */
-    public function getWidgetsCollection()
+    public function getGenerated()
     {
-        return $this->widgetsCollection;
+        return $this->generated;
     }
 
     /**
@@ -128,23 +129,43 @@ class Engine
         $this->prepare();
 
         $widgestWithoutIdCounter = 0;
+        $element = $this->reader->getElement();
+        $elementItems = array();
 
-        foreach ($this->reader->getWidgets() as $widget) {
+        foreach ($element->getWidgets() as $widget) {
             if ($widget->getId() === '') {
                 $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
             }
 
-            $data = $this->mapWidget($widget);
+            $data = $this->mapElementInformation($widget);
+            $generated = $this->parser->generate($data['xtype'], $data);
+            $widget->setGenerated($generated);
 
-            $this->widgetsCollection[$widget->getId()] = array(
+            if (array_key_exists('html', $generated)) {
+                $elementItems[$widget->getId()] = $generated['html'];
+            }
+
+            $this->generated['widgets'][$widget->getId()] = array(
                 'object' => $widget,
                 'data'   => $data,
-                'output' => $this->parser->generate(
-                    $data['xtype'],
-                    $data
-                )
+                'generated' => $generated
             );
         }
+
+        $data = $this->mapElementInformation($element);
+        $data['items'] = $elementItems;
+
+        $generated = $this->parser->generate(
+            $element->getXtype(),
+            $data
+        );
+
+        $this->generated['element'] = $generated;
+
+        $element->setGenerated($generated);
+
+        return $element;
+        //$this->build[$element->getXtype()]['widgets'] = $elementItems;
     }
 
     /**
@@ -152,7 +173,7 @@ class Engine
      * @param  WidgetInterface $widget widget object to map its attributes & properties
      * @return array                   mapped widget information
      */
-    protected function mapWidget(WidgetInterface $widget)
+    protected function mapElementInformation(Element $widget)
     {
         $mapping = $this->mapping['widget_mapping'];
         $widgetInfo = $widget->getInfo();

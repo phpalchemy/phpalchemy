@@ -11,7 +11,7 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  * @link      https://github.com/eriknyk/phpalchemy
  * @copyright Copyright 2012 Erik Amaru Ortiz
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @package   Alchemy/Component/Routing
+ * @package   Alchemy/Component/UI
  */
 class Menulist extends Widget
 {

@@ -14,48 +14,108 @@ use Alchemy\Component\UI\Engine;
  * @link      https://github.com/eriknyk/phpalchemy
  * @copyright Copyright 2012 Erik Amaru Ortiz
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @package   Alchemy/Component/Routing
+ * @package   Alchemy/Component/UI
  */
-abstract class Element extends \DependencyInjectionContainer
+abstract class Element
 {
-    public $id = '';
-    public $name = '';
+    public  $name = '';
+    protected $id = '';
+    protected $generated = array();
 
-    protected $widgetsIndex = 0;
-    protected $widgets      = array();
+    public function __construct(array $attributes = array())
+    {
+        if (!empty($attributes)) {
+            foreach ($attributes as $key => $value) {
+                $this->setAttribute($key, $value);
+            }
+        }
+    }
 
-    protected $templateEngine = 'haanga';
-
-    protected $engine = null;
-
-    public function __construct($id = '')
+    public function setId($id)
     {
         $this->id = $id;
-        $this->engine = new Engine();
     }
 
-    public function add(WidgetInterface $w)
+    public function getId()
     {
-        $this->widgets[] = $w;
+        return $this->id;
+    }
 
-        if (empty($w->id)) {
-            $w->id = 'x-uigen-' . $this->widgetsIndex++;
+    public function setAttribute($name, $value = '')
+    {
+        if (is_array($name)) {
+            return $this->setAttributesFromArray($name);
         }
 
-        $this[$w->id] = $w;
+        if (property_exists($this, $name)) {
+            return $this->{$name} = $value;
+        }
     }
 
-    protected function build()
+    protected function setAttributesFromArray(array $attributes)
     {
-        $o = '';
-        foreach ($this->all() as $i => $widget) {
-            $widget->prepare();
-            $o .= $this->engine->buildWidget($widget);
+        foreach ($attributes as $name => $value) {
+            $this->setAttribute($name, $value);
+        }
+    }
+
+    public function getInfo()
+    {
+        $result = array();
+        $refl   = new \ReflectionObject($this);
+        $attributes  = $refl->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+        foreach ($attributes as $att) {
+            $value = $att->getValue($this);
+
+            if ($value !== null) {
+                $result['attributes'][$att->getName()] = $att->getValue($this);
+            }
         }
 
-        return $o;
+        $properties  = $refl->getProperties(\ReflectionProperty::IS_PROTECTED);
+        foreach ($properties as $pro) {
+            $pro->setAccessible(true);
+            $value = $pro->getValue($this);
+            $pro->setAccessible(false);
+
+            if ($value !== null) {
+                $result[$pro->getName()] = $value;
+            }
+        }
+
+        return $result;
     }
 
-    abstract public function render();
+    public function setGenerated($type, $content = '')
+    {
+        if (is_array($type)) {
+            foreach ($type as $key => $value) {
+                $this->generated[$key] = $value;
+            }
+        } else {
+            $this->generated[$type] = $content;
+        }
+    }
+
+    public function getGenerated($type = '')
+    {
+        if (empty($type)) {
+            return $this->generated;
+        } else {
+            return $this->generated[$type];
+        }
+    }
+
+    private function toString($val)
+    {
+        if ($val === true) {
+            return 'true';
+        } elseif ($val === false) {
+            return 'false';
+        } else {
+            return (string) $val;
+        }
+    }
 }
 

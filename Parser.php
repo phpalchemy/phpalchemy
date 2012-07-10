@@ -404,7 +404,7 @@ class Parser
 
         // verify if the template is multiline
         if ($iterator['sep'] === "\n") {
-            $tplLines = explode("\n", $this->currentBlock['template']);
+            $tplLines = explode("\n", $this->currentBlock['html']);
 
             foreach ($tplLines as $tplLine) {
                 if (($pos = strpos($tplLine, $matches[0])) !== false) {
@@ -454,7 +454,7 @@ class Parser
                 } else {
                     // When set to true, Parser throws an exception instead
                     throw new \RuntimeException(sprintf(
-                        'Runtime Error: Undefined variable: "%s"', $key
+                        'Runtime Error: Undefined variable: "%s" on tpl: "%s"', $key, $template
                     ));
                 }
             }

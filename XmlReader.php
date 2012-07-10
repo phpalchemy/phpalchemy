@@ -11,13 +11,13 @@ class XmlReader extends Reader
 
     public function __construct($filepath)
     {
+        // defining properties
         $this->dom      = new \DOMDocument();
         $this->widgets  = array();
         $this->filepath = $filepath;
-        $this->attributes = Array();
-
         $this->xmlnsPrefix = 'ui';
 
+        // loading xml document
         $this->dom->load($this->filepath);
         $this->root  = $this->dom->firstChild;
         $this->xmlns = $this->dom->lookupnamespaceURI($this->xmlnsPrefix);
@@ -27,22 +27,40 @@ class XmlReader extends Reader
 
     public function parse()
     {
-        // getting element attributes
+        // getting element attributes from root element
+        $attributes = array();
+
         foreach ($this->root->attributes as $attribute) {
             // filtering by xmlns
             if (preg_match('/' . $this->xmlnsPrefix . ':(.+)/', $attribute->nodeName, $match)) {
-                $this->attributes[$match[1]] = $attribute->nodeValue;
+                $attributes[$match[1]] = $attribute->nodeValue;
             } else {
-                $this->attributes[$attribute->nodeName] = $attribute->nodeValue;
+                $attributes[$attribute->nodeName] = $attribute->nodeValue;
             }
         }
-        $this->attributes['type'] = $this->root->nodeName;
+
+        $elementClass = 'Alchemy\Component\UI\Element\\' . ucfirst($this->root->nodeName);
+
+        if (! class_exists($elementClass)) {
+            throw new \RuntimeException(
+                sprintf("Runtime Error: Undefined UI Element Class '%s'.", ucfirst($this->root->nodeName)
+            ));
+        }
+
+        $this->element = new $elementClass($attributes);
 
         // getting child nodes
         foreach ($this->root->childNodes as $childNode) {
             //if ($childNode->nodeType == XML_ELEMENT_NODE) {
             if (get_class($childNode) == 'DOMElement') {
                 $widgetClass = 'Alchemy\Component\UI\Widget\\' . ucfirst($childNode->nodeName);
+
+                if (! class_exists($widgetClass)) {
+                    throw new \RuntimeException(
+                        sprintf("Runtime Error: Undefined UI Widget Class '%s'.", ucfirst($childNode->nodeName)
+                    ));
+                }
+
                 $widget = new $widgetClass();
                 $widget->setXtype($childNode->nodeName);
 
@@ -87,9 +105,9 @@ class XmlReader extends Reader
                 }
 
                 // at the end create the type attribute, override if was defined by user
-                ////////erik $widget->attributes['type'] = $childNode->nodeName;
+                //erik $widget->attributes['type'] = $childNode->nodeName;
 
-                $this->widgets[] = $widget;
+                $this->element->add($widget);
             }
         }
     }

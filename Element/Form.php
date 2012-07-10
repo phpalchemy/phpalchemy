@@ -1,6 +1,8 @@
 <?php
 namespace Alchemy\Component\UI\Element;
 
+use Alchemy\Component\UI\Widget\WidgetInterface;
+
 /**
  * Class Form
  *
@@ -9,26 +11,35 @@ namespace Alchemy\Component\UI\Element;
  * @link      https://github.com/eriknyk/phpalchemy
  * @copyright Copyright 2012 Erik Amaru Ortiz
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @package   Alchemy/Component/Routing
+ * @package   Alchemy/Component/UI
  */
 class Form extends Element
 {
-    public function render()
+    public $width = '250px';
+    public $action = '';
+    public $method = 'post';
+
+    protected $xtype = 'form';
+
+    private $widgets = array();
+
+    public function getWidgets()
     {
-        //var_dump($this); die;
-        echo $this->build();
+        return $this->widgets;
+    }
 
-        //foreach ($this->all() as $i => $widget) {
+    public function add(WidgetInterface $w)
+    {
+        $this->widgets[$w->getId()] = $w;
+    }
 
-            //TODO make event driven this
-            //$widget->prepare();
+    public function getXtype()
+    {
+        return $this->xtype;
+    }
 
-            //$attributes = $widget->getAttributes();
-
-            //var_dump($attributes);
-            //
-            //echo $this->buildUiWidget($widget);
-        //}
+    protected function build()
+    {
     }
 }
 
