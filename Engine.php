@@ -71,7 +71,7 @@ class Engine
         }
 
         if (! file_exists($this->metaFile)) {
-            throw new \Exception(sprintf("Error: meta file '%' does not exist.", $this->metaFile));
+            throw new \Exception(sprintf("Error: meta file '%s' does not exist.", $this->metaFile));
         }
 
         $this->parser->setScriptFile($genscriptFilename);
