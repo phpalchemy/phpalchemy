@@ -6,7 +6,7 @@ class ViewAnnotation extends Annotation
     public $template = '';
     public $engine   = '';
 
-    public function resolveTemplateName()
+    public function prepare()
     {
         if ($this->exists('0')) {
             $this->template = $this->get('0');

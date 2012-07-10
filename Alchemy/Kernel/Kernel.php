@@ -34,6 +34,8 @@ use Alchemy\Component\Routing\Mapper;
 
 use Alchemy\Annotation\ViewAnnotation;
 
+use Alchemy\Component\UI\Engine;
+
 /**
  * Class Kernel
  *
@@ -52,6 +54,8 @@ class Kernel implements KernelInterface
     protected $config     = null;
     protected $view       = null;
     protected $controller = null;
+    protected $annotation = null;
+    protected $uiEngine   = null;
 
     public $request = null;
 
@@ -68,13 +72,15 @@ class Kernel implements KernelInterface
         Mapper $matcher,
         ControllerResolver $resolver,
         Config $config,
-        Annotations $annotation
+        Annotations $annotation,
+        Engine $uiEngine
     ) {
         $this->matcher    = $matcher;
         $this->resolver   = $resolver;
         $this->dispatcher = $dispatcher;
         $this->config     = $config;
         $this->annotation = $annotation;
+        $this->uiEngine   = $uiEngine;
 
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
         defined('NS') || define('NS', '\\'); // NAMESPACE_SEPARATOR
@@ -203,9 +209,20 @@ class Kernel implements KernelInterface
 
             // gets View instance
             $viewAnnotation = empty($annotatedObjects['View']) ? null : $annotatedObjects['View'];
+            $serveUiAnnotation = empty($annotatedObjects['ServeUi']) ? null : $annotatedObjects['ServeUi'];
+
+            // handling meta ui
+            $view = $this->handleMetaUi(
+                $controllerData,
+                $serveUiAnnotation
+            );
+
+            // handling view
             $view = $this->handleView(
-                $params['_controllerClass'], $params['_controllerMethod'],
-                $controllerData, $viewAnnotation
+                $params['_controllerClass'],
+                $params['_controllerMethod'],
+                $controllerData,
+                $viewAnnotation
             );
 
             // if there is a view adapter instance, get its contents and set to response content
@@ -224,7 +241,7 @@ class Kernel implements KernelInterface
         } catch (ResourceNotFoundException $e) {
             $response = new Response($e->getMessage(), 404);
         } catch (\Exception $e) {
-            $response = new Response($e->getMessage(), 500);
+            $response = new Response($e->getMessage() . '<br/>'.$e->getTraceAsString(), 500);
         }
 
         $responseAnnotation = empty($annotatedObjects['Response']) ? null : $annotatedObjects['Response'];
@@ -238,6 +255,82 @@ class Kernel implements KernelInterface
         return $response;
     }
 
+    protected function handleMetaUi(array $data, $annotation)
+    {
+        // check if a @ServeUi definition exists on method's annotations
+        if (empty($annotation)) {
+            return null; // no @serveUi annotation found, just return to break view handling
+        }
+
+        $annotation->prepare();
+
+        $metaPath = $this->config->get('app.meta_dir');
+        $metaFile   = $annotation->metaFile;
+        $attributes = $annotation->attributes;
+
+        $this->uiEngine->setTargetBundle('html');
+        $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
+        $element = $this->uiEngine->build();
+        $element->setAttribute($attributes);
+
+        //echo '<pre>'; print_r($element);
+        //print_r($this->uiEngine->getGenerated());
+        //
+
+        // creating config obj and setting it with all defaults configurations
+
+        $conf = new \StdClass();
+        $conf->engine       = $this->config->get('templating.default_engine');
+        $conf->templateDir  = $this->config->get('app.views_dir') . DS . 'uigen' . DS;
+        $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
+        $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
+        $conf->extension    = $this->config->get('templating.extension');
+        $conf->charset      = $this->config->get('templating.charset');
+        $conf->debug        = $this->config->get('templating.debug');
+
+        switch ($conf->engine) {
+            case 'smarty':
+                $ext = 'tpl';
+                break;
+            case 'haanga':
+                $ext = 'haanga';
+                break;
+            case 'twig':
+                $ext = 'twig';
+                break;
+
+        }
+
+        $conf->template = 'form.' . $ext;
+
+        // composing the view class string
+        $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
+
+        // check if view engine class exists, if does not exist throw an exception
+        if (!class_exists($viewClass)) {
+            throw new \Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
+        }
+
+        // create view object
+        $view = new $viewClass($conf->template);
+
+        // setup view object
+        $view->enableDebug($conf->debug);
+        $view->enableCache($conf->cacheEnabled);
+        $view->setCacheDir($conf->cacheDir);
+        $view->setTemplateDir($conf->templateDir);
+        $view->setCharset($conf->charset);
+
+        // setting data to be used by template
+        $view->assign('form', $element);
+        echo $view->getOutput();
+
+        // foreach ($element->getWidgets() as $w) {
+        //     var_dump($w->getGenerated('html'));
+        // }
+
+    }
+
     protected function handleView($class, $method, $data, $annotation)
     {
         // check if a @view definition exists on method's annotations
@@ -245,7 +338,7 @@ class Kernel implements KernelInterface
             return null; // no @view annotation found, just return to break view handling
         }
 
-        $annotation->resolveTemplateName();
+        $annotation->prepare();
 
         // creating config obj and setting it with all defaults configurations
         $conf = new \StdClass();

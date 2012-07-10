@@ -37,13 +37,20 @@ class Handler
 
         // setting data
         $view->assign('message', $exception->getMessage());
-        $view->assign('line', $exception->getFile());
-        $view->assign('file', $exception->getLine());
+        $view->assign('line', $exception->getLine());
+        $view->assign('file', $exception->getFile());
         $view->assign('trace', $exception->getTraceAsString());
         $view->assign('query', print_r($this->request->query->all(), true));
         $baseurl = $this->request->getBaseUrl();
-        $baseurl .= $baseurl == '' || $baseurl == '/' ? '' : '/../';
-        $view->assign('baseurl', $baseurl);
+
+        $baseurl = $this->request->getHttpHost() . $this->request->getBaseUrl();
+        if (substr($baseurl, -4) == '.php') {
+            $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
+        } elseif (substr($baseurl, -1) !== '/') {
+            $baseurl .= '/';
+        }
+
+        $view->assign('baseurl', 'http://' . $baseurl);
 
         $view->render();
     }

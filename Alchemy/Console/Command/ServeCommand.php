@@ -124,12 +124,10 @@ class ServeCommand extends Command
             throw new \Exception("php-cgi binary not found!");
         }
 
-        $output->writeln(PHP_EOL . '--= PhpAlchemy Framework Cli / running on '.PHP_OS.')=--'.PHP_EOL);
+        $output->writeln("\n--= PhpAlchemy Framework Cli  =--\n    (Running on " . self::getOs() . ')'. PHP_EOL);
         //$output->writeln('<comment>Using "'.$env.'" environment.</comment>');
-        $output->writeln(sprintf(
-            '\n* The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port
-        ));
-        $output->writeln("* URL: <info>http://$host:$port</info>");
+        $output->writeln(sprintf('- The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port));
+        $output->writeln("- URL: <info>http://$host:$port</info>");
 
         $lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 
@@ -173,15 +171,6 @@ class ServeCommand extends Command
         return '';
     }
 
-    protected static function convertPathToPosix($path)
-    {
-        $r = '/cygdrive/' . preg_replace(array('/(?):/', '/\\\/', '/\s/'), array('${1}', '/', '\ '), $path);
-        $r = str_replace('/cygdrive/C', '/cygdrive/c', $r);
-        $r = str_replace('/cygdrive/D', '/cygdrive/d', $r);
-
-        return $r;
-    }
-
     protected function loadTemplate($tplFile, $vars)
     {
         if (! is_file($tplFile)) {
@@ -198,6 +187,28 @@ class ServeCommand extends Command
         }
 
         return preg_replace($patterns, $replacements, $content);
+    }
+
+    protected static function convertPathToPosix($path)
+    {
+        $r = '/cygdrive/' . preg_replace(array('/(?):/', '/\\\/', '/\s/'), array('${1}', '/', '\ '), $path);
+        $r = str_replace('/cygdrive/C', '/cygdrive/c', $r);
+        $r = str_replace('/cygdrive/D', '/cygdrive/d', $r);
+
+        return $r;
+    }
+
+    protected static function getOs()
+    {
+        switch (PHP_OS) {
+            case 'Darwin':
+                $os = 'OSX/' . PHP_OS;
+                break;
+            default:
+                $os = PHP_OS;
+        }
+
+        return $os;
     }
 }
 

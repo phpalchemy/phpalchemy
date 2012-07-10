@@ -32,6 +32,10 @@ use Alchemy\Kernel\KernelEvents;
 
 use Alchemy\Exception\Handler;
 
+use Alchemy\Component\UI\Parser;
+use Alchemy\Component\UI\ReaderFactory;
+use Alchemy\Component\UI\Engine;
+
 /**
  * Class Application
  *
@@ -116,7 +120,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             return $mapper;
         });
 
-        // $this['exception_handler'] = $this->share(function () {
+        //TODO $this['exception_handler'] = $this->share(function () {
         //     return new ExceptionHandler();
         // });
 
@@ -126,7 +130,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
 
             // subscribing events
             $dispatcher->addSubscriber(new EventListener\ResponseListener($app['config']->get('templating.charset')));
-            // $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
+            //TODO $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 
             return $dispatcher;
         });
@@ -135,8 +139,30 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             return new ControllerResolver($app, $app['logger']);
         });
 
+        $this['ui_reader_factory'] = $this->share(function () use ($app) {
+            return new ReaderFactory();
+        });
+
+        $this['ui_parser'] = $this->share(function () use ($app) {
+            return new Parser();
+        });
+
+        $this['ui_engine'] = $this->share(function () use ($app) {
+            return new Engine(
+                $app['ui_reader_factory'],
+                $app['ui_parser']
+            );
+        });
+
         $this['kernel'] = $this->share(function () use ($app) {
-            return new Kernel($app['dispatcher'], $app['mapper'], $app['resolver'], $app['config'], $app['annotation']);
+            return new Kernel(
+                $app['dispatcher'],
+                $app['mapper'],
+                $app['resolver'],
+                $app['config'],
+                $app['annotation'],
+                $app['ui_engine']
+            );
         });
 
         // registering the aplication namespace to SPL ClassLoader
