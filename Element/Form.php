@@ -18,6 +18,7 @@ class Form extends Element
     public $width = '250px';
     public $action = '';
     public $method = 'post';
+    public $title = '';
 
     protected $xtype = 'form';
 

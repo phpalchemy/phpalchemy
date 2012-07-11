@@ -27,7 +27,7 @@ class Textbox extends Widget
     public $rows;
     public $cols;
 
-    public $size = 20;
+    public $size = 120;
 
     public function __construct(array $attributes = array())
     {

@@ -19,6 +19,8 @@ use Alchemy\Component\UI\Engine;
 abstract class Element
 {
     public  $name = '';
+    public  $class;
+
     protected $id = '';
     protected $generated = array();
 
