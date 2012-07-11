@@ -214,18 +214,19 @@ class Kernel implements KernelInterface
             $viewAnnotation = empty($annotatedObjects['View']) ? null : $annotatedObjects['View'];
             $serveUiAnnotation = empty($annotatedObjects['ServeUi']) ? null : $annotatedObjects['ServeUi'];
 
-            // handling meta ui
-            $view = $this->handleMetaUi(
-                $controllerData,
-                $serveUiAnnotation
-            );
-
             // handling view
             $view = $this->handleView(
                 $params['_controllerClass'],
                 $params['_controllerMethod'],
                 $controllerData,
                 $viewAnnotation
+            );
+
+            // handling meta ui
+            $view = $this->handleMetaUi(
+                $controllerData,
+                $serveUiAnnotation,
+                $view
             );
 
             // if there is a view adapter instance, get its contents and set to response content
@@ -260,11 +261,11 @@ class Kernel implements KernelInterface
         return $response;
     }
 
-    protected function handleMetaUi(array $data, $annotation)
+    protected function handleMetaUi(array $data, $annotation, $targetView)
     {
         // check if a @ServeUi definition exists on method's annotations
         if (empty($annotation)) {
-            return null; // no @serveUi annotation found, just return to break view handling
+            return $targetView; // no @serveUi annotation found, just return to break view handling
         }
 
         $annotation->prepare();
@@ -275,15 +276,15 @@ class Kernel implements KernelInterface
 
         $this->uiEngine->setTargetBundle('html');
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
+
         $element = $this->uiEngine->build();
         $element->setAttribute($attributes);
 
-        //echo '<pre>'; print_r($element);
-        //print_r($this->uiEngine->getGenerated());
-        //
+        if (! empty($annotation->id)) {
+            $element->setId($annotation->id);
+        }
 
         // creating config obj and setting it with all defaults configurations
-
         $conf = new \StdClass();
         $conf->engine       = $this->config->get('templating.default_engine');
         $conf->templateDir  = $this->config->get('app.views_dir') . DS;
@@ -306,7 +307,9 @@ class Kernel implements KernelInterface
 
         }
 
-        $conf->template = 'uigen'.DS.'form.' . $ext;
+        $filename = empty($targetView) ? 'form_page' : 'form';
+
+        $conf->template = 'uigen' . DS . $filename . '.' . $ext;
 
         // composing the view class string
         $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
@@ -337,11 +340,14 @@ class Kernel implements KernelInterface
         $view->assign('baseurl', $baseurl);
         $view->assign('form', $element);
 
-        echo $view->getOutput();
+        if (empty($targetView)) {
+            return $view;
+        } else {
+            $targetView->setUiElement($element->getId(), $view->getOutput());
 
-        // foreach ($element->getWidgets() as $w) {
-        //     var_dump($w->getGenerated('html'));
-        // }
+            return $targetView;;
+        }
+
 
     }
 
@@ -416,7 +422,15 @@ class Kernel implements KernelInterface
         $view->setTemplateDir($conf->templateDir);
         $view->setCharset($conf->charset);
 
+        $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
+        if (substr($baseurl, -4) == '.php') {
+            $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
+        } elseif (substr($baseurl, -1) !== '/') {
+            $baseurl .= '/';
+        }
+
         // setting data to be used by template
+        $view->assign('baseurl', $baseurl);
         $view->assign($data);
 
         return $view;

@@ -64,6 +64,8 @@ abstract class View implements ViewInterface
      */
     protected $charset = 'UTF-8';
 
+    protected $uiElements = array();
+
     /**
      * Debug flag to indicate to template engine is a debug environment
      * Defaults false
@@ -288,6 +290,11 @@ abstract class View implements ViewInterface
         }
 
         umask($oldumask);
+    }
+
+    public function setUiElement($id, $element)
+    {
+        $this->uiElements[$id] = $element;
     }
 }
 

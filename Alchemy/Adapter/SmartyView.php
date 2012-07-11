@@ -89,7 +89,7 @@ class SmartyView extends View
 
     public function formWidget($params, $smarty)
     {
-        return 'yo robot';
+        return $this->uiElements[$params['id']];
     }
 }
 

@@ -4,7 +4,8 @@ namespace Alchemy\Annotation;
 class ServeUiAnnotation extends Annotation
 {
     public $metaFile  = '';
-    public $name      = '';
+    public $id        = '';
+
     public $attributes = array();
 
     public function prepare()
@@ -23,8 +24,8 @@ class ServeUiAnnotation extends Annotation
         if (is_numeric($keys[0])) {
             $this->metaFile = $params[0];
         } else {
-            $this->name = $keys[0];
-            $this->metaFile = $params[$this->name];
+            $this->id = $keys[0];
+            $this->metaFile = $params[$this->id];
         }
     }
 }
