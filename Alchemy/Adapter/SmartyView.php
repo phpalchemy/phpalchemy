@@ -13,6 +13,9 @@ class SmartyView extends View
         parent::__construct($tpl);
 
         $this->smarty = new \Smarty();
+
+        $this->smarty->registerPlugin("function","form_widget", array($this, "formWidget"));
+
     }
 
     //Wrapped
@@ -82,6 +85,11 @@ class SmartyView extends View
     public function render()
     {
         $this->smarty->display($this->getTpl());
+    }
+
+    public function formWidget($params, $smarty)
+    {
+        return 'yo robot';
     }
 }
 

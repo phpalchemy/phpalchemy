@@ -36,6 +36,8 @@ use Alchemy\Annotation\ViewAnnotation;
 
 use Alchemy\Component\UI\Engine;
 
+use Alchemy\Exception;
+
 /**
  * Class Kernel
  *
@@ -92,6 +94,7 @@ class Kernel implements KernelInterface
      */
     public function handle(Request $request)
     {
+        $this->request = $request;
         /*
          * "EVENT" KernelEvents::REQUEST using GetResponse Event
          *
@@ -239,9 +242,11 @@ class Kernel implements KernelInterface
             }
 
         } catch (ResourceNotFoundException $e) {
-            $response = new Response($e->getMessage(), 404);
+            $hanlder = new Exception\Handler($e);
+            $response = new Response($hanlder->handle(), 404);
         } catch (\Exception $e) {
-            $response = new Response($e->getMessage() . '<br/>'.$e->getTraceAsString(), 500);
+            $hanlder = new Exception\Handler($e);
+            $response = new Response($hanlder->handle(), 500);
         }
 
         $responseAnnotation = empty($annotatedObjects['Response']) ? null : $annotatedObjects['Response'];
@@ -281,7 +286,7 @@ class Kernel implements KernelInterface
 
         $conf = new \StdClass();
         $conf->engine       = $this->config->get('templating.default_engine');
-        $conf->templateDir  = $this->config->get('app.views_dir') . DS . 'uigen' . DS;
+        $conf->templateDir  = $this->config->get('app.views_dir') . DS;
         $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
         $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
         $conf->extension    = $this->config->get('templating.extension');
@@ -301,7 +306,7 @@ class Kernel implements KernelInterface
 
         }
 
-        $conf->template = 'form.' . $ext;
+        $conf->template = 'uigen'.DS.'form.' . $ext;
 
         // composing the view class string
         $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
@@ -321,8 +326,17 @@ class Kernel implements KernelInterface
         $view->setTemplateDir($conf->templateDir);
         $view->setCharset($conf->charset);
 
+        $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
+        if (substr($baseurl, -4) == '.php') {
+            $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
+        } elseif (substr($baseurl, -1) !== '/') {
+            $baseurl .= '/';
+        }
+
         // setting data to be used by template
+        $view->assign('baseurl', $baseurl);
         $view->assign('form', $element);
+
         echo $view->getOutput();
 
         // foreach ($element->getWidgets() as $w) {

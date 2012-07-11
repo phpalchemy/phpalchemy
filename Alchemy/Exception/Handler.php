@@ -6,18 +6,22 @@ use Alchemy\Adapter\PhtmlView;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 
+use Alchemy\Exception\ExceptionInterface;
+
 class Handler
 {
-    public function __construct()
+    protected $exception;
+
+    public function __construct(\Exception $exception = null)
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
-
         $this->request = Request::createFromGlobals();
-        $this->response = new Response();
+        $this->exception = $exception;
     }
 
-    public function handle($exception)
+    public function handle()
     {
+        $exception = $this->exception;
         $tplDir = realpath(__DIR__ . '/../../') . DS . 'templates' . DS;
         $data = array();
         $data['message'] = $exception->getMessage();
@@ -52,7 +56,7 @@ class Handler
 
         $view->assign('baseurl', 'http://' . $baseurl);
 
-        $view->render();
+        return $view->getOutput();
     }
 }
 
