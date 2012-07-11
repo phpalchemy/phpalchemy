@@ -84,6 +84,11 @@ class Kernel implements KernelInterface
         $this->annotation = $annotation;
         $this->uiEngine   = $uiEngine;
 
+        // Some configurations for developments environments
+        if ($this->config->get('env.type') === 'dev') {
+            $this->annotation->setStrict(true);
+        }
+
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
         defined('NS') || define('NS', '\\'); // NAMESPACE_SEPARATOR
     }
@@ -136,10 +141,10 @@ class Kernel implements KernelInterface
             } catch (\Exception $exception) {
                 /*
                  * Detailed exception types are only for development environments
-                 * if the current is a non dev environment just overrides with
+                 * if the current is a non dev environment just overrides the current exception with
                  * a ResourceNotFoundException exception
                  */
-                if (substr($this->config->get('env.type'), 0, 3) !== 'dev') {
+                if ($this->config->get('env.type') !== 'dev') {
                     $exception = new ResourceNotFoundException($request->getPathInfo());
                 }
 
