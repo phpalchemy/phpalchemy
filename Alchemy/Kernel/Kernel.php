@@ -36,6 +36,8 @@ use Alchemy\Annotation\ViewAnnotation;
 
 use Alchemy\Component\UI\Engine;
 
+use Alchemy\Annotation\Reader\Reader;
+
 use Alchemy\Exception;
 
 /**
@@ -74,19 +76,20 @@ class Kernel implements KernelInterface
         Mapper $matcher,
         ControllerResolver $resolver,
         Config $config,
-        Annotations $annotation,
+        Reader $annotationReader,
+        //Annotations $annotationReader,
         Engine $uiEngine
     ) {
         $this->matcher    = $matcher;
         $this->resolver   = $resolver;
         $this->dispatcher = $dispatcher;
         $this->config     = $config;
-        $this->annotation = $annotation;
+        $this->annotationReader = $annotationReader;
         $this->uiEngine   = $uiEngine;
 
         // Some configurations for developments environments
-        if ($this->config->get('env.type') === 'dev') {
-            $this->annotation->setStrict(true);
+        if ($this->config->get('env.type') !== 'dev') {
+            $this->annotationReader->setStrict(false);
         }
 
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
@@ -155,14 +158,19 @@ class Kernel implements KernelInterface
                 throw new ResourceNotFoundException($request->getPathInfo());
             }
 
-
             // ANNOTATIONS, Getting controller annotations
-            $this->annotation->setDefaultAnnotationNamespace(NS.'Alchemy'.NS.'Annotation'.NS);
+
+            $this->annotationReader->setDefaultNamespace(NS.'Alchemy'.NS.'Annotation'.NS);
 
             // getting all annotations objects of controller's method
-            $annotatedObjects = $this->annotation->getMethodAnnotationsObjects(
+            $annotatedObjects = $this->annotationReader->getMethodAnnotationsObjects(
                 $params['_controllerClass'], $params['_controllerMethod']
             );
+
+            // getting annotations instances
+            $viewAnnotation = array_key_exists('View', $annotatedObjects) ? $annotatedObjects['View'] : null;
+            $serveUiAnnotation = array_key_exists('ServeUi', $annotatedObjects) ? $annotatedObjects['ServeUi'] : null;
+
             // ANNOTATIONS END;
 
             $arguments = $this->resolver->getArguments($request, $controller);
@@ -214,10 +222,6 @@ class Kernel implements KernelInterface
 
                 $this->dispatcher->dispatch(KernelEvents::AFTER_CONTROLLER, $event);
             }
-
-            // gets View instance
-            $viewAnnotation = empty($annotatedObjects['View']) ? null : $annotatedObjects['View'];
-            $serveUiAnnotation = empty($annotatedObjects['ServeUi']) ? null : $annotatedObjects['ServeUi'];
 
             // handling view
             $view = $this->handleView(

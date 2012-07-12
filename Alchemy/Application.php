@@ -36,6 +36,8 @@ use Alchemy\Component\UI\Parser;
 use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Engine;
 
+use Alchemy\Annotation\Reader\Adapter\NotojReader;
+
 /**
  * Class Application
  *
@@ -78,8 +80,8 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         });
 
         $this['annotation'] = $this->share(function () use ($app) {
-            //return new NotojAnnotations($app['config']);
-            return new Annotations($app['config']);
+            return new NotojReader();
+            //return new Annotations($app['config']);
         });
 
         $this['mapper'] = $this->share(function () use ($app){

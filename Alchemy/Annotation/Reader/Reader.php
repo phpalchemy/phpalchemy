@@ -82,6 +82,11 @@ abstract class Reader
      */
     public function setDefaultNamespace($namespace)
     {
+        // fix namespace, to ensure a final ns separator at the end
+        if (substr($namespace, -1) !== '\\') {
+            $namespace .= '\\';
+        }
+
         $this->defaultNamespace = $namespace;
     }
 

@@ -35,8 +35,9 @@ class NotojReader extends Reader
         $annotations = $this->getMethodAnnotations($class, $method);
         $objects     = array();
 
-        foreach ($annotations as $class => $args) {
-            $class = $this->defaultNamespace . ucfirst($class) . 'Annotation';
+        foreach ($annotations as $decorator => $args) {
+            $decorator = ucfirst($decorator);
+            $class = $this->defaultNamespace . $decorator . 'Annotation';
 
             if (empty($objects[$class])) {
                 if (!class_exists($class)) {
@@ -47,11 +48,11 @@ class NotojReader extends Reader
                     }
                 }
 
-                $objects[$class] = new $class();
+                $objects[$decorator] = new $class();
             }
 
             foreach ($args as $key => $value) {
-                $objects[$class]->set($key, $value);
+                $objects[$decorator]->set($key, $value);
             }
         }
 
