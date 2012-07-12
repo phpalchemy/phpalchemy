@@ -3,14 +3,13 @@ namespace Alchemy\Annotation;
 
 class ServeUiAnnotation extends Annotation
 {
-    public $metaFile  = '';
-    public $id        = '';
-
+    public $metaFile   = '';
+    public $id         = '';
     public $attributes = array();
 
     public function prepare()
     {
-        if ($this->exists('data')) {
+        if ($this->has('data')) {
             $this->attributes = $this->get('data');
             $this->remove('data');
         }

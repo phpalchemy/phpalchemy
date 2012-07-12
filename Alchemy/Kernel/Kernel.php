@@ -154,7 +154,7 @@ class Kernel implements KernelInterface
                 throw $exception;
             }
 
-            if (!$controller) {
+            if (! $controller) {
                 throw new ResourceNotFoundException($request->getPathInfo());
             }
 
@@ -170,6 +170,8 @@ class Kernel implements KernelInterface
             // getting annotations instances
             $viewAnnotation = array_key_exists('View', $annotatedObjects) ? $annotatedObjects['View'] : null;
             $serveUiAnnotation = array_key_exists('ServeUi', $annotatedObjects) ? $annotatedObjects['ServeUi'] : null;
+            $responseAnnotation = array_key_exists('Response', $annotatedObjects) ? $annotatedObjects['Response']: null;
+
 
             // ANNOTATIONS END;
 
@@ -258,8 +260,6 @@ class Kernel implements KernelInterface
             $hanlder = new Exception\Handler($e);
             $response = new Response($hanlder->handle(), 500);
         }
-
-        $responseAnnotation = empty($annotatedObjects['Response']) ? null : $annotatedObjects['Response'];
 
         // dispatch a response event
         $this->dispatcher->dispatch(

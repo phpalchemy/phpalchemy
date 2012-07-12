@@ -8,11 +8,11 @@ class ViewAnnotation extends Annotation
 
     public function prepare()
     {
-        if ($this->exists('0')) {
+        if ($this->has('0')) {
             $this->template = $this->get('0');
-        } elseif ($this->exists('file')) {
+        } elseif ($this->has('file')) {
             $this->template = $this->get('file');
-        } elseif ($this->exists('template')) {
+        } elseif ($this->has('template')) {
             $this->template = $this->get('template');
         }
 

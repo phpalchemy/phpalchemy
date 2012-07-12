@@ -16,28 +16,33 @@ class NotojReader extends Reader
         \Notoj\Notoj::enableCache($cacheDir . DIRECTORY_SEPARATOR . "_annotations.php");
     }
 
-    public function getClassAnnotations($className)
+    public function getClassAnnotations($class)
     {
-        $reflection  = new ReflectionClass($className);
-
-        return $this->convertAnnotationObj($reflection);
+        return $this->convertAnnotationObj(new ReflectionClass($class));
     }
 
-    public function getMethodAnnotations($className, $methodName)
+    public function getMethodAnnotations($class, $methodName)
     {
-        $reflection  = new ReflectionMethod($className, $methodName);
+        return $this->convertAnnotationObj(new ReflectionMethod($class, $methodName));
+    }
 
-        return $this->convertAnnotationObj($reflection);
+    public function getClassAnnotationsObjects($class)
+    {
+        return $this->createAnnotationObjects($this->getClassAnnotations($class));
     }
 
     public function getMethodAnnotationsObjects($class, $method)
     {
-        $annotations = $this->getMethodAnnotations($class, $method);
+        return $this->createAnnotationObjects($this->getMethodAnnotations($class, $method));
+    }
+
+    protected function createAnnotationObjects(array $annotations)
+    {
         $objects     = array();
 
-        foreach ($annotations as $decorator => $args) {
-            $decorator = ucfirst($decorator);
-            $class = $this->defaultNamespace . $decorator . 'Annotation';
+        foreach ($annotations as $name => $args) {
+            $name = ucfirst($name);
+            $class = $this->defaultNamespace . $name . 'Annotation';
 
             if (empty($objects[$class])) {
                 if (!class_exists($class)) {
@@ -48,11 +53,11 @@ class NotojReader extends Reader
                     }
                 }
 
-                $objects[$decorator] = new $class();
+                $objects[$name] = new $class();
             }
 
             foreach ($args as $key => $value) {
-                $objects[$decorator]->set($key, $value);
+                $objects[$name]->set($key, $value);
             }
         }
 
