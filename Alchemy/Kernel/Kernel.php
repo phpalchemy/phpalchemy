@@ -158,22 +158,10 @@ class Kernel implements KernelInterface
                 throw new ResourceNotFoundException($request->getPathInfo());
             }
 
-            // ANNOTATIONS, Getting controller annotations
-
+            // setting default annotations namespace
             $this->annotationReader->setDefaultNamespace(NS.'Alchemy'.NS.'Annotation'.NS);
-
-            // getting all annotations objects of controller's method
-            $annotatedObjects = $this->annotationReader->getMethodAnnotationsObjects(
-                $params['_controllerClass'], $params['_controllerMethod']
-            );
-
-            // getting annotations instances
-            $viewAnnotation = array_key_exists('View', $annotatedObjects) ? $annotatedObjects['View'] : null;
-            $serveUiAnnotation = array_key_exists('ServeUi', $annotatedObjects) ? $annotatedObjects['ServeUi'] : null;
-            $responseAnnotation = array_key_exists('Response', $annotatedObjects) ? $annotatedObjects['Response']: null;
-
-
-            // ANNOTATIONS END;
+            // seeting annotation reader target
+            $this->annotationReader->setTarget($params['_controllerClass'], $params['_controllerMethod']);
 
             $arguments = $this->resolver->getArguments($request, $controller);
 
@@ -207,7 +195,7 @@ class Kernel implements KernelInterface
             $controllerData = (array) $controller[0]->view;
 
             if (! ($response instanceof Response || $response instanceof JsonResponse)) {
-                if (isset($annotatedObjects['JsonResponse'])) {
+                if ($this->annotationReader->getAnnotation('JsonResponse')) {
                     $response = new JsonResponse();
                     $response->setData($controllerData);
                 } else {
@@ -230,13 +218,13 @@ class Kernel implements KernelInterface
                 $params['_controllerClass'],
                 $params['_controllerMethod'],
                 $controllerData,
-                $viewAnnotation
+                $this->annotationReader->getAnnotation('View')
             );
 
             // handling meta ui
             $view = $this->handleMetaUi(
                 $controllerData,
-                $serveUiAnnotation,
+                $this->annotationReader->getAnnotation('ServeUi'),
                 $view
             );
 
@@ -264,7 +252,7 @@ class Kernel implements KernelInterface
         // dispatch a response event
         $this->dispatcher->dispatch(
             KernelEvents::RESPONSE,
-            new FilterResponseEvent($this, $request, $response, $responseAnnotation)
+            new FilterResponseEvent($this, $request, $response, $this->annotationReader->getAnnotation('Response'))
         );
 
         return $response;
