@@ -1,8 +1,8 @@
 <?php
 namespace Alchemy\Exception;
 
-use Alchemy\Adapter\HaangaView;
-use Alchemy\Adapter\PhtmlView;
+use Alchemy\Mvc\Adapter\HaangaView;
+use Alchemy\Mvc\Adapter\PhtmlView;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 

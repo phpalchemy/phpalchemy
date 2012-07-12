@@ -383,7 +383,7 @@ class Kernel implements KernelInterface
 
         // Setting template engine
         // Check if template engine param was set on annotation. i.e.: @view(engine=...)
-        if (!empty($annotation->engine)) {
+        if (! empty($annotation->engine)) {
             $conf->engine = $annotation->engine; // it exits, use it!
         }
 
@@ -414,11 +414,14 @@ class Kernel implements KernelInterface
         }
 
         // composing the view class string
-        $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
+        $viewClass = NS . 'Alchemy' . NS . 'Mvc' . NS . 'Adapter' . NS . ucfirst($conf->engine) . 'View';
 
         // check if view engine class exists, if does not exist throw an exception
-        if (!class_exists($viewClass)) {
-            throw new \Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
+        if (! class_exists($viewClass)) {
+            throw new \RuntimeException(sprintf(
+                "Runtime Error: Template Engine is not available: '%s'",
+                $conf->engine
+            ));
         }
 
         // create view object

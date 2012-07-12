@@ -1,5 +1,5 @@
 <?php
-namespace Alchemy\Adapter;
+namespace Alchemy\Mvc\Adapter;
 
 use \Alchemy\Mvc\View;
 
