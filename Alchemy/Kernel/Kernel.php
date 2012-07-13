@@ -10,35 +10,26 @@
 
 namespace Alchemy\Kernel;
 
+use Alchemy\Annotation\Reader\Reader;
+use Alchemy\Annotation\ViewAnnotation;
+use Alchemy\Config;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
-
-// events
+use Alchemy\Component\Http\Request;
+use Alchemy\Component\Http\Response;
+use Alchemy\Component\Http\JsonResponse;
+use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
+use Alchemy\Component\Routing\Mapper;
+use Alchemy\Component\UI\Engine;
+use Alchemy\Exception;
 use Alchemy\Kernel\Event\GetResponseEvent;
 use Alchemy\Kernel\Event\FilterResponseEvent;
 use Alchemy\Kernel\Event\ControllerEvent;
 use Alchemy\Kernel\Event\ViewEvent;
 use Alchemy\Kernel\Event\ResponseEvent;
 use Alchemy\Kernel\Event\FilterControllerEvent;
-
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Mvc\ControllerResolver;
-use Alchemy\Component\Http\Request;
-use Alchemy\Component\Http\Response;
-use Alchemy\Component\Http\JsonResponse;
-use Alchemy\Component\Annotations\Annotations;
-use Alchemy\Config;
-
-use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
-use Alchemy\Component\Routing\Mapper;
-
-use Alchemy\Annotation\ViewAnnotation;
-
-use Alchemy\Component\UI\Engine;
-
-use Alchemy\Annotation\Reader\Reader;
-
-use Alchemy\Exception;
 
 /**
  * Class Kernel
@@ -52,35 +43,67 @@ use Alchemy\Exception;
  */
 class Kernel implements KernelInterface
 {
-    protected $matcher    = null;
+    /**
+     * Routing mapper object
+     * @var Alchemy\Component\Routing\Mapper
+     */
+    protected $mapper    = null;
+
+    /**
+     * Controller resolver object
+     * @var Alchemy\Mvc\ControllerResolver
+     */
     protected $resolver   = null;
+
+    /**
+     * Event dispatcher object
+     * @var Alchemy\Component\EventDispatcher\EventDispatcher
+     */
     protected $dispatcher = null;
+
+    /**
+     * Configuration object
+     * @var Alchemy\Config
+     */
     protected $config     = null;
-    protected $view       = null;
-    protected $controller = null;
-    protected $annotation = null;
+
+    /**
+     * Annotations Reader object
+     * @var Alchemy\Annotation\Reader\Reader
+     */
+    protected $annotationReader = null;
+
+    /**
+     * UI Generator Engine
+     * @var Alchemy\Component\UI\Engine
+     */
     protected $uiEngine   = null;
 
+    /**
+     * Request handler object
+     * @var Alchemy\Component\Http\Request
+     */
     public $request = null;
 
     /**
      * Kernel constructor
      *
      * @param EventDispatcher     $dispatcher Event dispatcher object.
-     * @param UrlMatcherInterface $matcher    UrlMatcher object.
+     * @param Mapper              $mapper     Routing\Mapper object.
      * @param ControllerResolver  $resolver   Controller resolver object.
      * @param Config              $config     Configuration object.
+     * @param Reader              $reader     Annotation\Reader object.
+     * @param Engine              $uiEngine   UI\Engine object.
      */
     public function __construct(
         EventDispatcher $dispatcher,
-        Mapper $matcher,
+        Mapper $mapper,
         ControllerResolver $resolver,
         Config $config,
         Reader $annotationReader,
-        //Annotations $annotationReader,
         Engine $uiEngine
     ) {
-        $this->matcher    = $matcher;
+        $this->mapper     = $mapper;
         $this->resolver   = $resolver;
         $this->dispatcher = $dispatcher;
         $this->config     = $config;
@@ -128,7 +151,7 @@ class Kernel implements KernelInterface
              * it any route match the current url a ResourceNotFoundException
              * will be thrown.
              */
-            $params = $this->matcher->match($request->getPathInfo());
+            $params = $this->mapper->match($request->getPathInfo());
 
             // prepare request params.
             $params = $this->prepareRequestParams(array($params, $request->query->all()));

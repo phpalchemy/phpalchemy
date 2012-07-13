@@ -10,33 +10,26 @@
 
 namespace Alchemy;
 
+use Alchemy\Adapter\NotojAnnotations;
+use Alchemy\Annotation\Reader\Adapter\NotojReader;
+use Alchemy\Component\Annotations\Annotations;
+use Alchemy\Component\ClassLoader\ClassLoader;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 use Alchemy\Component\Routing\Mapper;
 use Alchemy\Component\Routing\Route;
-use Alchemy\Component\Yaml\Yaml;
-
-use Alchemy\Kernel\KernelInterface;
-use Alchemy\Kernel\EventListener;
-use Alchemy\Kernel\Kernel;
-
-use Alchemy\Mvc\ControllerResolver;
-
-use Alchemy\Component\Annotations\Annotations;
-use Alchemy\Component\ClassLoader\ClassLoader;
-use Alchemy\Adapter\NotojAnnotations;
-
-use Alchemy\Kernel\KernelEvents;
-
-use Alchemy\Exception\Handler;
-
 use Alchemy\Component\UI\Parser;
 use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Engine;
-
-use Alchemy\Annotation\Reader\Adapter\NotojReader;
+use Alchemy\Component\Yaml\Yaml;
+use Alchemy\Exception\Handler;
+use Alchemy\Kernel\EventListener;
+use Alchemy\Kernel\KernelInterface;
+use Alchemy\Kernel\Kernel;
+use Alchemy\Kernel\KernelEvents;
+use Alchemy\Mvc\ControllerResolver;
 
 /**
  * Class Application
@@ -201,13 +194,8 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
 
     public function handle(Request $request)
     {
-        //$current = HttpKernelInterface::SUB_REQUEST === $type ? $this['request'] : $this['request_error'];
-
         $this['request'] = $request;
-
         $response = $this['kernel']->handle($request);
-
-        //$this['request'] = $current;
 
         return $response;
     }
