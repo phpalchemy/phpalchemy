@@ -47,7 +47,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
      * Construct application object
      * @param Config $config Contains all app configuration
      */
-    public function __construct($conf = array())
+    public function init($conf = array())
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 
@@ -62,7 +62,11 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             return $config;
         });
 
+        // load configuration ini files
         $this->loadAppConfigurationFiles();
+
+        // apply configurated php settings
+        $this->applyPhpSettings();
 
         $this['autoloader'] = $this->share(function () {
             return new ClassLoader();
@@ -257,6 +261,15 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         }
 
         return $this['config']->get('app.env_ini_file');
+    }
+
+    protected function applyPhpSettings()
+    {
+        $phpIniSettings = $this['config']->getSection('php.ini_set.');
+
+        foreach ($phpIniSettings as $name => $value) {
+            ini_set($name, $value);
+        }
     }
 
     /**
