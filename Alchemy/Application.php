@@ -104,13 +104,19 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
                 foreach ($routesList as $rname => $rconf) {
                     $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
                     $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
-                    $options      = isset($rconf['options'])      ? $rconf['options']      : array();
+                    $type         = isset($rconf['type'])         ? $rconf['type']         : '';
+                    $resourcePath = isset($rconf['resourcePath']) ? $rconf['resourcePath'] : '';
 
-                    if (!isset($rconf['pattern'])) {
-                        throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $rname));
+                    if (! array_key_exists('pattern', $rconf)) {
+                        throw new \InvalidArgumentException(sprintf(
+                            'Runtime Error: Route pattern for "%s" route is missing.', $rname
+                        ));
                     }
 
-                    $mapper->connect($rname, new Route($rconf['pattern'], $defaults, $requirements, $options));
+                    $mapper->connect(
+                        $rname,
+                        new Route($rconf['pattern'], $defaults, $requirements, $type, $resourcePath
+                    ));
                 }
             } else {
                 throw new \Exception(

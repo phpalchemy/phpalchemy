@@ -10,18 +10,19 @@ use Alchemy\Exception\ExceptionInterface;
 
 class Handler
 {
-    protected $exception;
-
-    public function __construct(\Exception $exception = null)
+    public function __construct()
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
         $this->request = Request::createFromGlobals();
-        $this->exception = $exception;
     }
 
-    public function handle()
+    public function handle($exception)
     {
-        $exception = $this->exception;
+        echo $this->getOutput($exception);
+    }
+
+    protected function getOutput($exception)
+    {
         $tplDir = realpath(__DIR__ . '/../../') . DS . 'templates' . DS;
         $data = array();
         $data['message'] = $exception->getMessage();
@@ -58,5 +59,6 @@ class Handler
 
         return $view->getOutput();
     }
+
 }
 

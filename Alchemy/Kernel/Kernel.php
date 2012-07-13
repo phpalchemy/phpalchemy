@@ -242,17 +242,21 @@ class Kernel implements KernelInterface
             }
 
         } catch (ResourceNotFoundException $e) {
-            $hanlder = new Exception\Handler($e);
-            $response = new Response($hanlder->handle(), 404);
+            $response = new Response($e->getMessage(), 404);
         } catch (\Exception $e) {
-            $hanlder = new Exception\Handler($e);
-            $response = new Response($hanlder->handle(), 500);
+            $response = new Response($e->getMessage(), 500);
+        }
+
+        if ($this->annotationReader->hasTarget()) {
+            $responseAnnotation = $this->annotationReader->getAnnotation('Response');
+        } else {
+            $responseAnnotation = null;
         }
 
         // dispatch a response event
         $this->dispatcher->dispatch(
             KernelEvents::RESPONSE,
-            new FilterResponseEvent($this, $request, $response, $this->annotationReader->getAnnotation('Response'))
+            new FilterResponseEvent($this, $request, $response, $responseAnnotation)
         );
 
         return $response;

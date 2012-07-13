@@ -140,6 +140,11 @@ abstract class Reader
         return $this->defaultNamespace;
     }
 
+    public function hasTarget()
+    {
+        return ! empty($this->targetClass);
+    }
+
     /**
      * Loads class annotations and persist on the reader
      *
