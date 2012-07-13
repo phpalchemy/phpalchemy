@@ -2,9 +2,11 @@
 /**
  * Class DiContainer
  *
- * Simplest Dependency injection container (fork of Pimple)
+ * Simplest Dependency injection container
+ * (DiContainer is fork of Pimple, with modifications, some concepts were changed,
+ * i.e. the method protect has other functionality than Pimple has)
  *
- * This Class is a adapted version of \Pimple
+ * This Class is a adapted version of \DiContainer
  * Code subject to the MIT license
  * Copyright (c) 2009 Fabien Potencier
  *
@@ -18,6 +20,7 @@
 class DiContainer implements \ArrayAccess
 {
     private $container;
+    private $protected = array();
 
     /**
      * Instantiate the container.
@@ -45,6 +48,11 @@ class DiContainer implements \ArrayAccess
      */
     public function offsetSet($id, $value)
     {
+        if (in_array($id, $this->protected)) {
+            //TODO need implements a logger to store this modifications attempts
+            return;
+        }
+
         $this->container[$id] = $value;
     }
 
@@ -90,10 +98,9 @@ class DiContainer implements \ArrayAccess
 
     /**
      * Returns a closure that stores the result of the given closure for
-     * uniqueness in the scope of this instance of Pimple.
+     * uniqueness in the scope of this instance of DiContainer.
      *
      * @param Closure $callable A closure to wrap for uniqueness
-     *
      * @return Closure The wrapped closure
      */
     public function share(Closure $callable)
@@ -110,15 +117,25 @@ class DiContainer implements \ArrayAccess
     }
 
     /**
-     * Protects a callable from being interpreted as a service.
+     * This method protect to previously defined service to posterior modifications
+     * to prevent break the initial logic.
      *
+     * @param string $id the service id
+     * @author Erik Amaru Ortiz <aortiz.erik@gmail.com>
+     */
+    public function protect($id)
+    {
+        $this->protected[] = $id;
+    }
+
+    /**
+     * Share and protects a callable from being interpreted as a service.
      * This is useful when you want to store a callable as a parameter.
      *
      * @param Closure $callable A closure to protect from being evaluated
-     *
      * @return Closure The protected closure
      */
-    public function protect(Closure $callable)
+    public function shareCallable(Closure $callable)
     {
         return function ($c) use ($callable) {
             return $callable;
@@ -129,9 +146,7 @@ class DiContainer implements \ArrayAccess
      * Gets a parameter or the closure defining an object.
      *
      * @param  string $id The unique identifier for the parameter or object
-     *
      * @return mixed  The value of the parameter or the closure defining an object
-     *
      * @throws InvalidArgumentException if the identifier is not defined
      */
     public function raw($id)
