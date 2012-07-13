@@ -173,13 +173,47 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         // registering the aplication namespace to SPL ClassLoader
         $this['autoloader']->register(
             $this['config']->get('app.name'),
-            $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
+            $this['config']->get('app.root_dir') . DIRECTORY_SEPARATOR,
             $this['config']->get('app.namespace')
         );
 
         $this['exception_handler'] = $this->share(function() use ($app) {
             return new ExceptionHandler;
         });
+
+        $this->protect('logger');
+        $this->protect('config');
+        $this->protect('autoloader');
+        $this->protect('yaml');
+        $this->protect('annotation');
+        $this->protect('mapper');
+        $this->protect('logger');
+        $this->protect('dispatcher');
+        $this->protect('resolver');
+        $this->protect('ui_reader_factory');
+        $this->protect('ui_parser');
+        $this->protect('ui_engine');
+        $this->protect('resolver');
+        $this->protect('kernel');
+        $this->protect('autoloader');
+        $this->protect('exception_handler');
+    }
+
+    /**
+     * Registers a service provider.
+     *
+     * @param ServiceProviderInterface $provider A ServiceProviderInterface instance
+     * @param array                    $values   An array of values that customizes the provider
+     */
+    public function register(ServiceProviderInterface $provider, array $values = array())
+    {
+        $this->providers[] = $provider;
+
+        $provider->register($this);
+
+        foreach ($values as $key => $value) {
+            $this[$key] = $value;
+        }
     }
 
     /**
