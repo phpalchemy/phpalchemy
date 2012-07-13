@@ -93,7 +93,6 @@ class Kernel implements KernelInterface
         }
 
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
-        defined('NS') || define('NS', '\\'); // NAMESPACE_SEPARATOR
     }
 
     /**
@@ -103,28 +102,27 @@ class Kernel implements KernelInterface
     public function handle(Request $request)
     {
         $this->request = $request;
-        /*
-         * "EVENT" KernelEvents::REQUEST using GetResponse Event
-         *
-         * This event can be used by an application to filter a request before
-         * ever all kernel logic being executed, listeners for this event should
-         * be registered outside framework logic (should be on application logic).
-         */
-        if ($this->dispatcher->hasListeners(KernelEvents::REQUEST)) {
-            $event = new GetResponseEvent($this, $request);
-            $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
-
-            if ($event->hasResponse()) {
-                $event = new FilterResponseEvent($this, $request, $event->getResponse());
-                $this->dispatcher->dispatch(KernelEvents::RESPONSE, $event);
-
-                return $event->getResponse();
-            }
-        }
-
-        $annotatedObjects = array();
 
         try {
+            /*
+             * "EVENT" KernelEvents::REQUEST using GetResponse Event
+             *
+             * This event can be used by an application to filter a request before
+             * ever all kernel logic being executed, listeners for this event should
+             * be registered outside framework logic (should be on application logic).
+             */
+            if ($this->dispatcher->hasListeners(KernelEvents::REQUEST)) {
+                $event = new GetResponseEvent($this, $request);
+                $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
+
+                if ($event->hasResponse()) {
+                    $event = new FilterResponseEvent($this, $request, $event->getResponse());
+                    $this->dispatcher->dispatch(KernelEvents::RESPONSE, $event);
+
+                    return $event->getResponse();
+                }
+            }
+
             /*
              * try match the url request with a defined route.
              * it any route match the current url a ResourceNotFoundException
@@ -159,7 +157,7 @@ class Kernel implements KernelInterface
             }
 
             // setting default annotations namespace
-            $this->annotationReader->setDefaultNamespace(NS.'Alchemy'.NS.'Annotation'.NS);
+            $this->annotationReader->setDefaultNamespace('\Alchemy\Annotation\\');
             // seeting annotation reader target
             $this->annotationReader->setTarget($params['_controllerClass'], $params['_controllerMethod']);
 
@@ -285,71 +283,19 @@ class Kernel implements KernelInterface
             $element->setId($annotation->id);
         }
 
-        // creating config obj and setting it with all defaults configurations
-        $conf = new \StdClass();
-        $conf->engine       = $this->config->get('templating.default_engine');
-        $conf->templateDir  = $this->config->get('app.views_dir') . DS;
-        $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
-        $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
-        $conf->extension    = $this->config->get('templating.extension');
-        $conf->charset      = $this->config->get('templating.charset');
-        $conf->debug        = $this->config->get('templating.debug');
-
-        switch ($conf->engine) {
-            case 'smarty':
-                $ext = 'tpl';
-                break;
-            case 'haanga':
-                $ext = 'haanga';
-                break;
-            case 'twig':
-                $ext = 'twig';
-                break;
-
-        }
-
         $filename = empty($targetView) ? 'form_page' : 'form';
+        $template = 'uigen' . DS . $filename;
 
-        $conf->template = 'uigen' . DS . $filename . '.' . $ext;
-
-        // composing the view class string
-        $viewClass = NS.'Alchemy'.NS.'Adapter'.NS.ucfirst($conf->engine).'View';
-
-        // check if view engine class exists, if does not exist throw an exception
-        if (!class_exists($viewClass)) {
-            throw new \Exception("Error Processing: Template Engine is not available: '{$conf->engine}'");
-        }
-
-        // create view object
-        $view = new $viewClass($conf->template);
-
-        // setup view object
-        $view->enableDebug($conf->debug);
-        $view->enableCache($conf->cacheEnabled);
-        $view->setCacheDir($conf->cacheDir);
-        $view->setTemplateDir($conf->templateDir);
-        $view->setCharset($conf->charset);
-
-        $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
-        if (substr($baseurl, -4) == '.php') {
-            $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
-        } elseif (substr($baseurl, -1) !== '/') {
-            $baseurl .= '/';
-        }
-
-        // setting data to be used by template
-        $view->assign('baseurl', $baseurl);
+        $view = $this->createView($template, $data);
         $view->assign('form', $element);
 
         if (empty($targetView)) {
             return $view;
-        } else {
-            $targetView->setUiElement($element->getId(), $view->getOutput());
-
-            return $targetView;;
         }
 
+        $targetView->setUiElement($element->getId(), $view->getOutput());
 
+        return $targetView;
     }
 
     protected function handleView($class, $method, $data, $annotation)
@@ -360,84 +306,19 @@ class Kernel implements KernelInterface
         }
 
         $annotation->prepare();
-
-        // creating config obj and setting it with all defaults configurations
-        $conf = new \StdClass();
-
-        $conf->template     = $annotation->template;
-        $conf->engine       = $this->config->get('templating.default_engine');
-        $conf->templateDir  = $this->config->get('app.views_dir') . DS;
-        $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
-        $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
-        $conf->extension    = $this->config->get('templating.extension');
-        $conf->charset      = $this->config->get('templating.charset');
-        $conf->debug        = $this->config->get('templating.debug');
-
-        // Setting template engine
-        // Check if template engine param was set on annotation. i.e.: @view(engine=...)
-        if (! empty($annotation->engine)) {
-            $conf->engine = $annotation->engine; // it exits, use it!
-        }
+        $template = $annotation->template;
 
         // check if template filename is empty
-        if (empty($conf->template)) {
+        if (empty($template)) {
             // that means it wasn't set on @view annotation
             // Then we compose a template filename using controller class and method names but
             // removing ...Controller & ..Action sufixes from those names
-            $nsSepPos        = strrpos($class, NS);
-            $conf->template  = substr($class, $nsSepPos + 1, -10) . DS;
-            $conf->template .= substr($method, 0, -6);
+            $nsSepPos  = strrpos($class, '\\');
+            $template  = substr($class, $nsSepPos + 1, -10) . DS;
+            $template .= substr($method, 0, -6);
         }
 
-        // File extension validation
-        // A criteria can be if filename doesn't a period character (.)
-        if (strpos($conf->template, '.') === false && !empty($conf->extension)) {
-            $conf->template .= '.' . $conf->extension; // concatenate it with default extension from configuration
-        }
-
-        // check if template file exists
-        if (file_exists($conf->templateDir . $conf->template)) {
-            // if relative path was given
-        } elseif (file_exists($conf->template)) {
-            // if absolute path was given
-        } else {
-            // file doesn't exist, throw error
-            throw new \Exception("Error, File Not Found: template file doesn't exist: '{$conf->template}'");
-        }
-
-        // composing the view class string
-        $viewClass = NS . 'Alchemy' . NS . 'Mvc' . NS . 'Adapter' . NS . ucfirst($conf->engine) . 'View';
-
-        // check if view engine class exists, if does not exist throw an exception
-        if (! class_exists($viewClass)) {
-            throw new \RuntimeException(sprintf(
-                "Runtime Error: Template Engine is not available: '%s'",
-                $conf->engine
-            ));
-        }
-
-        // create view object
-        $view = new $viewClass($conf->template);
-
-        // setup view object
-        $view->enableDebug($conf->debug);
-        $view->enableCache($conf->cacheEnabled);
-        $view->setCacheDir($conf->cacheDir);
-        $view->setTemplateDir($conf->templateDir);
-        $view->setCharset($conf->charset);
-
-        $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
-        if (substr($baseurl, -4) == '.php') {
-            $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
-        } elseif (substr($baseurl, -1) !== '/') {
-            $baseurl .= '/';
-        }
-
-        // setting data to be used by template
-        $view->assign('baseurl', $baseurl);
-        $view->assign($data);
-
-        return $view;
+        return $this->createView($template, $data, $annotation->engine);
     }
 
     protected function prepareRequestParams($data)
@@ -471,11 +352,93 @@ class Kernel implements KernelInterface
         }
 
         // composing controller class & method real names
-        $params['_controllerClass']  = NS.$namespace.NS.'Controller'.NS.$params['_controller'].'Controller';
+        $params['_controllerClass']  = '\\'.$namespace.'\Controller\\'.$params['_controller'].'Controller';
         $params['_controllerMethod'] = $params['_action'] . 'Action';
         $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
 
         return $params;
+    }
+
+    protected function createView($template, array $data, $engine = '')
+    {
+        // creating config obj and setting it with all defaults configurations
+        $conf = new \StdClass();
+
+        $conf->template     = $template;
+        $conf->engine       = empty($engine) ? $this->config->get('templating.default_engine') : $engine;
+        $conf->templateDir  = $this->config->get('app.views_dir') . DS;
+        $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
+        $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
+        $conf->extension    = $this->config->get('templating.extension');
+        $conf->charset      = $this->config->get('templating.charset');
+        $conf->debug        = $this->config->get('templating.debug');
+
+        // File extension validation
+        // A criteria can be if filename doesn't a period character (.)
+        if (strpos($conf->template, '.') === false) {
+            if ($this->config->isEmpty('templating.extension')) {
+                switch ($conf->engine) {
+                    case 'haanga':
+                        $tplExtension = 'haanga';
+                        break;
+                    case 'twig':
+                        $tplExtension = 'twig';
+                        break;
+                    case 'smarty':
+                    default:
+                        $tplExtension = 'tpl';
+                        break;
+                }
+            } else {
+                $tplExtension = $this->config->get('templating.extension');
+            }
+
+            $conf->template .= '.' . $tplExtension; // concatenate it with default extension from configuration
+        }
+
+        // check if template file exists
+        if (file_exists($conf->templateDir . $conf->template)) {
+            // if relative path was given
+        } elseif (file_exists($conf->template)) {
+            // if absolute path was given
+        } else {
+            // file doesn't exist, throw error
+            throw new \Exception("Error, File Not Found: template file doesn't exist: '{$conf->template}'");
+        }
+
+        // composing the view class string
+        $viewClass = '\Alchemy\Mvc\Adapter\\' . ucfirst($conf->engine) . 'View';
+
+        // check if view engine class exists, if does not exist throw an exception
+        if (! class_exists($viewClass)) {
+            throw new \RuntimeException(sprintf(
+                "Runtime Error: Template Engine is not available: '%s'",
+                $conf->engine
+            ));
+        }
+
+        // create view object
+        $view = new $viewClass($conf->template);
+
+        // setup view object
+        $view->enableDebug($conf->debug);
+        $view->enableCache($conf->cacheEnabled);
+        $view->setCacheDir($conf->cacheDir);
+        $view->setTemplateDir($conf->templateDir);
+        $view->setCharset($conf->charset);
+
+        $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
+        if (substr($baseurl, -4) == '.php') {
+            $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
+        } elseif (substr($baseurl, -1) !== '/') {
+            $baseurl .= '/';
+        }
+
+        // setting data to be used by template
+        $view->assign('baseurl', $baseurl);
+        $view->assign($data);
+
+        return $view;
     }
 }
 
