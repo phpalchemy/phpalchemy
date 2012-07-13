@@ -177,6 +177,11 @@ class Response
         $this->statusText = false === $text ? '' : (null === $text ? self::$statusTexts[$this->statusCode] : $text);
     }
 
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
+
     public function setContent($content)
     {
         if (
