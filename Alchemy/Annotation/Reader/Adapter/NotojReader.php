@@ -48,7 +48,13 @@ class NotojReader extends Reader
      */
     public function getMethodAnnotationsObjects($class, $method)
     {
-        return $this->createAnnotationObjects($this->getMethodAnnotations($class, $method));
+        $objects = $this->createAnnotationObjects($this->getMethodAnnotations($class, $method));
+
+        foreach ($objects as $object) {
+            $object->prepare();
+        }
+
+        return $objects;
     }
 
     /**
@@ -65,7 +71,7 @@ class NotojReader extends Reader
             $name = ucfirst($name);
             $class = $this->defaultNamespace . $name . 'Annotation';
 
-            if (empty($objects[$class])) {
+            if (! array_key_exists($class, $objects)) {
                 if (!class_exists($class)) {
                     if ($this->strict) {
                         throw new \Exception(sprintf('Annotation Class Not Found: %s', $class));
@@ -76,7 +82,7 @@ class NotojReader extends Reader
 
                 $objects[$name] = new $class();
             }
-
+            //var_dump($args);
             foreach ($args as $key => $value) {
                 $objects[$name]->set($key, $value);
             }

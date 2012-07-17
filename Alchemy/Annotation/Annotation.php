@@ -23,11 +23,16 @@ abstract class Annotation
     public function set($key, $value = null)
     {
         if (is_array($key)) {
-            foreach ($key as $name => $value) {
-                $this->data[$name] = $value;
-            }
-        } else {
-            $this->data[$key] = $value;
+            return $this->setFromArray($key);
+        }
+
+        $this->data[$key] = $value;
+    }
+
+    protected function setFromArray($value)
+    {
+        foreach ($value as $name => $value) {
+            $this->set($name, $value);
         }
     }
 

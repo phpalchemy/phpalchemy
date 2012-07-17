@@ -265,7 +265,7 @@ class Kernel implements KernelInterface
         } catch (ResourceNotFoundException $e) {
             $response = new Response($e->getMessage(), 404);
         } catch (\Exception $e) {
-            $response = new Response($e->getMessage(), 500);
+            $response = new Response($e->getMessage().'<br>'.$e->getTraceAsString(), 500);
         }
 
         if ($this->annotationReader->hasTarget()) {
@@ -341,7 +341,40 @@ class Kernel implements KernelInterface
             $template .= substr($method, 0, -6);
         }
 
-        return $this->createView($template, $data, $annotation->engine);
+        $view = $this->createView($template, $data, $annotation->engine);
+        $registeredVars = array();
+
+        // for javascript annotated
+        if ($registerAnnotation = $this->annotationReader->getAnnotation('RegisterJavascript')) {
+            $registeredVars = $registerAnnotation->all();
+
+            $publicBasePath = $this->config->get('app.public_dir') . DS;
+            $sourceBasePath = $this->config->get('app.view_scripts_javascript_dir') . DS;
+            $jsBaseUrl = 'assets/cache/';
+
+            // to register javascript
+
+            foreach ($registeredVars as  $i => $jsFile) {
+                $jsPath = substr($jsFile, 0, strrpos($jsFile, DS));
+
+                if (! is_dir($publicBasePath . $jsBaseUrl . $jsPath)) {
+                    self::createDir($publicBasePath . $jsBaseUrl . $jsPath);
+                }
+
+                if (file_exists($sourceBasePath . $jsFile)) {
+                    //TODO create the copiled js file nefore copy
+                    //it can be a plain version for debug or a minified version for production.
+                    copy($sourceBasePath . $jsFile, $publicBasePath . $jsBaseUrl . $jsFile);
+                }
+
+                $registeredVars[$i] = $jsBaseUrl . $jsFile;
+            }
+        }
+
+        // registering variables
+        $view->assign('javascript', $registeredVars);
+
+        return $view;
     }
 
     protected function prepareRequestParams($data)
@@ -426,7 +459,7 @@ class Kernel implements KernelInterface
             // if absolute path was given
         } else {
             // file doesn't exist, throw error
-            throw new \Exception("Error, File Not Found: template file doesn't exist: '{$conf->template}'");
+            throw new \Exception("Error: File Not Found: template file doesn't exist: '{$conf->template}'");
         }
 
         // composing the view class string
@@ -462,6 +495,30 @@ class Kernel implements KernelInterface
         $view->assign($data);
 
         return $view;
+    }
+
+    protected static function createDir($strPath, $rights = 0777)
+    {
+        $folderPath = array($strPath);
+        $oldumask    = umask(0);
+
+        while (!@is_dir(dirname(end($folderPath)))
+            && dirname(end($folderPath)) != '/'
+            && dirname(end($folderPath)) != '.'
+            && dirname(end($folderPath)) != ''
+        ) {
+            array_push($folderPath, dirname(end($folderPath)));
+        }
+
+        while ($parentFolderPath = array_pop($folderPath)) {
+            if (!@is_dir($parentFolderPath)) {
+                if (!@mkdir($parentFolderPath, $rights)) {
+                    throw new \Exception("Runtime Error: Can't create folder '$parentFolderPath'");
+                }
+            }
+        }
+
+        umask($oldumask);
     }
 }
 
