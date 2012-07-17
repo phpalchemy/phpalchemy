@@ -30,10 +30,10 @@ class Alchemist extends Application
 
         $this->config->set('phpalchemy.root_dir', $this->homeDir);
 
-        $title    = "\nPHPAlchemy Framework Cli.";
+        $title    = "\n PHPAlchemy Framework Cli. ";
         $version  = '1.0';
 
-        parent::__construct('Welcome to Umpirsky CLI Calculator', '1.0');
+        parent::__construct($title, $version);
         $this->setCatchExceptions(true);
     }
 
