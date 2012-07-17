@@ -1,6 +1,16 @@
 <?php
 namespace Alchemy\Annotation;
 
+/**
+ * Annotation abstract class
+ * Add Annotations support to classes and methods
+ *
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/phpalchemy
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   Alchemy/Annotation
+ */
 abstract class Annotation
 {
     protected $data = array();
@@ -35,7 +45,7 @@ abstract class Annotation
         return $this->data;
     }
 
-    public function exists($key)
+    public function has($key)
     {
         return array_key_exists($key, $this->data);
     }

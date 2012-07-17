@@ -10,31 +10,26 @@
 
 namespace Alchemy;
 
+use Alchemy\Adapter\NotojAnnotations;
+use Alchemy\Annotation\Reader\Adapter\NotojReader;
+use Alchemy\Component\Annotations\Annotations;
+use Alchemy\Component\ClassLoader\ClassLoader;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 use Alchemy\Component\Routing\Mapper;
 use Alchemy\Component\Routing\Route;
-use Alchemy\Component\Yaml\Yaml;
-
-use Alchemy\Kernel\KernelInterface;
-use Alchemy\Kernel\EventListener;
-use Alchemy\Kernel\Kernel;
-
-use Alchemy\Mvc\ControllerResolver;
-
-use Alchemy\Component\Annotations\Annotations;
-use Alchemy\Component\ClassLoader\ClassLoader;
-use Alchemy\Adapter\NotojAnnotations;
-
-use Alchemy\Kernel\KernelEvents;
-
-use Alchemy\Exception\Handler;
-
 use Alchemy\Component\UI\Parser;
 use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Engine;
+use Alchemy\Component\Yaml\Yaml;
+use Alchemy\Exception\Handler;
+use Alchemy\Kernel\EventListener;
+use Alchemy\Kernel\KernelInterface;
+use Alchemy\Kernel\Kernel;
+use Alchemy\Kernel\KernelEvents;
+use Alchemy\Mvc\ControllerResolver;
 
 /**
  * Class Application
@@ -52,7 +47,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
      * Construct application object
      * @param Config $config Contains all app configuration
      */
-    public function __construct($conf = array())
+    public function init($conf = array())
     {
         defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 
@@ -67,7 +62,11 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             return $config;
         });
 
+        // load configuration ini files
         $this->loadAppConfigurationFiles();
+
+        // apply configurated php settings
+        $this->applyPhpSettings();
 
         $this['autoloader'] = $this->share(function () {
             return new ClassLoader();
@@ -78,8 +77,8 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         });
 
         $this['annotation'] = $this->share(function () use ($app) {
-            //return new NotojAnnotations($app['config']);
-            return new Annotations($app['config']);
+            return new NotojReader();
+            //return new Annotations($app['config']);
         });
 
         $this['mapper'] = $this->share(function () use ($app){
@@ -102,13 +101,19 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
                 foreach ($routesList as $rname => $rconf) {
                     $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
                     $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
-                    $options      = isset($rconf['options'])      ? $rconf['options']      : array();
+                    $type         = isset($rconf['type'])         ? $rconf['type']         : '';
+                    $resourcePath = isset($rconf['resourcePath']) ? $rconf['resourcePath'] : '';
 
-                    if (!isset($rconf['pattern'])) {
-                        throw new \InvalidArgumentException(sprintf('You must define a "pattern" for the "%s" route.', $rname));
+                    if (! array_key_exists('pattern', $rconf)) {
+                        throw new \InvalidArgumentException(sprintf(
+                            'Runtime Error: Route pattern for "%s" route is missing.', $rname
+                        ));
                     }
 
-                    $mapper->connect($rname, new Route($rconf['pattern'], $defaults, $requirements, $options));
+                    $mapper->connect(
+                        $rname,
+                        new Route($rconf['pattern'], $defaults, $requirements, $type, $resourcePath
+                    ));
                 }
             } else {
                 throw new \Exception(
@@ -168,13 +173,47 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         // registering the aplication namespace to SPL ClassLoader
         $this['autoloader']->register(
             $this['config']->get('app.name'),
-            $this['config']->get('app.app_dir') . DIRECTORY_SEPARATOR,
+            $this['config']->get('app.root_dir') . DIRECTORY_SEPARATOR,
             $this['config']->get('app.namespace')
         );
 
         $this['exception_handler'] = $this->share(function() use ($app) {
             return new ExceptionHandler;
         });
+
+        $this->protect('logger');
+        $this->protect('config');
+        $this->protect('autoloader');
+        $this->protect('yaml');
+        $this->protect('annotation');
+        $this->protect('mapper');
+        $this->protect('logger');
+        $this->protect('dispatcher');
+        $this->protect('resolver');
+        $this->protect('ui_reader_factory');
+        $this->protect('ui_parser');
+        $this->protect('ui_engine');
+        $this->protect('resolver');
+        $this->protect('kernel');
+        $this->protect('autoloader');
+        $this->protect('exception_handler');
+    }
+
+    /**
+     * Registers a service provider.
+     *
+     * @param ServiceProviderInterface $provider A ServiceProviderInterface instance
+     * @param array                    $values   An array of values that customizes the provider
+     */
+    public function register(ServiceProviderInterface $provider, array $values = array())
+    {
+        $this->providers[] = $provider;
+
+        $provider->register($this);
+
+        foreach ($values as $key => $value) {
+            $this[$key] = $value;
+        }
     }
 
     /**
@@ -193,13 +232,8 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
 
     public function handle(Request $request)
     {
-        //$current = HttpKernelInterface::SUB_REQUEST === $type ? $this['request'] : $this['request_error'];
-
         $this['request'] = $request;
-
         $response = $this['kernel']->handle($request);
-
-        //$this['request'] = $current;
 
         return $response;
     }
@@ -261,6 +295,15 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         }
 
         return $this['config']->get('app.env_ini_file');
+    }
+
+    protected function applyPhpSettings()
+    {
+        $phpIniSettings = $this['config']->getSection('php.ini_set.');
+
+        foreach ($phpIniSettings as $name => $value) {
+            ini_set($name, $value);
+        }
     }
 
     /**

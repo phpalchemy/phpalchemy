@@ -1,9 +1,9 @@
 <?php
 use Alchemy\Annotation\Reader\Adapter\NotojReader;
 
-include __DIR__ . '/Fixtures/Sample.php';
-include __DIR__ . '/Fixtures/Base/Annotation/PermissionAnnotation.php';
-include __DIR__ . '/Fixtures/Base/Annotation/RoleAnnotation.php';
+include_once __DIR__ . '/Fixtures/Test.php';
+include_once __DIR__ . '/Fixtures/Base/Annotation/PermissionAnnotation.php';
+include_once __DIR__ . '/Fixtures/Base/Annotation/RoleAnnotation.php';
 
 /**
  * NotojReader Unit Test
@@ -22,143 +22,54 @@ class NotojReaderTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->reader = new NotojReader();
+        $this->reader->setDefaultNamespace('\Base\Annotation');
     }
 
     /**
-     * @covers NotojReader::setCacheDir
+     * @covers NotojReader::getAnnotations
      */
-    public function testSetStrict()
+    public function testClassGetAnnotations()
     {
-        // by default strict flag is true
-        $this->assertTrue($this->reader->isStrict());
+        $this->reader->setTarget('Test');
+        $result = $this->reader->getAnnotations();
 
-        // disabling
-        $this->reader->setStrict(false);
-        $this->assertFalse($this->reader->isStrict());
-
-        // enabling
-        $this->reader->setStrict(true);
-        $this->assertTrue($this->reader->isStrict());
-
-        // setting non boolean value, it should be evaluated/converted to his equivalent boolean
-        $this->reader->setStrict(1);
-        $this->assertTrue($this->reader->isStrict());
-
-        // setting non boolean value, it should be evaluated/converted to his equivalent boolean
-        $this->reader->setStrict(0);
-        $this->assertFalse($this->reader->isStrict());
-
-        // setting non boolean value, it should be evaluated/converted to his equivalent boolean
-        $this->reader->setStrict('test string');
-        $this->assertTrue($this->reader->isStrict());
-
-        // setting non boolean value, it should be evaluated/converted to his equivalent boolean
-        $this->reader->setStrict('');
-        $this->assertFalse($this->reader->isStrict());
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf('Base\Annotation\RoleAnnotation', array_pop($result));
     }
 
     /**
-     * @covers NotojReader::setCacheDir and NotojReader::getCacheDir
+     * @covers NotojReader::getAnnotation
      */
-    public function testSetGetCacheDir()
+    public function testClassGetAnnotation()
     {
-        // empty by default
-        $this->assertEmpty($this->reader->getCacheDir());
-
-        // setting a cache dir path (this directory should be exists)
-        $this->reader->setCacheDir(sys_get_temp_dir());
-        $this->assertEquals(sys_get_temp_dir(), $this->reader->getCacheDir());
+        $this->reader->setTarget('Test');
+        $this->assertInstanceOf('Base\Annotation\RoleAnnotation', $this->reader->getAnnotation('Role'));
+        $this->assertEquals(null, $this->reader->getAnnotation('Permission'));
     }
 
     /**
-     * @covers NotojReader::setCacheDir
-     * @expectedException \RuntimeException
+     * @covers NotojReader::getAnnotations
      */
-    public function testSetCacheDir()
+    public function testGetAnnotations()
     {
-        // setting a non existent cache dir path (a RuntimeException should be thrown)
-        $this->reader->setCacheDir('/non/existent/path');
-    }
+        $this->reader->setTarget('Test', 'app');
+        $result = $this->reader->getAnnotations();
 
-    /**
-     * @covers Annotations::setDefaultNamespace
-     */
-    public function testSetDefaultNamespace()
-    {
-        // it should be empty by default
-        $this->assertEmpty($this->reader->getDefaultNamespace());
-
-        // setting a namespace
-        $this->reader->setDefaultNamespace('\Base\Annotation\\');
-        $this->assertEquals('\Base\Annotation\\', $this->reader->getDefaultNamespace());
-    }
-
-    /**
-     * @covers NotojReader::getClassAnnotations
-     */
-    public function testGetClassAnnotations()
-    {
-        $result = $this->reader->getClassAnnotations('Sample');
-        $expected = array (
-            'Foo' => array (
-                0 => 'some other strings',
-                'some_label' => 'something here'
-            ),
-            'Bar' => array(
-                0 =>  array (
-                    'some' => 'array here',
-                    'arr' => array (
-                        0 => 1,
-                        1 => 2,
-                        2 => 3,
-                    )
-                )
-            )
-        );
-
-        $this->assertEquals($expected, $result);
-    }
-
-    /**
-     * @covers NotojReader::getClassAnnotations
-     */
-    public function testGetMethodAnnotations()
-    {
-        $result = $this->reader->getMethodAnnotations('Sample', 'test');
-
-        $expected = array (
-            'Foo' => array (
-                'some_label' => array (
-                    'some' => 'array here',
-                    'arr' => array (
-                        0 => 1,
-                        1 => 2,
-                        2 => 3,
-                    ),
-                ),
-            ),
-            'Bar' => array (
-                'test_var' => array (
-                    0 => 'one',
-                    1 => 'two',
-                    2 => 'three',
-                ),
-            ),
-        );
-
-        $this->assertEquals($expected, $result);
-    }
-
-    /**
-     * @covers NotojReader::getMethodAnnotationsObjects
-     */
-    public function testGetMethodAnnotationsObjects()
-    {
-        $this->reader->setDefaultNamespace('\Base\Annotation\\');
-        $result = $this->reader->getMethodAnnotationsObjects('Sample', 'app');
+        $this->assertCount(2, $result);
 
         $this->assertInstanceOf('Base\Annotation\PermissionAnnotation', array_pop($result));
         $this->assertInstanceOf('Base\Annotation\RoleAnnotation', array_pop($result));
+    }
+
+    /**
+     * @covers NotojReader::getAnnotation
+     */
+    public function testGetAnnotation()
+    {
+        $this->reader->setTarget('Test', 'app');
+
+        $this->assertInstanceOf('Base\Annotation\PermissionAnnotation', $this->reader->getAnnotation('Permission'));
+        $this->assertInstanceOf('Base\Annotation\RoleAnnotation', $this->reader->getAnnotation('Role'));
     }
 }
 

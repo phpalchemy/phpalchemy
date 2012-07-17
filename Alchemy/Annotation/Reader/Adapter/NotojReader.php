@@ -10,33 +10,60 @@ use Notoj\ReflectionMethod;
  */
 class NotojReader extends Reader
 {
+    /**
+     * {@inheritdoc}
+     */
     public function setCacheDir($cacheDir)
     {
         parent::setCacheDir($cacheDir);
         \Notoj\Notoj::enableCache($cacheDir . DIRECTORY_SEPARATOR . "_annotations.php");
     }
 
-    public function getClassAnnotations($className)
+    /**
+     * {@inheritdoc}
+     */
+    public function getClassAnnotations($class)
     {
-        $reflection  = new ReflectionClass($className);
-
-        return $this->convertAnnotationObj($reflection);
+        return $this->convertAnnotationObj(new ReflectionClass($class));
     }
 
-    public function getMethodAnnotations($className, $methodName)
+    /**
+     * {@inheritdoc}
+     */
+    public function getMethodAnnotations($class, $methodName)
     {
-        $reflection  = new ReflectionMethod($className, $methodName);
-
-        return $this->convertAnnotationObj($reflection);
+        return $this->convertAnnotationObj(new ReflectionMethod($class, $methodName));
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getClassAnnotationsObjects($class)
+    {
+        return $this->createAnnotationObjects($this->getClassAnnotations($class));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getMethodAnnotationsObjects($class, $method)
     {
-        $annotations = $this->getMethodAnnotations($class, $method);
+        return $this->createAnnotationObjects($this->getMethodAnnotations($class, $method));
+    }
+
+    /**
+     * Create annotations object
+     *
+     * @param  array  $annotations annotated elements
+     * @return array               array of annoatated objects
+     */
+    protected function createAnnotationObjects(array $annotations)
+    {
         $objects     = array();
 
-        foreach ($annotations as $class => $args) {
-            $class = $this->defaultNamespace . ucfirst($class) . 'Annotation';
+        foreach ($annotations as $name => $args) {
+            $name = ucfirst($name);
+            $class = $this->defaultNamespace . $name . 'Annotation';
 
             if (empty($objects[$class])) {
                 if (!class_exists($class)) {
@@ -47,17 +74,23 @@ class NotojReader extends Reader
                     }
                 }
 
-                $objects[$class] = new $class();
+                $objects[$name] = new $class();
             }
 
             foreach ($args as $key => $value) {
-                $objects[$class]->set($key, $value);
+                $objects[$name]->set($key, $value);
             }
         }
 
         return $objects;
     }
 
+    /**
+     * This method converts Notoj returned array to reader data
+     *
+     * @param  Mixed/Reflection  $reflection a Notoj reflection object
+     * @return array             annoations array
+     */
     protected function convertAnnotationObj($reflection)
     {
         $annotations = (array) $reflection->getAnnotations();

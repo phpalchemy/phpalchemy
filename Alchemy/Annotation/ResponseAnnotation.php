@@ -7,5 +7,9 @@ class ResponseAnnotation extends Annotation
     {
         return $this->data;
     }
+
+    public function prepare()
+    {
+    }
 }
 

@@ -69,6 +69,20 @@ class Config
         return $this->exists($name) ? $this->config[$name] : $default;
     }
 
+    public function getSection($targetSection)
+    {
+        $confSection = array();
+
+        foreach ($this->config as $key => $value) {
+            if (($pos = strpos($key, $targetSection)) !== false && $pos === 0) {
+                $varname = substr($key, strlen($targetSection));
+                $confSection[ltrim($varname, '.')] = $value;
+            }
+        }
+
+        return $confSection;
+    }
+
     public function exists($name)
     {
         return array_key_exists($name, $this->config);
