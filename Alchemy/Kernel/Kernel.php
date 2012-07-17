@@ -389,7 +389,7 @@ class Kernel implements KernelInterface
 
         $conf->template     = $template;
         $conf->engine       = empty($engine) ? $this->config->get('templating.default_engine') : $engine;
-        $conf->templateDir  = $this->config->get('app.views_dir') . DS;
+        $conf->templateDir  = $this->config->get('app.view_templates_dir') . DS;
         $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
         $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
         $conf->extension    = $this->config->get('templating.extension');
