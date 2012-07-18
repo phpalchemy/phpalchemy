@@ -173,9 +173,17 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         // registering the aplication namespace to SPL ClassLoader
         $this['autoloader']->register(
             $this['config']->get('app.name'),
-            $this['config']->get('app.root_dir') . DIRECTORY_SEPARATOR,
+            $this['config']->get('app.root_dir'),
             $this['config']->get('app.namespace')
         );
+
+        // registering the aplication Extend folder to SPL ClassLoader (if folder was created)
+        if (is_dir($this['config']->get('app.root_dir') . DIRECTORY_SEPARATOR . 'Extend')) {
+            $this['autoloader']->register(
+                $this['config']->get('app.name') . '/Extend',
+                $this['config']->get('app.root_dir') . DIRECTORY_SEPARATOR . 'Extend'
+            );
+        }
 
         $this['exception_handler'] = $this->share(function() use ($app) {
             return new ExceptionHandler;

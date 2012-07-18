@@ -250,12 +250,11 @@ class Kernel implements KernelInterface
             );
 
             // if there is a view adapter instance, get its contents and set to response content
-            if (!empty($view)) {
+            if (! empty($view)) {
                 //"EVENT" VIEW dispatch all KernelEvents::VIEW events
                 if ($this->dispatcher->hasListeners(KernelEvents::VIEW)) {
-                    $event = new ViewEvent();
+                    $event = new ViewEvent($this, $view, $request, $this->annotationReader);
                     $this->dispatcher->dispatch(KernelEvents::VIEW, $event);
-
                     $view = $event->getView();
                 }
 
