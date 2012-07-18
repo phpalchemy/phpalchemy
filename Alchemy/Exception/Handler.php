@@ -21,7 +21,7 @@ class Handler
         echo $this->getOutput($exception);
     }
 
-    protected function getOutput($exception)
+    public function getOutput($exception)
     {
         $tplDir = realpath(__DIR__ . '/../../') . DS . 'templates' . DS;
         $data = array();
