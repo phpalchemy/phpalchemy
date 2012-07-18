@@ -13,7 +13,7 @@ namespace Alchemy\Mvc;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
  */
-abstract class View implements ViewInterface
+abstract class View
 {
     /**
      * Contains all variables that are available on template file
