@@ -352,24 +352,38 @@ class Kernel implements KernelInterface
             $sourceBasePath = $this->config->get('app.view_scripts_javascript_dir') . DS;
             $jsBaseUrl = 'assets/cache/';
 
-            // to register javascript
-
             foreach ($registeredVars as  $i => $jsFile) {
-                $jsPath = substr($jsFile, 0, strrpos($jsFile, DS));
-
-                if (! is_dir($publicBasePath . $jsBaseUrl . $jsPath)) {
-                    self::createDir($publicBasePath . $jsBaseUrl . $jsPath);
+                if (! file_exists($sourceBasePath . $jsFile)) {
+                    throw new \Exception(sprintf("File Not Found Error: File %s doesn't exist!.", $jsFile));
                 }
 
-                if (file_exists($sourceBasePath . $jsFile)) {
-                    //TODO create the copiled js file nefore copy
-                    //it can be a plain version for debug or a minified version for production.
-                    copy($sourceBasePath . $jsFile, $publicBasePath . $jsBaseUrl . $jsFile);
+                $jsPath  = substr($jsFile, 0, strrpos($jsFile, DS));
+                $fileSum = md5_file($sourceBasePath . $jsFile);
+                $jsCacheFile = rtrim($jsFile, '.js') . '-' . $fileSum . '.js';
+
+                // verify if the source file was modified since last cache generated version
+                if (! is_file($publicBasePath . $jsBaseUrl . $jsCacheFile)) {
+                    if (! is_dir($publicBasePath . $jsBaseUrl . $jsPath)) {
+                        self::createDir($publicBasePath . $jsBaseUrl . $jsPath);
+                    }
+
+                    // clean up -! Remove old cache file
+                    $oldCacheFiles = glob($publicBasePath . $jsBaseUrl . rtrim($jsFile, '.js') . '-*');
+                    if (count($oldCacheFiles) > 0) {
+                        foreach ($oldCacheFiles as $oldCacheFile) {
+                            @unlink($oldCacheFile);
+                        }
+                    }
+
+                    // TODO copy a minified version instead a normal copy, it depends if it is a debug env.
+                    copy($sourceBasePath . $jsFile, $publicBasePath . $jsBaseUrl . $jsCacheFile);
                 }
 
-                $registeredVars[$i] = $jsBaseUrl . $jsFile;
+                // adding the new js file path to assign as variable to view object
+                $registeredVars[$i] = $jsBaseUrl . $jsCacheFile;
             }
         }
+        // end javascript registration
 
         // registering variables
         $view->assign('javascript', $registeredVars);
