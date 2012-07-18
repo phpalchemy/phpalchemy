@@ -608,5 +608,21 @@ class Request
             )
         );
     }
+
+
+    /**
+     * Returns true if the request is a XMLHttpRequest.
+     *
+     * It works if your JavaScript library set an X-Requested-With HTTP header.
+     * It is known to work with Prototype, Mootools, jQuery.
+     *
+     * @return Boolean true if the request is an XMLHttpRequest, false otherwise
+     *
+     * @api
+     */
+    public function isXmlHttpRequest()
+    {
+        return 'XMLHttpRequest' == $this->headers->get('X_REQUESTED_WITH');
+    }
 }
 
