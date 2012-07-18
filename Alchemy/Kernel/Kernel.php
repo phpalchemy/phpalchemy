@@ -154,7 +154,7 @@ class Kernel implements KernelInterface
             $params = $this->mapper->match($request->getPathInfo());
 
             // prepare request params.
-            $params = $this->prepareRequestParams(array($params, $request->query->all()));
+            $params = $this->prepareRequestParams(array($params, $request->query->all(), $request->request->all()));
 
             // add prepared params to request as attributes.
             $request->attributes->add($params);
@@ -217,6 +217,7 @@ class Kernel implements KernelInterface
 
             if (! ($response instanceof Response || $response instanceof JsonResponse)) {
                 if ($this->annotationReader->getAnnotation('JsonResponse')) {
+
                     $response = new JsonResponse();
                     $response->setData($controllerData);
                 } else {
@@ -263,10 +264,24 @@ class Kernel implements KernelInterface
 
         } catch (ResourceNotFoundException $e) {
             $exceptionHandler = new Exception\Handler();
-            $response = new Response($exceptionHandler->getOutput($e), 404);
+
+            if ($request->isXmlHttpRequest()) {
+                $responseContent = $e->getMessage();
+            } else {
+                $responseContent = $exceptionHandler->getOutput($e);
+            }
+
+            $response = new Response($responseContent, 404);
         } catch (\Exception $e) {
             $exceptionHandler = new Exception\Handler();
-            $response = new Response($exceptionHandler->getOutput($e), 500);
+
+            if ($request->isXmlHttpRequest()) {
+                $responseContent = $e->getMessage();
+            } else {
+                $responseContent = $exceptionHandler->getOutput($e);
+            }
+
+            $response = new Response($responseContent, 500);
         }
 
         if ($this->annotationReader->hasTarget()) {
