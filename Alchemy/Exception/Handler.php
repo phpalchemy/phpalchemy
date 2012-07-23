@@ -29,16 +29,16 @@ class Handler
 
         if (class_exists('\Haanga')) {
             $view = new HaangaView();
-            $tplFile = 'Exception.djt';
-            $view->setTemplateDir($tplDir . 'djt' . DS . 'Exception');
+            $tplFileExt = 'djt';
         } else {
             $view = new PhtmlView();
-            $tplFile = 'Exception.phtml';
-            $view->setTemplateDir($tplDir . 'phtml' . DS . 'Exception');
+            $tplFileExt = 'phtml';
         }
 
+        $view->setTemplateDir($tplDir . 'Exception');
+
         $view->setCacheDir(sys_get_temp_dir() . DS . '_phpalchemy');
-        $view->setTpl($tplFile);
+        $view->setTpl('Exception.' . $tplFileExt);
 
         // setting data
         $view->assign('message', $exception->getMessage());

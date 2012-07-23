@@ -514,6 +514,7 @@ class Kernel implements KernelInterface
         $view->setCharset($conf->charset);
 
         $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
+        //var_dump($this->request->getPathInfo()); die;
         if (substr($baseurl, -4) == '.php') {
             $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
         } elseif (substr($baseurl, -1) !== '/') {

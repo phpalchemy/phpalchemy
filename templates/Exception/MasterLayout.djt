@@ -1,0 +1,34 @@
+<?php use Alchemy\Mvc\Adapter\PhtmlView; ?>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Welcome{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="{{ baseurl }}assets/framework/css/style.css">
+        <!--[if lt IE 9]>
+        <script src="{{ baseurl }}assets/framework/js/html5.js"></script>
+        <![endif]-->
+        <style>
+        pre{
+            background-color: inherit;
+            border: 0px;
+            color: inherit;
+            font: inherit;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            {% block body %}{% endblock %}
+            <footer>
+                <p>Powered by <a href="http://phpalchemy.org">PhpAlchemy</a> Framework - &copy; 2012</p>
+            </footer>
+        </div>
+        <script src="{{ baseurl }}assets/framework/js/jquery.js"></script>
+        <script src="{{ baseurl }}assets/framework/js/bootstrap.js"></script>
+        <script src="{{ baseurl }}assets/framework/js/codemirror.js"></script>
+        <script src="{{ baseurl }}assets/framework/js/main.js"></script>
+    </body>
+</html>
+

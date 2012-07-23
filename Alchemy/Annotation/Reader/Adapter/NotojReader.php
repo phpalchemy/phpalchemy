@@ -103,6 +103,7 @@ class NotojReader extends Reader
         $result = array();
 
         foreach ($annotations as $annotation) {
+            $result[$annotation['method']] = array();
 
             foreach ($annotation['args'] as $key => $value) {
                 if (is_numeric($key)) {

@@ -9,7 +9,7 @@ class HaangaView extends View
     {
         parent::__construct($tpl);
 
-        require "crodas/Haanga/lib/Haanga.php";
+        require_once "crodas/Haanga/lib/Haanga.php";
     }
 
     //Wrapped

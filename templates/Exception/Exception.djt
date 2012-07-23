@@ -1,0 +1,58 @@
+{% extends 'MasterLayout.djt' %}
+
+{% block title %}Exception{% endblock %}
+
+{% block body %}
+<div class="commit-view">
+    <div class="commit-header">
+        <img src="{{ baseurl }}assets/framework/img/i.png" class="pull-left space-right" />
+        <h3>Application Exception</h3>
+    </div>
+    <div class="commit-body">
+        <span>
+            <div class="tabbable">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#1" data-toggle="tab">Message</a></li>
+                    <li><a href="#2" data-toggle="tab">Information</a></li>
+                    <li><a href="#3" data-toggle="tab">Stack trace</a></li>
+                    <li><a href="#4" data-toggle="tab">Request Parameters</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="1">
+                        <div class="alert alert-error">
+                            <pre>{{ message }}</pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="2">
+                        <div class="well">
+                            <h3 class="alert-heading">Exception information:</h3><br/>
+                            <p>
+                                <b>Message:</b>{{ message }} <br/>
+                                <b>File:</b> {{ file }} <br/>
+                                <b>Line:</b> {{ line }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="3">
+                        <div class="well">
+                            <h3>Stack trace:</h3>
+                            <pre>{{ trace }}</pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="4">
+                        <div class="well">
+                            <h3>Request Parameters:</h3>
+                            <pre>{{ query }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </span>
+    </div>
+</div>
+{% endblock %}
+
