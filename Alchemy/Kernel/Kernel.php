@@ -179,6 +179,9 @@ class Kernel implements KernelInterface
                 throw new ResourceNotFoundException($request->getPathInfo());
             }
 
+            // controller resolved successfully
+            $this->dispatcher->addSubscriber($controller[0]);
+
             // setting default annotations namespace
             $this->annotationReader->setDefaultNamespace('\Alchemy\Annotation\\');
             // seeting annotation reader target

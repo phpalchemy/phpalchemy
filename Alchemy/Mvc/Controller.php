@@ -3,6 +3,8 @@ namespace Alchemy\Mvc;
 
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
+use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
+use Alchemy\Kernel\KernelEvents;
 
 /**
  * Controller
@@ -17,7 +19,7 @@ use Alchemy\Component\Http\Response;
  * @package   phpalchemy
  */
 
-abstract class Controller
+abstract class Controller implements EventSubscriberInterface
 {
     /**
      * Meta object to store all data that will use on templates
@@ -25,17 +27,22 @@ abstract class Controller
      */
     public $view = null;
 
-    protected $reponse = null;
-    protected $request = null;
-
-    public function setRequest(Request $request)
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
     {
-        $this->request = $request;
+        $subscribedEvents = array();
+
+        $subscribedEvents[KernelEvents::BEFORE_CONTROLLER] = 'if_defined::__before';
+        $subscribedEvents[KernelEvents::AFTER_CONTROLLER]  = 'if_defined::__after';
+
+        return $subscribedEvents;
     }
 
-    public function getRequest()
+    protected function isDefinedMethod($methodName)
     {
-        return $this->request;
+        return method_exists($this, $methodName);
     }
 }
 
