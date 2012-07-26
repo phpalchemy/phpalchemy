@@ -1,0 +1,6 @@
+[submodule "lib/YUI-CSS-compressor-PHP-port"]
+	path = lib/YUI-CSS-compressor-PHP-port
+	url = git://github.com/tubalmartin/YUI-CSS-compressor-PHP-port.git
+[submodule "lib/jsmin-php"]
+	path = lib/jsmin-php
+	url = git://github.com/rgrove/jsmin-php.git
