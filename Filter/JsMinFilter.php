@@ -1,5 +1,5 @@
 <?php
-namespace WebAssets\Filter;
+namespace Alchemy\Component\WebAssets\Filter;
 
 class JsMinFilter implements FilterInterface
 {

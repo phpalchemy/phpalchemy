@@ -1,9 +1,9 @@
 <?php
-namespace WebAssets;
+namespace Alchemy\Component\WebAssets;
 
-use WebAssets\Filter\FilterInterface;
-use WebAssets\Filter\CssMinFilter;
-use WebAssets\Asset;
+use Alchemy\Component\WebAssets\Filter\FilterInterface;
+use Alchemy\Component\WebAssets\Filter\CssMinFilter;
+use Alchemy\Component\WebAssets\Asset;
 
 class Bundle
 {

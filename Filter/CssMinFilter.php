@@ -1,9 +1,14 @@
 <?php
-namespace WebAssets\Filter;
+namespace Alchemy\Component\WebAssets\Filter;
 
 class CssMinFilter implements FilterInterface
 {
     private $lineBreak = 2000;
+
+    public function __construct()
+    {
+        include_once 'lib/YUI-CSS-compressor-PHP-port/cssmin.php';
+    }
 
     public function setLineBreak($lineBreakNum)
     {
@@ -12,6 +17,7 @@ class CssMinFilter implements FilterInterface
 
     public function apply($content)
     {
-        return \CssMin::run($content, $this->lineBreak);
+        $cssMin = new \CSSmin();
+        return $cssMin->run($content, $this->lineBreak);
     }
 }

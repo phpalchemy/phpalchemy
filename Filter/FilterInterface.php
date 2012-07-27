@@ -1,7 +1,7 @@
 <?php
-namespace WebAssets\Filter;
+namespace Alchemy\Component\WebAssets\Filter;
 
 interface FilterInterface
 {
-    public function apply();
+    public function apply($content);
 }

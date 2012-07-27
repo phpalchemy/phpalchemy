@@ -1,5 +1,5 @@
 <?php
-namespace WebAssets;
+namespace Alchemy\Component\WebAssets;
 
 /**
  * A file in the file system.

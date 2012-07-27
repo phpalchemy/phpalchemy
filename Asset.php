@@ -1,8 +1,8 @@
 <?php
-namespace WebAssets;
+namespace Alchemy\Component\WebAssets;
 
-use WebAssets\Filter\FilterInterface;
-use WebAssets\File;
+use Alchemy\Component\WebAssets\Filter\FilterInterface;
+use Alchemy\Component\WebAssets\File;
 
 class Asset
 {
@@ -39,6 +39,11 @@ class Asset
     public function setFilter(FilterInterface $filter)
     {
         $this->filter = $filter;
+    }
+
+    public function hasFilter()
+    {
+        return isset($this->filter);
     }
 
     public function getOutput()
