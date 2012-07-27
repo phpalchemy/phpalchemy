@@ -94,13 +94,12 @@ server.tag = "lighttpd server / Powered by PHPAlchemy Framework"
 #)
 
 #url.rewrite-once = (
-#    ".*\.(jpg|jpeg|gif|png|swf|avi|mpg|mpeg|mp3|flv|ico|css)$" => "$0",
-#    "^/(.+)/?$" => "/app.php"
+#  "^/(.*)\.(.+)$" => "$0",
+#  "^/(.+)?$" => "/app.php"
 #)
 
-url.rewrite-once = (
-  "^/(.*)\.(.+)$" => "$0",
-  "^/(.+)?$" => "/app.php"
+url.rewrite-if-not-file = (
+  "^/(.*)$" => "/app.php"
 )
 
 static-file.exclude-extensions = (".fcgi", ".php", ".rb", "~", ".inc")

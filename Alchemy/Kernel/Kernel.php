@@ -14,6 +14,7 @@ use Alchemy\Annotation\Reader\Reader;
 use Alchemy\Annotation\ViewAnnotation;
 use Alchemy\Config;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
+use Alchemy\Component\Http;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 use Alchemy\Component\Http\JsonResponse;
@@ -151,7 +152,13 @@ class Kernel implements KernelInterface
              * it any route match the current url a ResourceNotFoundException
              * will be thrown.
              */
-            $params = $this->mapper->match($request->getPathInfo());
+            $params = $this->mapper->match($request);
+            if (array_key_exists('_type', $params)) {
+                if ($params['_type'] == 'x-asset-request') {
+                    //$this->handleAssetRequest($params);
+                    //exit(0);n
+                }
+            }
 
             // prepare request params.
             $params = $this->prepareRequestParams(array($params, $request->query->all(), $request->request->all()));
@@ -178,9 +185,6 @@ class Kernel implements KernelInterface
             if (! $controller) {
                 throw new ResourceNotFoundException($request->getPathInfo());
             }
-
-            // controller resolved successfully
-            $this->dispatcher->addSubscriber($controller[0]);
 
             // setting default annotations namespace
             $this->annotationReader->setDefaultNamespace('\Alchemy\Annotation\\');
@@ -300,6 +304,39 @@ class Kernel implements KernelInterface
         );
 
         return $response;
+    }
+
+    protected function handleAssetRequest(array $params)
+    {
+        $response = new Response();
+
+        $assetsConf = $this->config->getSection('asset_resolv');
+        $assetsDir  = $this->config->get('app.public_dir') . '/assets';
+
+        var_dump($assetsDir . '/' . $assetsConf['current'] . '/' . $params['filename']);
+
+        if (! empty($assetsConf['current'])) {
+            $file = $assetsDir . '/' . $assetsConf['current'] . '/' . $params['filename'];
+
+            if (file_exists($file)) {
+                $fileResource = new Http\File\File($file);
+                $mtime = filemtime($fileResource->getPathname());
+
+                $response->headers->set('Content-Type', $fileResource->getMimeType());
+                $response->setContent(file_get_contents($fileResource->getPathname()));
+                $response->setCache(array(
+                    'public' => true,
+                    'last_modified' => new \DateTime(gmdate("D, d M Y H:i:s", $mtime))
+                ));
+
+                $response->setExpires(new \DateTime(gmdate("D, j M Y H:i:s", time() + MONTH)));
+                $response->isNotModified($this->request);
+
+                return $response;
+            }
+        } elseif (! empty($assetsConf['fallback'])) {
+
+        }
     }
 
     protected function handleMetaUi(array $data, $annotation, $targetView)

@@ -19,30 +19,12 @@ use Alchemy\Kernel\KernelEvents;
  * @package   phpalchemy
  */
 
-abstract class Controller implements EventSubscriberInterface
+abstract class Controller
 {
     /**
      * Meta object to store all data that will use on templates
      * @var [type]
      */
     public $view = null;
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function getSubscribedEvents()
-    {
-        $subscribedEvents = array();
-
-        $subscribedEvents[KernelEvents::BEFORE_CONTROLLER] = 'if_defined::__before';
-        $subscribedEvents[KernelEvents::AFTER_CONTROLLER]  = 'if_defined::__after';
-
-        return $subscribedEvents;
-    }
-
-    protected function isDefinedMethod($methodName)
-    {
-        return method_exists($this, $methodName);
-    }
 }
 

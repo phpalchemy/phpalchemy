@@ -20,6 +20,9 @@ class HaangaView extends View
             'template_dir' => $this->getTemplateDir(),
             'cache_dir' => $this->getCacheDir(),
             'debug' => $this->debug,
+            'compiler' => array(
+                'allow_exec'  => true,
+            ),
         );
 
         if ($this->cache && is_callable('xcache_isset')) {
