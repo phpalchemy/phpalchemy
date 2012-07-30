@@ -3,8 +3,11 @@ namespace Alchemy\Console;
 
 use Alchemy\Config;
 
-use Symfony\Component\Console\Application,
-    Application\Cli\Command;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Application\Cli\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 
 class Alchemist extends Application
 {
@@ -58,7 +61,6 @@ class Alchemist extends Application
 
     protected function prepare()
     {
-
         $helpers  = array();
         $commands = array();
 
@@ -76,10 +78,10 @@ class Alchemist extends Application
         $this->addCommands($commands);
     }
 
-    public function run()
+    public function run(InputInterface $input = null, OutputInterface $output = null)
     {
         $this->prepare();
-        parent::run();
+        return parent::run();
     }
 }
 
