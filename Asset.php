@@ -50,7 +50,7 @@ class Asset
     {
         $contents = $this->file->getContent();
 
-        if (! empty($this->filter)) {
+        if ($this->hasFilter()) {
             $contents = $this->filter->apply($contents);
         }
 

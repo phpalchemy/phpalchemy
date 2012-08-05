@@ -7,4 +7,6 @@ include 'Asset.php';
 include 'File.php';
 include 'Filter/FilterInterface.php';
 include 'Filter/CssMinFilter.php';
+include 'Filter/JsMinPlusFilter.php';
+include 'Filter/JsMinFilter.php';
 

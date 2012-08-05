@@ -1,6 +1,8 @@
 <?php
 use Alchemy\Component\WebAssets\Asset;
 use Alchemy\Component\WebAssets\Filter\CssMinFilter;
+use Alchemy\Component\WebAssets\Filter\JsMinPlusFilter;
+use Alchemy\Component\WebAssets\Filter\JsMinFilter;
 
 /**
  * Asset Class - Unit Test
@@ -31,6 +33,16 @@ class AssetTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Asset::__constructor().
+     */
+    public function testConstructorWithJs()
+    {
+        $asset = new Asset(__DIR__ . '/fixtures/js/before.js');
+
+        return $asset;
+    }
+
+    /**
      * @covers Asset::setFilter
      * @depends testConstructorWithCss
      */
@@ -55,6 +67,12 @@ class AssetTest extends PHPUnit_Framework_TestCase
         // with CssMin filter
         $asset = new Asset(__DIR__ . '/fixtures/css/styles.css', new CssMinFilter());
         $expected = file_get_contents(__DIR__ . '/fixtures/css/styles.min.css');
+        $result = $asset->getOutput();
+        $this->assertEquals($expected, $result);
+
+        // with JsMinPlus filter
+        $asset = new Asset(__DIR__ . '/fixtures/js/before.js', new JsMinFilter());
+        $expected = file_get_contents(__DIR__ . '/fixtures/js/before.min.js');
         $result = $asset->getOutput();
         $this->assertEquals($expected, $result);
     }

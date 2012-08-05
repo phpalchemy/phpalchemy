@@ -7,7 +7,7 @@ class CssMinFilter implements FilterInterface
 
     public function __construct()
     {
-        include_once 'lib/YUI-CSS-compressor-PHP-port/cssmin.php';
+        include_once 'lib/cssmin.php';
     }
 
     public function setLineBreak($lineBreakNum)
