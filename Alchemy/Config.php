@@ -116,6 +116,8 @@ class Config
     private function loadFromArray($configList)
     {
         foreach ($configList as $section => $config) {
+            $this->set($section, $config);
+
             foreach ($config as $key => $value) {
                 if (substr_count($value, '%') !== 2) {
                     $this->set($section . '.' . $key, $value);
