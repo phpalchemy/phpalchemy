@@ -32,24 +32,7 @@ class Config
             throw new \Exception("Invalid configuration key.");
         }
 
-        if (is_string($value) && preg_match('/.*\%(.+\..+)\%.*/', $value, $match)) {
-            try {
-                $value = str_replace("%{$match[1]}%", $this->get($match[1]), $value);
-            } catch (\Exception $e) {
-                throw new \Exception(
-                    "Configuration Missing for %" . $match[1] . "% for " .
-                    "key: '$name', with value: '$value'"
-                );
-            }
-
-            if (substr($name, -4) === '_dir') {
-                $value = rtrim($value, DS);
-            }
-
-            $this->config[$name] = $value;
-        }
-
-        $this->config[$name] = $value;
+        $this->config[$name] = $this->prepare($value, $name);
     }
 
     /**
@@ -116,7 +99,7 @@ class Config
     private function loadFromArray($configList)
     {
         foreach ($configList as $section => $config) {
-            $this->set($section, $config);
+            $this->config[$section] = $config;
 
             foreach ($config as $key => $value) {
                 if (substr_count($value, '%') !== 2) {
@@ -150,6 +133,31 @@ class Config
     public function all()
     {
         return $this->getAll();
+    }
+
+    public function prepare($value, $name = '')
+    {
+        if (is_string($value) && preg_match('/.*\%(.+\..+)\%.*/', $value, $match)) {
+            try {
+                $value = str_replace("%{$match[1]}%", $this->get($match[1]), $value);
+            } catch (\Exception $e) {
+                throw new \Exception("Configuration Missing for %" . $match[1] . "%");
+            }
+
+            if (! empty($name) && substr($name, -4) === '_dir') {
+                $value = rtrim($value, DS);
+            }
+        } elseif (is_array($value)) {
+            $result = array();
+
+            foreach ($value as $key => $item) {
+                $result[$key] = $this->prepare($item);
+            }
+
+            $value = $result;
+        }
+
+        return $value;
     }
 }
 
