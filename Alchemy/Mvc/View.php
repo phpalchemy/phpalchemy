@@ -66,6 +66,8 @@ abstract class View
 
     protected $uiElements = array();
 
+    protected $assetsHandler = null;
+
     /**
      * Debug flag to indicate to template engine is a debug environment
      * Defaults false
@@ -295,6 +297,11 @@ abstract class View
     public function setUiElement($id, $element)
     {
         $this->uiElements[$id] = $element;
+    }
+
+    public function registerAssetHandler($assetHandler)
+    {
+        $this->assetsHandler = $assetHandler;
     }
 }
 

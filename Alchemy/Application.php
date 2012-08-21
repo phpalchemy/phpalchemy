@@ -23,6 +23,7 @@ use Alchemy\Component\Routing\Route;
 use Alchemy\Component\UI\Parser;
 use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Engine;
+use Alchemy\Component\WebAssets;
 use Alchemy\Component\Yaml\Yaml;
 use Alchemy\Exception\Handler;
 use Alchemy\Kernel\EventListener;
@@ -172,6 +173,10 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             );
         });
 
+        $this['assetsHandler'] = $this->share(function () use ($app) {
+            return new WebAssets\Bundle();
+        });
+
         $this['kernel'] = $this->share(function () use ($app) {
             return new Kernel(
                 $app['dispatcher'],
@@ -179,7 +184,8 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
                 $app['resolver'],
                 $app['config'],
                 $app['annotation'],
-                $app['ui_engine']
+                $app['ui_engine'],
+                $app['assetsHandler']
             );
         });
 

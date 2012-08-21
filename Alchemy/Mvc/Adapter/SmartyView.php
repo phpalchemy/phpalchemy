@@ -15,7 +15,6 @@ class SmartyView extends View
         $this->smarty = new \Smarty();
 
         $this->smarty->registerPlugin("function","form_widget", array($this, "formWidget"));
-
     }
 
     //Wrapped

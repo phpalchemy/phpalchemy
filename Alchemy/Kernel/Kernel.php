@@ -21,6 +21,7 @@ use Alchemy\Component\Http\JsonResponse;
 use Alchemy\Component\Routing\Exception\ResourceNotFoundException;
 use Alchemy\Component\Routing\Mapper;
 use Alchemy\Component\UI\Engine;
+use Alchemy\Component\WebAssets\Bundle;
 use Alchemy\Exception;
 use Alchemy\Kernel\Event\GetResponseEvent;
 use Alchemy\Kernel\Event\FilterResponseEvent;
@@ -87,6 +88,12 @@ class Kernel implements KernelInterface
     public $request = null;
 
     /**
+     * Assets handler object
+     * @var Alchemy\Component\WebAssets\Bundle
+     */
+    public $assetsHandler = null;
+
+    /**
      * Kernel constructor
      *
      * @param EventDispatcher     $dispatcher Event dispatcher object.
@@ -102,7 +109,8 @@ class Kernel implements KernelInterface
         ControllerResolver $resolver,
         Config $config,
         Reader $annotationReader,
-        Engine $uiEngine
+        Engine $uiEngine,
+        Bundle $assetsHandler
     ) {
         $this->mapper     = $mapper;
         $this->resolver   = $resolver;
@@ -110,6 +118,7 @@ class Kernel implements KernelInterface
         $this->config     = $config;
         $this->annotationReader = $annotationReader;
         $this->uiEngine   = $uiEngine;
+        $this->assetsHandler = $assetsHandler;
 
         // Some configurations for developments environments
         if ($this->config->get('env.type') !== 'dev') {
@@ -498,6 +507,11 @@ class Kernel implements KernelInterface
         $conf->extension    = $this->config->get('templating.extension');
         $conf->charset      = $this->config->get('templating.charset');
         $conf->debug        = $this->config->get('templating.debug');
+        $conf->assetsLocate = $this->config->get('assets_location');
+
+        var_dump($conf->assetsLocate);
+        var_dump($this->config->prepare($conf->assetsLocate));
+        die;
 
         // File extension validation
         // A criteria can be if filename doesn't a period character (.)
@@ -564,6 +578,13 @@ class Kernel implements KernelInterface
         // setting data to be used by template
         $view->assign('baseurl', $baseurl);
         $view->assign($data);
+
+        // setting & regitsering assets handler on view
+        $this->assetsHandler->setLocateDir(array(
+            __DIR__.'/fixtures/js2/',
+            __DIR__.'/fixtures/js/',
+        ));
+        $view->registerAssetHandler($this->assetsHandler);
 
         return $view;
     }
