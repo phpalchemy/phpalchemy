@@ -105,6 +105,7 @@ class Bundle
             return $this->output;
         }
 
+    public function handle()
         $checksum = array();
         $id = array();
         $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
@@ -151,6 +152,8 @@ class Bundle
         }
 
         return $this->output;
+        $this->save();
+    public function save()
     }
 
     protected function loadCache()
