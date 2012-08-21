@@ -226,26 +226,3 @@ class Bundle
     }
 }
 
-include 'Asset.php';
-include 'File.php';
-include 'Filter/FilterInterface.php';
-include 'Filter/CssMinFilter.php';
-include 'Filter/JsMinFilter.php';
-
-$bundle = new Bundle(
-    array('before.js', New JsMinFilter),
-    'issue74.js'
-);
-
-$bundle->setLocateDir(array(
-    'Tests/fixtures/js2/',
-    'Tests/fixtures/js/',
-));
-$bundle->setCacheDir('Tests/cache');
-$bundle->setOutputDir('Tests/cache');
-
-if ($genFile = $bundle->save())
-    echo 'File writed as ' . $genFile."\n";
-else
-    echo "Could't save file: $genFile\n";
-

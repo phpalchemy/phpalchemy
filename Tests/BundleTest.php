@@ -32,41 +32,28 @@ class BundleTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle::setOutputFilename
-     * @todo   Implement testSetOutputFilename().
-     */
-    public function testSetOutputFilename()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @covers Bundle::setFilter
-     * @todo   Implement testSetFilter().
-     */
-    public function testSetFilter()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
      * @covers Bundle::getOutput
      * @todo   Implement testGetOutput().
      */
     public function testGetOutput()
     {
         $bundle = new Bundle(
-            array(__DIR__.'/fixtures/js/before.js', New JsMinFilter),
-            __DIR__.'/fixtures/js/issue74.js'
+            array('before.js', New JsMinFilter),
+            'issue74.js'
         );
 
-        $bundle->setCacheDir(__DIR_.'/cache');
-        echo $bundle->getOutput();
+        $bundle->setLocateDir(array(
+            __DIR__.'/fixtures/js2/',
+            __DIR__.'/fixtures/js/',
+        ));
+        $bundle->setCacheDir(__DIR__.'/cache');
+        $bundle->setOutputDir(__DIR__.'/cache');
+
+        $genFile = $bundle->save();
+
+        $expected = file_get_contents(__DIR__.'/fixtures/js/result1.js');
+        $result = file_get_contents($genFile);
+
+        $this->assertEquals($expected, $result);
     }
 }
