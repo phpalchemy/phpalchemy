@@ -35,8 +35,13 @@ class BundleTest extends PHPUnit_Framework_TestCase
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown()
+    public function __destruct()
     {
+        foreach(glob(__DIR__.'/cache/*.*') as $file){
+            unlink($file);
+        }
+        @unlink(__DIR__.'/cache/.webassets.cacheinf');
+        echo 'clean up!';
     }
 
     /**
@@ -57,12 +62,44 @@ class BundleTest extends PHPUnit_Framework_TestCase
         $bundle->setCacheDir(__DIR__.'/cache');
         $bundle->setOutputDir(__DIR__.'/cache');
 
-        $genFile = $bundle->save();
+        $bundle->handle();
+
+        $genFile = $bundle->getPath();
 
         $expected = file_get_contents(__DIR__.'/fixtures/js/result1.js');
         $result = file_get_contents($genFile);
 
         $this->assertEquals($expected, $result);
+        $this->assertFalse($bundle->isFromCache());
+    }
+
+    /**
+     * @covers Bundle::getOutput
+     * @todo   Implement testGetOutput().
+     */
+    public function testGetOutputFromCache()
+    {
+        $bundle = new Bundle(
+            array('before.js', New JsMinFilter),
+            'issue74.js'
+        );
+
+        $bundle->setLocateDir(array(
+            __DIR__.'/fixtures/js2/',
+            __DIR__.'/fixtures/js/',
+        ));
+        $bundle->setCacheDir(__DIR__.'/cache');
+        $bundle->setOutputDir(__DIR__.'/cache');
+
+        $bundle->handle();
+
+        $genFile = $bundle->getPath();
+
+        $expected = file_get_contents(__DIR__.'/fixtures/js/result1.js');
+        $result = file_get_contents($genFile);
+
+        $this->assertEquals($expected, $result);
+        $this->assertTrue($bundle->isFromCache());
     }
 
 }

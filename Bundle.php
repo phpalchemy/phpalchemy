@@ -41,6 +41,7 @@ class Bundle
     protected $cacheDir  = '';
     protected $outputDir = '';
     protected $locateDirs = array();
+    protected $fromCache = false;
 
     public function __construct()
     {
@@ -90,6 +91,11 @@ class Bundle
         $this->outputDir = rtrim(realpath($outputDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 
+    public function isFromCache()
+    {
+        return $this->fromCache;
+    }
+
     public function setLocateDir($dir)
     {
         if (is_array($dir)) {
@@ -101,11 +107,11 @@ class Bundle
 
     public function getOutput()
     {
-        if (! empty($this->output)) {
-            return $this->output;
-        }
+        return $this->output;
+    }
 
     public function handle()
+    {
         $checksum = array();
         $id = array();
         $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
@@ -139,11 +145,14 @@ class Bundle
         $this->loadCache();
 
         if ($this->isCached() && ! $this->isCacheOutdated()) {
+            $this->fromCache = true;
+
             return file_get_contents($this->cacheInfo[$this->id]['filename']);
-        } else {
-            $this->saveCacheInf();
         }
 
+        $this->saveCacheInf();
+
+        // build asset compiled file.
         foreach ($this->meta as $item) {
             $asset = new Asset($item[0], $item[1]);
 
@@ -151,9 +160,18 @@ class Bundle
             $this->output .= $asset->getOutput() . "\n";
         }
 
-        return $this->output;
         $this->save();
+    }
+
     public function save()
+    {
+        $output = $this->getOutput();
+
+        if (@file_put_contents($this->outputDir . $this->genFilename, $output) !== false) {
+            return $this->outputDir . $this->genFilename;
+        }
+
+        return false;
     }
 
     protected function loadCache()
@@ -219,30 +237,9 @@ class Bundle
         return true;
     }
 
-    public function getUrl()
+    public function getPath()
     {
-        return $this->genFilename . '?' . $this->checksum;
-    }
-
-    public function setOutputFilename($filename)
-    {
-        $this->outputFilename = $filename;
-    }
-
-    public function setFilter(FilterInterface $filter)
-    {
-        $this->filter = $filter;
-    }
-
-    public function save()
-    {
-        $output = $this->getOutput();
-
-        if (@file_put_contents($this->outputDir . $this->genFilename, $output) !== false) {
-            return $this->outputDir . $this->genFilename;
-        }
-
-        return false;
+        return $this->outputDir . $this->genFilename;
     }
 
     protected function saveCacheInf()
@@ -260,8 +257,21 @@ class Bundle
 
         $content = '<?php return ' . var_export($this->cacheInfo, true) . ';';
         file_put_contents($this->cacheInfoFile, $content);
+    }
 
-        echo "* cache inf. regenerated\n";
+    public function getUrl()
+    {
+        return $this->genFilename . '?' . $this->checksum;
+    }
+
+    public function setOutputFilename($filename)
+    {
+        $this->outputFilename = $filename;
+    }
+
+    public function setFilter(FilterInterface $filter)
+    {
+        $this->filter = $filter;
     }
 }
 
