@@ -53,23 +53,24 @@ class Bundle
         }
     }
 
-    public function add($filename, $filter = null)
+    public function getPath()
     {
-        if (! empty($filter) && ! ($filter instanceof FilterInterface)) {
-            throw new \RuntimeException("Runtime Exception: Invalid Filter, it must implement FilterInterface.");
-        }
+        return $this->path;
+    }
 
-        if (is_string($filename)) {
-            $this->meta[] = array($filename, $filter);
-        } elseif (is_array($filename)) {
-            $this->meta[] = $filename;
-        } else {
-            throw new \RuntimeException(sprintf(
-                "Runtime Exception: Invalid param. " .
-                "The first param should be a string containing asset file name, '%s given'",
-                $filename
-            ));
-        }
+    public function getUrl()
+    {
+        return $this->genFilename . '?' . $this->checksum;
+    }
+
+    public function setOutputFilename($filename)
+    {
+        $this->outputFilename = $filename;
+    }
+
+    public function setFilter(FilterInterface $filter)
+    {
+        $this->filter = $filter;
     }
 
     public function setCacheDir($cacheDir)
@@ -101,6 +102,25 @@ class Bundle
         return $this->output;
     }
 
+    public function add($filename, $filter = null)
+    {
+        if (! empty($filter) && ! ($filter instanceof FilterInterface)) {
+            throw new \RuntimeException("Runtime Exception: Invalid Filter, it must implement FilterInterface.");
+        }
+
+        if (is_string($filename)) {
+            $this->meta[] = array($filename, $filter);
+        } elseif (is_array($filename)) {
+            $this->meta[] = $filename;
+        } else {
+            throw new \RuntimeException(sprintf(
+                "Runtime Exception: Invalid param. " .
+                "The first param should be a string containing asset file name, '%s given'",
+                $filename
+            ));
+        }
+    }
+
     public function handle()
     {
         // first verify if a single resource file without filter was requested
@@ -110,7 +130,7 @@ class Bundle
             return true;
         }
 
-        // continue processing multiples resources or filtered single file
+        // continue processing multiples resources or a single filtered res.
         $checksum = array();
         $id = array();
         $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
@@ -225,11 +245,6 @@ class Bundle
         return true;
     }
 
-    public function getPath()
-    {
-        return $this->path;
-    }
-
     protected function saveCacheInf()
     {
         if (array_key_exists($this->id, $this->cacheInfo)) {
@@ -247,22 +262,7 @@ class Bundle
         file_put_contents($this->cacheInfoFile, $content);
     }
 
-    public function getUrl()
-    {
-        return $this->genFilename . '?' . $this->checksum;
-    }
-
-    public function setOutputFilename($filename)
-    {
-        $this->outputFilename = $filename;
-    }
-
-    public function setFilter(FilterInterface $filter)
-    {
-        $this->filter = $filter;
-    }
-
-    public function locateFile($src)
+    protected function locateFile($src)
     {
         foreach ($this->locateDirs as $dir) {
             if (file_exists($dir . $src)) {
