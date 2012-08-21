@@ -22,3 +22,6 @@
 [submodule "Alchemy/Component/DiContainer"]
 	path = Alchemy/Component/DiContainer
 	url = git@github.com:eriknyk/DiContainer
+[submodule "Alchemy/Component/WebAssets"]
+	path = Alchemy/Component/WebAssets
+	url = git@github.com:eriknyk/WebAssets.git
