@@ -42,6 +42,7 @@ class Bundle
     protected $outputDir = '';
     protected $locateDirs = array();
     protected $fromCache = false;
+    protected $path = '';
 
     public function __construct()
     {
@@ -50,21 +51,11 @@ class Bundle
         foreach ($args as $arg) {
             $this->add($arg);
         }
-
-        foreach ($this->meta as $i => $assetInfo) {
-            if (! is_string($assetInfo[0])) {
-                throw new \RuntimeException(sprintf(
-                    "Runtime Exception: Invalid param. " .
-                    "The first param should be a string containing asset file name, '%s given'",
-                    $assetInfo[0]
-                ));
-            }
-        }
     }
 
     public function add($filename, $filter = null)
     {
-        if (! is_null($filter) && ! ($filter instanceof FilterInterface)) {
+        if (! empty($filter) && ! ($filter instanceof FilterInterface)) {
             throw new \RuntimeException("Runtime Exception: Invalid Filter, it must implement FilterInterface.");
         }
 
@@ -112,21 +103,20 @@ class Bundle
 
     public function handle()
     {
+        // first verify if a single resource file without filter was requested
+        if (count($this->meta) == 1 && empty($this->meta[0][1])) {
+            $this->path = $this->locateFile($this->meta[0][0]);
+
+            return true;
+        }
+
+        // continue processing multiples resources or filtered single file
         $checksum = array();
         $id = array();
         $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
 
         foreach ($this->meta as $i => $assetInfo) {
-            foreach ($this->locateDirs as $dir) {
-                if (file_exists($dir . $assetInfo[0])) {
-                    $filename = $this->meta[$i][0] = $dir . $assetInfo[0];
-                    break;
-                }
-            }
-
-            if (! file_exists($filename)) {
-                throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exists", $filename));
-            }
+            $filename = $this->meta[$i][0] = $this->locateFile($assetInfo[0]);
 
             $checksum[] = md5_file($filename);
             $id[] = $assetInfo[0];
@@ -146,13 +136,15 @@ class Bundle
 
         if ($this->isCached() && ! $this->isCacheOutdated()) {
             $this->fromCache = true;
+            $this->path = $this->cacheInfo[$this->id]['filename'];
 
-            return file_get_contents($this->cacheInfo[$this->id]['filename']);
+            return true;
         }
 
         $this->saveCacheInf();
 
         // build asset compiled file.
+
         foreach ($this->meta as $item) {
             $asset = new Asset($item[0], $item[1]);
 
@@ -160,18 +152,14 @@ class Bundle
             $this->output .= $asset->getOutput() . "\n";
         }
 
-        $this->save();
-    }
+        // save generated file
+        $this->path = $this->outputDir . $this->genFilename;
 
-    public function save()
-    {
-        $output = $this->getOutput();
-
-        if (@file_put_contents($this->outputDir . $this->genFilename, $output) !== false) {
-            return $this->outputDir . $this->genFilename;
+        if (@file_put_contents($this->path, $this->output) === false) {
+            throw new \RuntimeException(sprintf(
+                "Runtime Error: WebAssets couldn't save generated file in '%s' directory.", $this->outputDir
+            ));
         }
-
-        return false;
     }
 
     protected function loadCache()
@@ -239,7 +227,7 @@ class Bundle
 
     public function getPath()
     {
-        return $this->outputDir . $this->genFilename;
+        return $this->path;
     }
 
     protected function saveCacheInf()
@@ -272,6 +260,17 @@ class Bundle
     public function setFilter(FilterInterface $filter)
     {
         $this->filter = $filter;
+    }
+
+    public function locateFile($src)
+    {
+        foreach ($this->locateDirs as $dir) {
+            if (file_exists($dir . $src)) {
+                return $dir . $src;
+            }
+        }
+
+        throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exist!", $src));
     }
 }
 

@@ -41,7 +41,6 @@ class BundleTest extends PHPUnit_Framework_TestCase
             unlink($file);
         }
         @unlink(__DIR__.'/cache/.webassets.cacheinf');
-        echo 'clean up!';
     }
 
     /**
@@ -61,13 +60,10 @@ class BundleTest extends PHPUnit_Framework_TestCase
         ));
         $bundle->setCacheDir(__DIR__.'/cache');
         $bundle->setOutputDir(__DIR__.'/cache');
-
         $bundle->handle();
 
-        $genFile = $bundle->getPath();
-
         $expected = file_get_contents(__DIR__.'/fixtures/js/result1.js');
-        $result = file_get_contents($genFile);
+        $result = file_get_contents($bundle->getPath());
 
         $this->assertEquals($expected, $result);
         $this->assertFalse($bundle->isFromCache());
@@ -90,16 +86,31 @@ class BundleTest extends PHPUnit_Framework_TestCase
         ));
         $bundle->setCacheDir(__DIR__.'/cache');
         $bundle->setOutputDir(__DIR__.'/cache');
-
         $bundle->handle();
 
-        $genFile = $bundle->getPath();
-
         $expected = file_get_contents(__DIR__.'/fixtures/js/result1.js');
-        $result = file_get_contents($genFile);
+        $result = file_get_contents($bundle->getPath());
 
         $this->assertEquals($expected, $result);
         $this->assertTrue($bundle->isFromCache());
+    }
+
+    /**
+     * @covers Bundle::handle
+     */
+    public function testHandleSingleFileWithoutFilter()
+    {
+        $bundle = new Bundle('before.js');
+
+        $bundle->setLocateDir(array(
+            __DIR__.'/fixtures/js2/',
+            __DIR__.'/fixtures/js/',
+        ));
+        $bundle->setCacheDir(__DIR__.'/cache');
+        $bundle->setOutputDir(__DIR__.'/cache');
+        $bundle->handle();
+
+        $this->assertEquals(__DIR__.'/fixtures/js2/before.js', $bundle->getPath());
     }
 
 }
