@@ -19,23 +19,7 @@ class Bundle
 
     protected $cacheDir  = '';
     protected $outputDir = '';
-
-    public function __construct1()
-    {
-        $args = func_get_args();
-
-        foreach ($args as $arg) {
-            if ($arg instanceof Asset) {
-                $this->assets[] = $arg;
-            } elseif ($arg instanceof FilterInterface) {
-                if ($this->filter === null) {
-                    $this->setFilter($arg);
-                } else {
-                    throw new \RuntimeException("Runtime Error: A filter is already registered.");
-                }
-            }
-        }
-    }
+    protected $locateDirs = array();
 
     public function __construct()
     {
@@ -46,6 +30,16 @@ class Bundle
                 $this->meta[] = array($arg, null);
             } elseif (is_array($arg)) {
                 $this->meta[] = $arg;
+            }
+        }
+
+        foreach ($this->meta as $i => $assetInfo) {
+            if (! is_string($assetInfo[0])) {
+                throw new \RuntimeException(sprintf(
+                    "Runtime Exception: Invalid param. " .
+                    "The first param should be a string containing asset file name, '%s given'",
+                    $assetInfo[0]
+                ));
             }
         }
     }
@@ -60,6 +54,15 @@ class Bundle
         $this->outputDir = rtrim(realpath($outputDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 
+    public function setLocateDir($dir)
+    {
+        if (is_array($dir)) {
+            $this->locateDirs = array_merge($this->locateDirs, $dir);
+        } else {
+            $this->locateDirs[] = $dir;
+        }
+    }
+
     public function getOutput()
     {
         if (! empty($this->output)) {
@@ -71,27 +74,30 @@ class Bundle
         $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
 
         foreach ($this->meta as $i => $assetInfo) {
-            $filename = $assetInfo[0];
-
-            if (! is_string($filename)) {
-                throw new \RuntimeException(sprintf(
-                    "Runtime Exception: Invalid param. " .
-                    "The first param should be a string containing asset file name, '%s given'",
-                    $assetInfo[0]
-                ));
+            foreach ($this->locateDirs as $dir) {
+                if (file_exists($dir . $assetInfo[0])) {
+                    $filename = $this->meta[$i][0] = $dir . $assetInfo[0];
+                    break;
+                }
             }
+
             if (! file_exists($filename)) {
-                throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exists", $assetInfo[0]));
+                throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exists", $filename));
             }
 
             $checksum[] = md5_file($filename);
-            $id[] = $filename;
+            $id[] = $assetInfo[0];
         }
 
         $this->id = md5(count($id) == 1 ? $id[0] : implode(' ', $id));
-        $this->checksum = count($checksum) == 1 ? $checksum[0] : md5(implode('-', $checksum));
-        $this->genFilename = count($checksum) == 1 ? basename($filename)
-                           : 'x-gen-' . md5($this->checksum) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+
+        if (count($checksum) == 1) {
+            $this->checksum = $checksum[0];
+            $this->genFilename = basename($filename);
+        } else {
+            $this->checksum = md5(implode('-', $checksum));
+            $this->genFilename = 'x-gen-'.md5($this->checksum).'.'.pathinfo($filename, PATHINFO_EXTENSION);
+        }
 
         $this->loadCache();
 
@@ -104,8 +110,8 @@ class Bundle
         foreach ($this->meta as $item) {
             $asset = new Asset($item[0], $item[1]);
 
-            $this->output .= "\n/*! -- File: '".$asset->getFilename()."' -- */\n";
-            $this->output .= $asset->getOutput();
+            $this->output .= "/*! -- File: '".$asset->getFilename()."' -- */\n";
+            $this->output .= $asset->getOutput() . "\n";
         }
 
         return $this->output;
@@ -227,10 +233,14 @@ include 'Filter/CssMinFilter.php';
 include 'Filter/JsMinFilter.php';
 
 $bundle = new Bundle(
-    array('Tests/fixtures/js/before.js', New JsMinFilter),
-    'Tests/fixtures/js/issue74.js'
+    array('before.js', New JsMinFilter),
+    'issue74.js'
 );
 
+$bundle->setLocateDir(array(
+    'Tests/fixtures/js2/',
+    'Tests/fixtures/js/',
+));
 $bundle->setCacheDir('Tests/cache');
 $bundle->setOutputDir('Tests/cache');
 
