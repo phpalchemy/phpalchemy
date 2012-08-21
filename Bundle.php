@@ -47,11 +47,7 @@ class Bundle
         $args = func_get_args();
 
         foreach ($args as $arg) {
-            if (is_string($arg)) {
-                $this->meta[] = array($arg, null);
-            } elseif (is_array($arg)) {
-                $this->meta[] = $arg;
-            }
+            $this->add($arg);
         }
 
         foreach ($this->meta as $i => $assetInfo) {
@@ -62,6 +58,25 @@ class Bundle
                     $assetInfo[0]
                 ));
             }
+        }
+    }
+
+    public function add($filename, $filter = null)
+    {
+        if (! is_null($filter) && ! ($filter instanceof FilterInterface)) {
+            throw new \RuntimeException("Runtime Exception: Invalid Filter, it must implement FilterInterface.");
+        }
+
+        if (is_string($filename)) {
+            $this->meta[] = array($filename, $filter);
+        } elseif (is_array($filename)) {
+            $this->meta[] = $filename;
+        } else {
+            throw new \RuntimeException(sprintf(
+                "Runtime Exception: Invalid param. " .
+                "The first param should be a string containing asset file name, '%s given'",
+                $filename
+            ));
         }
     }
 
