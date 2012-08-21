@@ -75,6 +75,12 @@ class ServeCommand extends Command
         $phpCgiBin = $this->config->isEmpty('dev_appserver.php-cgi_bin') ?
                      $this->resolveBin('php-cgi') : $this->config->get('dev_appserver.php-cgi_bin');
 
+
+        // validations
+        if (! is_dir($tmpDir)) {
+            throw new \RuntimeException(sprintf("Runtime Error: Temporal directory '%s' does not exits!", $tmpDir));
+        }
+
         switch ($devServer) {
             case 'lighttpd':
                 $devServerBin = $this->config->isEmpty('dev_appserver.lighttpd_bin') ?
@@ -98,7 +104,7 @@ class ServeCommand extends Command
                 );
 
                 if (@file_put_contents($lighttpdTmpConfFile, $lighttpdConfContent) === false) {
-                    throw new Exception ("Error while creating the lighttpd configuration file!");
+                    throw new \Exception("Error while creating the lighttpd configuration file!");
                 }
 
                 $command = "$devServerBin -f $lighttpdTmpConfFile -D";
