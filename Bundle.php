@@ -1,4 +1,13 @@
 <?php
+/*
+ * This file is part of the phpalchemy package.
+ *
+ * (c) Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Alchemy\Component\WebAssets;
 
 use Alchemy\Component\WebAssets\Filter\FilterInterface;
@@ -6,6 +15,18 @@ use Alchemy\Component\WebAssets\Filter\CssMinFilter;
 use Alchemy\Component\WebAssets\Filter\JsMinFilter;
 use Alchemy\Component\WebAssets\Asset;
 
+/**
+ * Class Bundle
+ *
+ * This class handle assets
+ *
+ * @version   1.0
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/WebAssets
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   Alchemy/Component/WebAssets
+ */
 class Bundle
 {
     protected $outputFilename = '';
