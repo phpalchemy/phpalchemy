@@ -43,7 +43,7 @@ class Asset
 
     public function hasFilter()
     {
-        return isset($this->filter);
+        return ! empty($this->filter);
     }
 
     public function getOutput()

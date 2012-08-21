@@ -13,9 +13,12 @@ class Bundle
     protected $assets = array();
     protected $meta = array();
     protected $checksum = '';
-    protected $cacheDir = '';
     protected $genFilename = '';
     protected $cacheInfo = array();
+    protected $output = '';
+
+    protected $cacheDir  = '';
+    protected $outputDir = '';
 
     public function __construct1()
     {
@@ -49,15 +52,23 @@ class Bundle
 
     public function setCacheDir($cacheDir)
     {
-        $this->cacheDir = rtrim($cacheDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $this->cacheDir = rtrim(realpath($cacheDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 
-    public function build()
+    public function setOutputDir($outputDir)
     {
+        $this->outputDir = rtrim(realpath($outputDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    }
+
+    public function getOutput()
+    {
+        if (! empty($this->output)) {
+            return $this->output;
+        }
+
         $checksum = array();
         $id = array();
-        $modified = true;
-        $this->cacheInfoFile = $this->cacheDir.'/.webassets.cacheinf';
+        $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
 
         foreach ($this->meta as $i => $assetInfo) {
             $filename = $assetInfo[0];
@@ -77,22 +88,95 @@ class Bundle
             $id[] = $filename;
         }
 
-
         $this->id = md5(count($id) == 1 ? $id[0] : implode(' ', $id));
         $this->checksum = count($checksum) == 1 ? $checksum[0] : md5(implode('-', $checksum));
         $this->genFilename = count($checksum) == 1 ? basename($filename)
                            : 'x-gen-' . md5($this->checksum) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
 
-        if ($this->revalidate()) {
+        $this->loadCache();
+
+        if ($this->isCached() && ! $this->isCacheOutdated()) {
+            return file_get_contents($this->cacheInfo[$this->id]['filename']);
+        } else {
             $this->saveCacheInf();
         }
 
-        return $this->genFilename;
+        foreach ($this->meta as $item) {
+            $asset = new Asset($item[0], $item[1]);
+
+            $this->output .= "\n/*! -- File: '".$asset->getFilename()."' -- */\n";
+            $this->output .= $asset->getOutput();
+        }
+
+        return $this->output;
+    }
+
+    protected function loadCache()
+    {
+        if (! file_exists($this->cacheInfoFile)) {
+            return false;
+        }
+
+        $this->cacheInfo = include $this->cacheInfoFile;
+
+        // verify is cacheInfo data is corrupted, it should be an array
+        if (! is_array($this->cacheInfo)) {
+            @unlink($this->cacheInfoFile);
+            $this->cacheInfo = array();
+        }
+    }
+
+    protected function isCached()
+    {
+        if (
+            array_key_exists($this->id, $this->cacheInfo) &&
+            array_key_exists('filename', $this->cacheInfo[$this->id]) &&
+            array_key_exists('checksum', $this->cacheInfo[$this->id]) &&
+            file_exists($this->cacheInfo[$this->id]['filename'])
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function isCacheOutdated()
+    {
+        return ($this->checksum !== $this->cacheInfo[$this->id]['checksum']);
+    }
+
+    protected function isOutdated()
+    {
+        if (! file_exists($this->cacheInfoFile)) {
+            return true;
+        }
+
+        $this->cacheInfo = include $this->cacheInfoFile;
+
+        // verify is cacheInfo data is corrupted, it should be an array
+        if (! is_array($this->cacheInfo)) {
+            return true;
+        } elseif (
+            ! array_key_exists('checksum', $this->cacheInfo) ||
+            ! array_key_exists('filename', $this->cacheInfo)
+        ) {
+            return true;
+        }
+
+        if (array_key_exists($this->id, $this->cacheInfo)) {
+            $this->cacheInfo = $this->cacheInfo[$this->id];
+
+            if ($this->checksum === $this->cacheInfo['checksum']) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function getUrl()
     {
-        return $this->genFilename . '?' . $this->checksum
+        return $this->genFilename . '?' . $this->checksum;
     }
 
     public function setOutputFilename($filename)
@@ -105,56 +189,28 @@ class Bundle
         $this->filter = $filter;
     }
 
-    public function getOutput()
+    public function save()
     {
-        $this->process();
-        //var_dump($this->checksum);
-        die;
-        $contents = '';
+        $output = $this->getOutput();
 
-        foreach ($this->assets as $asset) {
-            $contents .= "/*! -- File: '".$asset->getFilename()."' -- */\n";
-            $contents .= $asset->getOutput();
+        if (@file_put_contents($this->outputDir . $this->genFilename, $output) !== false) {
+            return $this->outputDir . $this->genFilename;
         }
 
-        return $contents;
-    }
-
-    public function revalidate()
-    {
-        $this->cacheInfoFile = $this->cacheDir . '.webassets.cacheinf';
-        $modified = true;
-
-        if (file_exists($this->cacheInfoFile)) {
-            $this->cacheInfo = include $this->cacheInfoFile;
-        }
-
-        if (array_key_exists($this->id, $this->cacheInfo)) {
-            $this->cacheInfo = $this->cacheInfo[$this->id];
-
-            if ($this->checksum === $this->cacheInfo['checksum']) {
-                $modified = false;
-            }
-        }
-
-        return $modified;
+        return false;
     }
 
     protected function saveCacheInf()
     {
-        // save cacheInfo
-
         if (array_key_exists($this->id, $this->cacheInfo)) {
             if (file_exists($this->cacheInfo[$this->id]['filename'])) {
-                // if (@unlink($this->cacheInfo[$this->id]['filename'])) {
-                //     echo 'error al borrar old cache file';
-                // }
+                @unlink($this->cacheInfo[$this->id]['filename']);
             }
         }
 
         $this->cacheInfo[$this->id] = array(
             'checksum' => $this->checksum,
-            'filename' => $this->genFilename
+            'filename' => $this->outputDir . $this->genFilename
         );
 
         $content = '<?php return ' . var_export($this->cacheInfo, true) . ';';
@@ -168,7 +224,6 @@ include 'Asset.php';
 include 'File.php';
 include 'Filter/FilterInterface.php';
 include 'Filter/CssMinFilter.php';
-include 'Filter/JsMinPlusFilter.php';
 include 'Filter/JsMinFilter.php';
 
 $bundle = new Bundle(
@@ -177,13 +232,10 @@ $bundle = new Bundle(
 );
 
 $bundle->setCacheDir('Tests/cache');
-$genFile = $bundle->build();
-var_dump($genFile);
+$bundle->setOutputDir('Tests/cache');
 
-//-------------------
+if ($genFile = $bundle->save())
+    echo 'File writed as ' . $genFile."\n";
+else
+    echo "Could't save file: $genFile\n";
 
-$bundle = new Bundle('Tests/fixtures/js/issue74.js');
-
-$bundle->setCacheDir('Tests/cache');
-$genFile = $bundle->build();
-var_dump($genFile);

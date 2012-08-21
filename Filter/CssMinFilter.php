@@ -3,16 +3,16 @@ namespace Alchemy\Component\WebAssets\Filter;
 
 class CssMinFilter implements FilterInterface
 {
-    private $lineBreak = 2000;
+    private $lineBreak = false;
 
     public function __construct()
     {
         include_once 'lib/cssmin.php';
     }
 
-    public function setLineBreak($lineBreakNum)
+    public function setLineBreak($lineBreak)
     {
-        $this->lineBreak = $lineBreakNum;
+        $this->lineBreak = $lineBreak;
     }
 
     public function apply($content)
