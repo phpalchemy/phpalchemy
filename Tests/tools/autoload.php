@@ -35,7 +35,7 @@ class Loader
         foreach ($this->includePaths as $path) {
             //var_dump($path . $filename); //die;
             if (file_exists($path . $filename)) {
-                include $path . $filename;
+                require_once $path . $filename;
             }
         }
 

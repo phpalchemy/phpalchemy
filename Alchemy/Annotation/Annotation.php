@@ -59,5 +59,9 @@ abstract class Annotation
     {
         unset($this->data[$key]);
     }
+
+    public function prepare()
+    {
+    }
 }
 
