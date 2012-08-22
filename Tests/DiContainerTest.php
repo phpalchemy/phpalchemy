@@ -2,7 +2,7 @@
 /**
  * DiContainer Test
  */
-include __DIR__ . '/../DiContainer.php';
+require_once __DIR__ . '/../DiContainer.php';
 
 class Service
 {
