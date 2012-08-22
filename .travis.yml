@@ -7,4 +7,3 @@ php:
   
 before_install:
   - composer install
-  - git submodule update --init --recursive
