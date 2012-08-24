@@ -502,16 +502,13 @@ class Kernel implements KernelInterface
         $conf->template     = $template;
         $conf->engine       = empty($engine) ? $this->config->get('templating.default_engine') : $engine;
         $conf->templateDir  = $this->config->get('app.view_templates_dir') . DS;
+        $conf->webDir       = $this->config->get('app.web_dir');
         $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
         $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
         $conf->extension    = $this->config->get('templating.extension');
         $conf->charset      = $this->config->get('templating.charset');
         $conf->debug        = $this->config->get('templating.debug');
         $conf->assetsLocate = $this->config->get('assets_location');
-
-        var_dump($conf->assetsLocate);
-        var_dump($this->config->prepare($conf->assetsLocate));
-        die;
 
         // File extension validation
         // A criteria can be if filename doesn't a period character (.)
@@ -558,7 +555,7 @@ class Kernel implements KernelInterface
         }
 
         // create view object
-        $view = new $viewClass($conf->template);
+        $view = new $viewClass($conf->template, $this->assetsHandler);
 
         // setup view object
         $view->enableDebug($conf->debug);
@@ -579,12 +576,10 @@ class Kernel implements KernelInterface
         $view->assign('baseurl', $baseurl);
         $view->assign($data);
 
-        // setting & regitsering assets handler on view
-        $this->assetsHandler->setLocateDir(array(
-            __DIR__.'/fixtures/js2/',
-            __DIR__.'/fixtures/js/',
-        ));
-        $view->registerAssetHandler($this->assetsHandler);
+        // setting & registering assets handler on view
+        $view->assetsHandler->setLocateDir($this->config->prepare($conf->assetsLocate));
+        $view->assetsHandler->setCacheDir($conf->cacheDir);
+        $view->assetsHandler->setOutputDir($conf->webDir . '/assets/compiled/');
 
         return $view;
     }

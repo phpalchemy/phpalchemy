@@ -1,6 +1,8 @@
 <?php
 namespace Alchemy\Mvc;
 
+use Alchemy\Component\WebAssets\Bundle;
+
 /**
  * View
  *
@@ -66,7 +68,7 @@ abstract class View
 
     protected $uiElements = array();
 
-    protected $assetsHandler = null;
+    public $assetsHandler;
 
     /**
      * Debug flag to indicate to template engine is a debug environment
@@ -78,10 +80,12 @@ abstract class View
 
     /**
      * @param string $tpl template file
+     * @param Bundle $assetsHandler Bundle Assets Handler obj
      */
-    public function __construct($tpl = '')
+    public function __construct($tpl = '', Bundle $assetsHandler = null)
     {
-        $this->setTpl($tpl);
+        $this->tpl = $tpl;
+        $this->assetsHandler = $assetsHandler;
     }
 
     /**

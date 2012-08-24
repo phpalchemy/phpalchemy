@@ -1,16 +1,17 @@
 <?php
 namespace Alchemy\Mvc\Adapter;
 
-use \Alchemy\Mvc\View;
+use Alchemy\Mvc\View;
+use Alchemy\Component\WebAssets\Bundle;
 
 class TwigView extends View
 {
     protected $twig   = null;
     protected $loader = null;
 
-    public function __construct($tpl = '')
+    public function __construct($tpl = '', Bundle $assetsHandler = null)
     {
-        parent::__construct($tpl);
+        parent::__construct($tpl, $assetsHandler);
 
         require_once 'twig/twig/lib/Twig/Autoloader.php';
         \Twig_Autoloader::register();
@@ -42,12 +43,19 @@ class TwigView extends View
         ));
 
         // adding additional functionalities
-        $this->twig->addExtension(new AssetExtension());
+        $this->twig->addExtension(new AssetExtension($this->assetsHandler));
     }
 }
 
 class AssetExtension implements \Twig_ExtensionInterface
 {
+    protected $assetsHandler;
+
+    public function __construct($assetsHandler)
+    {
+        $this->assetsHandler = $assetsHandler;
+    }
+
     public function getName()
     {
         return 'asset';
@@ -93,14 +101,16 @@ class AssetExtension implements \Twig_ExtensionInterface
     // additional functionalities
     public function fn($assetPath, $filter = null)
     {
-        if (empty($this->assetHandler)) {
+        //var_dump($this->assetsHandler);
+
+        if (empty($this->assetsHandler)) {
             return $assetPath;
         }
 
         $this->assetsHandler->add($assetPath, $filter);
         $this->assetsHandler->handle();
 
-        return 'asset/'.$this->assetHandler->getUrl();
+        return $this->assetsHandler->getUrl();
     }
 }
 
