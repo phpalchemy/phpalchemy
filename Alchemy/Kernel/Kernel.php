@@ -509,6 +509,7 @@ class Kernel implements KernelInterface
         $conf->charset      = $this->config->get('templating.charset');
         $conf->debug        = $this->config->get('templating.debug');
         $conf->assetsLocate = $this->config->get('assets_location');
+        $conf->assetsPrecedence = explode(' ', $this->config->get('assets.precedence'));
 
         // File extension validation
         // A criteria can be if filename doesn't a period character (.)
@@ -565,7 +566,7 @@ class Kernel implements KernelInterface
         $view->setCharset($conf->charset);
 
         $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
-        //var_dump($this->request->getPathInfo()); die;
+
         if (substr($baseurl, -4) == '.php') {
             $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
         } elseif (substr($baseurl, -1) !== '/') {
@@ -577,9 +578,10 @@ class Kernel implements KernelInterface
         $view->assign($data);
 
         // setting & registering assets handler on view
+        $view->assetsHandler->setBaseDir($conf->webDir);
         $view->assetsHandler->setLocateDir($this->config->prepare($conf->assetsLocate));
         $view->assetsHandler->setCacheDir($conf->cacheDir);
-        $view->assetsHandler->setOutputDir($conf->webDir . '/assets/compiled/');
+        $view->assetsHandler->setOutputDir('assets/compiled');
 
         return $view;
     }
