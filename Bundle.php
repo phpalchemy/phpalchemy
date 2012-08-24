@@ -134,6 +134,7 @@ class Bundle
         // first verify if a single resource file without filter was requested
         if (count($this->meta) == 1 && empty($this->meta[0][1])) {
             $this->path = $this->locateFile($this->meta[0][0]);
+            $this->genFilename = $this->meta[0][0];
 
             return true;
         }
@@ -273,8 +274,8 @@ class Bundle
     protected function locateFile($src)
     {
         foreach ($this->locateDirs as $dir) {
-            if (file_exists($dir . $src)) {
-                return $dir . $src;
+            if (file_exists($dir.'/'.$src)) {
+                return $dir.'/'.$src;
             }
         }
 
