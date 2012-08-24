@@ -40,6 +40,7 @@ class Bundle
 
     protected $cacheDir  = '';
     protected $outputDir = '';
+    protected $baseDir = '';
     protected $locateDirs = array();
     protected $fromCache = false;
     protected $path = '';
@@ -60,7 +61,7 @@ class Bundle
 
     public function getUrl()
     {
-        return $this->genFilename . '?' . $this->checksum;
+        return str_replace($this->baseDir, '', $this->path) . '?'.$this->checksum;
     }
 
     public function setOutputFilename($filename)
@@ -88,6 +89,15 @@ class Bundle
 
         if (! is_dir($this->cacheDir)) {
             self::createDir($this->cacheDir);
+        }
+    }
+
+    public function setBaseDir($baseDir)
+    {
+        $this->baseDir = rtrim(realpath($baseDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        if (! is_dir($this->baseDir)) {
+            self::createDir($this->baseDir);
         }
     }
 
@@ -132,9 +142,10 @@ class Bundle
     public function handle()
     {
         // first verify if a single resource file without filter was requested
-        if (count($this->meta) == 1 && empty($this->meta[0][1])) {
+        if (count($this->meta) == 1 && empty($this->meta[0][1]) && strstr($this->meta[0][0], $this->baseDir) === false) {
             $this->path = $this->locateFile($this->meta[0][0]);
             $this->genFilename = $this->meta[0][0];
+            $this->checksum    = filemtime($this->path);
 
             return true;
         }
@@ -151,7 +162,7 @@ class Bundle
             $id[] = $assetInfo[0];
         }
 
-        $this->id = md5(count($id) == 1 ? $id[0] : implode(' ', $id));
+        $this->id = count($id) == 1 ? $id[0] : md5(implode(' ', $id));
 
         if (count($checksum) == 1) {
             $this->checksum = $checksum[0];
