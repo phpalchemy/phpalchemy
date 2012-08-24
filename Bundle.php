@@ -281,7 +281,7 @@ class Bundle
         throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exist!", $src));
     }
 
-    protected static function function createDir($strPath, $rights = 0777)
+    protected static function createDir($strPath, $rights = 0777)
     {
         $folderPath = array($strPath);
         $oldumask   = umask(0);
