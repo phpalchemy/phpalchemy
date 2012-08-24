@@ -76,11 +76,19 @@ class Bundle
     public function setCacheDir($cacheDir)
     {
         $this->cacheDir = rtrim(realpath($cacheDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        if (! is_dir($this->cacheDir)) {
+            self::createDir($this->cacheDir);
+        }
     }
 
     public function setOutputDir($outputDir)
     {
         $this->outputDir = rtrim(realpath($outputDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        if (! is_dir($this->cacheDir)) {
+            self::createDir($this->cacheDir);
+        }
     }
 
     public function isFromCache()
@@ -272,5 +280,27 @@ class Bundle
 
         throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exist!", $src));
     }
+
+    protected static function function createDir($strPath, $rights = 0777)
+    {
+        $folderPath = array($strPath);
+        $oldumask   = umask(0);
+        $terminalPath = array(DIRECTORY_SEPARATOR, '.', '');
+
+        while (! is_dir(dirname(end($folderPath))) && ! in_array(dirname(end($folderPath)), $terminalPath)) {
+            array_push($folderPath, dirname(end($folderPath)));
+        }
+
+        while ($parentFolderPath = array_pop($folderPath)) {
+            if (! @is_dir($parentFolderPath)) {
+                if (! @mkdir($parentFolderPath, $rights)) {
+                    throw new \Exception("Runtime Error: Can't create folder '$parentFolderPath'");
+                }
+            }
+        }
+
+        umask($oldumask);
+    }
+
 }
 
