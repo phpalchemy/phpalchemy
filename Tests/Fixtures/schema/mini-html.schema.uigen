@@ -23,7 +23,7 @@
 
 @var javascript alert('{id}');
 
-@var template <<<
+@var html <<<
 <select type="{xtype}" id="{id}" @@attributes({attributes})>
   @@options({options})
 </select>
@@ -33,13 +33,13 @@
 
 ## TEXTBOX
 @block textbox
-    @var template <input type="text" id="{id}" name="{name}" @@attributes({attributes})/>
+    @var html <input type="text" id="{id}" name="{name}" @@attributes({attributes})/>
 @end
 
 ## FORM
 @block form
 
-@var template <<<
+@var html <<<
 <form @@attributes({attributes})>
 @@form_items({items})
 </form>
@@ -49,5 +49,5 @@
 
 ## _DEFAULT
 @block _default
-    @var template <input type="{xtype}" id="{id}" name="{name}" @@attributes({attributes})/>
+    @var html <input type="{xtype}" id="{id}" name="{name}" @@attributes({attributes})/>
 @end

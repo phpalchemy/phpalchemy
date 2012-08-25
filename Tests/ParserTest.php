@@ -74,7 +74,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
 
         $expected = array();
-        $expected['template'] = '<input type="text" id="my_text_id" name="my_text" ' .
+        $expected['html'] = '<input type="text" id="my_text_id" name="my_text" ' .
                                 'size="25" emptyText="write your text here!"/>';
 
         $result = $parser->generate('textbox', $data);
@@ -108,7 +108,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             )
         );
         $expected = array();
-        $expected['template'] = '<input type="checkbox" id="my_checkbox_id" name="my_checkbox" value="some_choise"/>';
+        $expected['html'] = '<input type="checkbox" id="my_checkbox_id" name="my_checkbox" value="some_choise"/>';
 
         $result = $parser->generate('checkbox', $data);
         $this->assertEquals($expected, $result);
@@ -136,7 +136,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
         $expected = array();
         $expected['javascript'] = "alert('my_select_id');";
-        $expected['template'] = <<<EOT
+        $expected['html'] = <<<EOT
 <select type="slect" id="my_select_id" value="some_choise">
   <option name="one">1</option>
   <option name="two">2</option>
@@ -167,7 +167,7 @@ EOT;
 
         $expected = '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="write your text here!"/>';
         $result = $parser->generate('textbox', $data);
-        $formItems[] = $result['template'];
+        $formItems[] = $result['html'];
 
         $data = array(
             'id'    => 'my_checkbox_id',
@@ -180,7 +180,7 @@ EOT;
         $expected = '<input type="checkbox" id="my_checkbox_id" name="my_checkbox" value="some_choise"/>';
 
         $result = $parser->generate('checkbox', $data);
-        $formItems[] = $result['template'];
+        $formItems[] = $result['html'];
 
         $data = array(
             'id'    => 'my_select_id',
@@ -197,7 +197,7 @@ EOT;
         );
 
         $result = $parser->generate('select', $data);
-        $formItems[] = $result['template'];
+        $formItems[] = $result['html'];
 
         $data = array(
             'attributes' => array(
@@ -224,7 +224,7 @@ EOT;
 
         $result = $parser->generate('form', $data);
 
-        $this->assertEquals($expected, $result['template']);
+        $this->assertEquals($expected, $result['html']);
     }
 
     /**
@@ -235,7 +235,7 @@ EOT;
     public function testGenerate1(Parser $parser)
     {
         $expected = array(
-            'template' => '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="empty text"/>'
+            'html' => '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="empty text"/>'
         );
 
         // this array intentionally has not attribute: 'name'
@@ -258,7 +258,7 @@ EOT;
     public function testGenerate2(Parser $parser)
     {
         $expected = array(
-            'template' => '<input type="text" id="my_text_id" name="" size="25" emptyText="empty text"/>'
+            'html' => '<input type="text" id="my_text_id" name="" size="25" emptyText="empty text"/>'
         );
 
         // this array intentionally has not attribute: 'name'
