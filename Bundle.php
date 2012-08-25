@@ -37,6 +37,7 @@ class Bundle
     protected $genFilename = '';
     protected $cacheInfo = array();
     protected $output = '';
+    protected $forceReset = true;
 
     protected $cacheDir  = '';
     protected $outputDir = '';
@@ -72,6 +73,11 @@ class Bundle
     public function setFilter(FilterInterface $filter)
     {
         $this->filter = $filter;
+    }
+
+    public function setForceReset($value)
+    {
+        $this->forceReset = $value;
     }
 
     public function setCacheDir($cacheDir)
@@ -147,6 +153,10 @@ class Bundle
             $this->genFilename = $this->meta[0][0];
             $this->checksum    = filemtime($this->path);
 
+            if ($this->forceReset) {
+                $this->meta = array();
+            }
+
             return true;
         }
 
@@ -199,6 +209,10 @@ class Bundle
             throw new \RuntimeException(sprintf(
                 "Runtime Error: WebAssets couldn't save generated file in '%s' directory.", $this->outputDir
             ));
+        }
+
+        if ($this->forceReset) {
+            $this->meta = array();
         }
     }
 
