@@ -43,16 +43,18 @@ class TwigView extends View
         ));
 
         // adding additional functionalities
-        $this->twig->addExtension(new AssetExtension($this->assetsHandler));
+        $this->twig->addExtension(new AssetExtension($this, $this->assetsHandler));
     }
 }
 
 class AssetExtension implements \Twig_ExtensionInterface
 {
+    protected $view;
     protected $assetsHandler;
 
-    public function __construct($assetsHandler)
+    public function __construct($view, $assetsHandler)
     {
+        $this->view = $view;
         $this->assetsHandler = $assetsHandler;
     }
 
@@ -101,16 +103,17 @@ class AssetExtension implements \Twig_ExtensionInterface
     // additional functionalities
     public function fn($assetPath, $filter = null)
     {
-        //var_dump($this->assetsHandler);
-
         if (empty($this->assetsHandler)) {
             return $assetPath;
         }
 
         $this->assetsHandler->add($assetPath, $filter);
         $this->assetsHandler->handle();
+        $this->assetsHandler->setForceReset(true);
 
-        return $this->assetsHandler->getUrl();
+        $baseurl = $this->view->exists('baseurl') ? $this->view->get('baseurl') : '';
+
+        return $baseurl . $this->assetsHandler->getUrl();
     }
 }
 

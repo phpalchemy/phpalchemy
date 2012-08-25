@@ -235,6 +235,11 @@ abstract class View
         return $this->data[$name];
     }
 
+    public function exists($name)
+    {
+        return array_key_exists($name, $this->data);
+    }
+
     /**
      * Gets final template parsed output string
      *

@@ -565,7 +565,7 @@ class Kernel implements KernelInterface
         $view->setTemplateDir($conf->templateDir);
         $view->setCharset($conf->charset);
 
-        $baseurl = 'http://' . $this->request->getHttpHost() . $this->request->getBaseUrl();
+        $baseurl = '/' . $this->request->getBaseUrl();
 
         if (substr($baseurl, -4) == '.php') {
             $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
