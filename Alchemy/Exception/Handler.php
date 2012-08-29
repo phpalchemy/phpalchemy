@@ -48,14 +48,14 @@ class Handler
         $view->assign('query', print_r($this->request->query->all(), true));
         $baseurl = $this->request->getBaseUrl();
 
-        $baseurl = $this->request->getHttpHost() . $this->request->getBaseUrl();
+        $baseurl = '';
         if (substr($baseurl, -4) == '.php') {
             $baseurl = substr($baseurl, 0, strrpos($baseurl, '/') + 1);
         } elseif (substr($baseurl, -1) !== '/') {
             $baseurl .= '/';
         }
 
-        $view->assign('baseurl', 'http://' . $baseurl);
+        $view->assign('baseurl', $baseurl);
 
         return $view->getOutput();
     }
