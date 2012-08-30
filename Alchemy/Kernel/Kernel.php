@@ -169,6 +169,9 @@ class Kernel implements KernelInterface
                 }
             }
 
+            $controllerName = $params['_controller'];
+            $actionName = $params['_action'];
+
             // prepare request params.
             $params = $this->prepareRequestParams(array($params, $request->query->all(), $request->request->all()));
 
@@ -268,6 +271,9 @@ class Kernel implements KernelInterface
 
             // if there is a view adapter instance, get its contents and set to response content
             if (! empty($view)) {
+                $view->assign('_controller', $controllerName);
+                $view->assign('_action', $actionName);
+
                 //"EVENT" VIEW dispatch all KernelEvents::VIEW events
                 if ($this->dispatcher->hasListeners(KernelEvents::VIEW)) {
                     $event = new ViewEvent($this, $view, $request, $this->annotationReader);

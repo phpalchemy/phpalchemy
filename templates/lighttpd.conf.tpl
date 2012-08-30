@@ -75,7 +75,7 @@ compress.cache-dir = "{tmp_dir}"
 compress.filetype  = ("text/plain","text/css", "text/xml", "text/html", "text/javascript")
 compress.allowed-encodings = ("bzip2", "gzip", "deflate")
 
-server.errorlog = "{tmp_dir}_lighttpd.error.log"
+#server.errorlog = "{tmp_dir}_lighttpd.error.log"
 
 fastcgi.server = ( ".php" => ((
     "bin-path" => "{bin_path}",
@@ -99,7 +99,8 @@ server.tag = "lighttpd server / Powered by PHPAlchemy Framework"
 #)
 
 url.rewrite-if-not-file = (
-  "^/(.*)$" => "/app.php"
+  "^/.*\?(.*)$" => "/app.php?$1",
+  "^/(.*)$" => "/app.php",
 )
 
 static-file.exclude-extensions = (".fcgi", ".php", ".rb", "~", ".inc")
