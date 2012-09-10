@@ -57,5 +57,5 @@
 
 ## DEFAULT BLOCK
 @block _default
-    @var html <input type="{xtype}" x="sample" id="{id}" @@attributes({attributes})/>
+    @var html <input type="{xtype}" id="{id}" @@attributes({attributes})/>
 @end

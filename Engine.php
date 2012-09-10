@@ -137,12 +137,23 @@ class Engine
                 $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
             }
 
+            // getting xtype name, before mapping
+            // is important get xtype here, because more down this value can bechanged on mapping process
+            $xtypeTarget = $widget->getXtype();
+
+            // mapping element attributes
             $data = $this->mapElementInformation($widget);
-            $generated = $this->parser->generate($data['xtype'], $data);
+
+            // generate the code
+            $generated = $this->parser->generate($xtypeTarget, $data);
+
+            // setting generate code on widget property
             $widget->setGenerated($generated);
 
             if (array_key_exists('html', $generated)) {
                 $elementItems[$widget->getId()] = $generated['html'];
+            } else {
+                $elementItems[$widget->getId()] = '';
             }
 
             $this->generated['widgets'][$widget->getId()] = array(

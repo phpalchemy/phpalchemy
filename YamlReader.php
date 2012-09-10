@@ -3,7 +3,7 @@ namespace Alchemy\Component\UI;
 
 use \Alchemy\Component\Yaml\Yaml;
 
-class YamlReader extends ReaderInterface
+class YamlReader extends Reader
 {
     public $widgets;
     public $attributes;
@@ -15,7 +15,7 @@ class YamlReader extends ReaderInterface
             throw new \Exception("yaml file '$filepath' doesn't exist.");
         }
 
-        $this->widgets  = new WidgetCollection();
+        $this->widgets  = array();
         $this->filepath = $filepath;
         $this->attributes  = Array();
 
@@ -25,7 +25,8 @@ class YamlReader extends ReaderInterface
 
     public function parse()
     {
-        $data = (array) Yaml::load($this->filepath);
+        $yaml = new Yaml();
+        $data = (array) $yaml->load($this->filepath);
 
         if (!is_array($data)) {
             throw new \Exception("Invalid UI definition");
@@ -56,6 +57,16 @@ class YamlReader extends ReaderInterface
             $data = $data['items'];
         }
 
+        $elementClass = 'Alchemy\Component\UI\Element\\' . ucfirst($keys[0]);
+
+        if (! class_exists($elementClass)) {
+            throw new \RuntimeException(
+                sprintf("Runtime Error: Undefined UI Element Class '%s'.", ucfirst($this->root->nodeName)
+            ));
+        }
+
+        $this->element = new $elementClass($this->attributes);
+
         foreach ($data as $item) {
             if (!is_array($item)) {
                 continue;
@@ -63,11 +74,22 @@ class YamlReader extends ReaderInterface
 
             list($type) = array_keys($item);
 
-            $widget = new WidgetBase();
-            $widget->type = $type;
-            $widget->attributes = $item[$type];
+            $widgetClass = 'Alchemy\Component\UI\Widget\\' . ucfirst($type);
 
-            $this->widgets->add($widget);
+            if (! class_exists($widgetClass)) {
+                throw new \RuntimeException(
+                    sprintf("Runtime Error: Undefined UI Widget Class '%s'.", ucfirst($type)
+                ));
+            }
+
+            $widget = new $widgetClass();
+            $widget->setXtype($type);
+
+            foreach ($item[$type] as $name => $value) {
+                $widget->setAttribute($name, $value);
+            }
+
+            $this->element->add($widget);
         }
     }
 }
