@@ -6,6 +6,7 @@ class ServeUiAnnotation extends Annotation
     public $metaFile   = '';
     public $id         = '';
     public $attributes = array();
+    public $bundle     = 'html';
 
     public function prepare()
     {
@@ -13,6 +14,12 @@ class ServeUiAnnotation extends Annotation
             $this->attributes = $this->get('data');
             $this->remove('data');
         }
+
+        if ($this->has('ui-bundle')) {
+            $this->bundle = $this->get('ui-bundle');
+            $this->remove('ui-bundle');
+        }
+
         $params = $this->all();
         $keys = array_keys($params);
 

@@ -363,11 +363,11 @@ class Kernel implements KernelInterface
 
         $annotation->prepare();
 
-        $metaPath = $this->config->get('app.meta_dir');
+        $metaPath   = $this->config->get('app.meta_dir');
         $metaFile   = $annotation->metaFile;
         $attributes = $annotation->attributes;
 
-        $this->uiEngine->setTargetBundle('html');
+        $this->uiEngine->setTargetBundle($annotation->bundle);
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
 
         $element = $this->uiEngine->build();
