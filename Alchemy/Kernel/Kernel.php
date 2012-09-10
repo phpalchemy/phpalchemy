@@ -381,6 +381,7 @@ class Kernel implements KernelInterface
         $template = 'uigen' . DS . $filename;
 
         $view = $this->createView($template, $data);
+
         $view->assign('form', $element);
 
         if (empty($targetView)) {
