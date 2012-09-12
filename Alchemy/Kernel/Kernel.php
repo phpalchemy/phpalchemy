@@ -266,7 +266,8 @@ class Kernel implements KernelInterface
             $view = $this->handleMetaUi(
                 $controllerData,
                 $this->annotationReader->getAnnotation('ServeUi'),
-                $view
+                $view,
+                $request
             );
 
             // if there is a view adapter instance, get its contents and set to response content
@@ -321,14 +322,16 @@ class Kernel implements KernelInterface
         return $response;
     }
 
+    /**
+     * Handle a asset request
+     * @param  array  $params array containg all data
+     */
     protected function handleAssetRequest(array $params)
     {
         $response = new Response();
 
         $assetsConf = $this->config->getSection('asset_resolv');
         $assetsDir  = $this->config->get('app.public_dir') . '/assets';
-
-        var_dump($assetsDir . '/' . $assetsConf['current'] . '/' . $params['filename']);
 
         if (! empty($assetsConf['current'])) {
             $file = $assetsDir . '/' . $assetsConf['current'] . '/' . $params['filename'];
@@ -354,22 +357,35 @@ class Kernel implements KernelInterface
         }
     }
 
-    protected function handleMetaUi(array $data, $annotation, $targetView)
+    /**
+     * This method handle a Meta-UI
+     *
+     * @param  array         $data       data for view object
+     * @param  Annotation    $annotation Annotation object containing the information of @ServeUi annotation
+     * @param  ViewInterface $targetView A existent view object  (is was defined previously)
+     * @param  Request       $request    Request object containing the current request
+     */
+    protected function handleMetaUi(array $data, $annotation, $targetView, Request $request = null)
     {
-        // check if a @ServeUi definition exists on method's annotations
+        // check if a @ServeUi definition exists on action's annotations
         if (empty($annotation)) {
-            return $targetView; // no @serveUi annotation found, just return to break view handling
+            return $targetView; // @serveUi annotation not found, just return to break ui handling
         }
 
+        // prepare annotation object
         $annotation->prepare();
 
+        // getting configuration
         $metaPath   = $this->config->get('app.meta_dir');
         $metaFile   = $annotation->metaFile;
         $attributes = $annotation->attributes;
+        $uiBundle   = $annotation->bundle;
 
+        // setting uiEngine Object
         $this->uiEngine->setTargetBundle($annotation->bundle);
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
 
+        // tell to uiEngine object build the ui requested
         $element = $this->uiEngine->build();
         $element->setAttribute($attributes);
 
@@ -377,22 +393,47 @@ class Kernel implements KernelInterface
             $element->setId($annotation->id);
         }
 
+        // if any ui-bundle wasn't especified on action's annotation
+        if (empty($uiBunle)) {
+            // read defaults bundles from configuration for desktop & mobile platform
+            if ($request->isMobile()) {
+                if ($request->isIpad()) {
+                    $uiBunle = $this->config->get('ui-bundle.default_desktop');
+                } else {
+                    $uiBunle = $this->config->get('ui-bundle.default_mobile');
+                }
+            } else {
+                $uiBunle = $this->config->get('ui-bundle.default_desktop');
+            }
+        }
+
         $filename = empty($targetView) ? 'form_page' : 'form';
-        $template = 'uigen/' . $annotation->bundle . '/' . $filename;
+        $template = 'uigen/' . $uiBunle . '/' . $filename;
 
+        // creating a new view object
         $view = $this->createView($template, $data);
-
         $view->assign('form', $element);
 
+        // if the target view was not defined before return the new view object created.
         if (empty($targetView)) {
             return $view;
         }
 
+        // a target view exists, just set the generated ui to target view
         $targetView->setUiElement($element->getId(), $view->getOutput());
 
         return $targetView;
     }
 
+    /**
+     * handle the view layer
+     *
+     * @param  string     $class      current requested controller class
+     * @param  string     $method     current requested cotroller method or action
+     * @param  array      $data       array containing all data to be assigned to view
+     * @param  Annotation $annotation annotation object containig information about for view object
+     * @return ViewInterface $view    The create dview object
+     */
     protected function handleView($class, $method, $data, $annotation)
     {
         // check if a @view definition exists on method's annotations
@@ -463,7 +504,13 @@ class Kernel implements KernelInterface
         return $view;
     }
 
-    protected function prepareRequestParams($data)
+    /**
+     * This method prepares the request parameters to be consumed by Controller Resolver
+     * @param  array $data   array containing all request params.
+     * @return array $params array containing all prepared params included _controller,
+     *                       _action params, _controllerClass and _controllerMethod
+     */
+    protected function prepareRequestParams(array $data)
     {
         $params    = array();
         $namespace = $this->config->get('app.namespace');
@@ -501,6 +548,14 @@ class Kernel implements KernelInterface
         return $params;
     }
 
+    /**
+     * Create a view object for a determinated engine.
+     *
+     * @param  string $template view template filename
+     * @param  array  $data     array containing view data
+     * @param  string $engine   view engine name
+     * @return ViewInterface $view created view object
+     */
     protected function createView($template, array $data, $engine = '')
     {
         // creating config obj and setting it with all defaults configurations
@@ -608,6 +663,11 @@ class Kernel implements KernelInterface
         return $view;
     }
 
+    /**
+     * Creates a directory recursively
+     * @param  string  $strPath path
+     * @param  integer $rights  right for new directory
+     */
     protected static function createDir($strPath, $rights = 0777)
     {
         $folderPath = array($strPath);

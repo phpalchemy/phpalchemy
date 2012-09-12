@@ -43,7 +43,7 @@ class ServeCommand extends Command
             ),
             new InputOption(
                 'host', null, InputOption::VALUE_OPTIONAL,
-                'Set the server address', 'localhost'
+                'Set the server address', ''
             ),
             new InputOption(
                 'port', null, InputOption::VALUE_OPTIONAL,
@@ -58,7 +58,7 @@ class ServeCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $host = $input->getOption('host') ? $this->config->get('dev_appserver.host') : $input->getOption('host');
+        $host = $input->getOption('host') == '' ? $this->config->get('dev_appserver.host') : $input->getOption('host');
         $port = $input->getOption('port') ? $this->config->get('dev_appserver.port') : $input->getOption('port');
         $env  = $input->getArgument('environment');
 

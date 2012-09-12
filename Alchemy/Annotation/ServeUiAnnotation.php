@@ -6,7 +6,7 @@ class ServeUiAnnotation extends Annotation
     public $metaFile   = '';
     public $id         = '';
     public $attributes = array();
-    public $bundle     = 'html';
+    public $bundle     = '';
 
     public function prepare()
     {
