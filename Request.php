@@ -143,7 +143,7 @@ class Request
             'SERVER_NAME'          => 'localhost',
             'SERVER_PORT'          => 80,
             'HTTP_HOST'            => 'localhost',
-            'HTTP_USER_AGENT'      => 'Symfony/2.X',
+            'HTTP_USER_AGENT'      => 'PhpAlchemy/1.0',
             'HTTP_ACCEPT'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'HTTP_ACCEPT_LANGUAGE' => 'en-us,en;q=0.5',
             'HTTP_ACCEPT_CHARSET'  => 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
@@ -624,5 +624,70 @@ class Request
     {
         return 'XMLHttpRequest' == $this->headers->get('X_REQUESTED_WITH');
     }
+
+    function isMobile()
+    {
+        $is_mobile = '0';
+
+        if (preg_match(
+            '/(googlebot-mobile|android|up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|mobile)/i',
+            strtolower($_SERVER['HTTP_USER_AGENT']))
+        ) {
+            $is_mobile = 1;
+        }
+
+        if (
+            strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/vnd.wap.xhtml+xml') > 0 ||
+            isset($_SERVER['HTTP_X_WAP_PROFILE']) ||
+            isset($_SERVER['HTTP_PROFILE'])
+        ) {
+            $is_mobile = 1;
+        }
+
+        $mobile_ua = strtolower(substr($_SERVER['HTTP_USER_AGENT'], 0, 4 ));
+        $mobile_agents = array(
+            'w3c ','acs-','alav','alca','amoi','andr','audi','avan','benq','bird','blac','blaz','brew','cell',
+            'cldc','cmd-','dang','doco','eric','hipt','inno','ipaq','java','jigs','kddi','keji','leno','lg-c',
+            'lg-d','lg-g','lge-','maui','maxo','midp','mits','mmef','mobi','mot-','moto','mwbp','nec-','newt',
+            'noki','oper','palm','pana','pant','phil','play','port','prox','qwap','sage','sams','sany','sch-',
+            'sec-','send','seri','sgh-','shar','sie-','siem','smal','smar','sony','sph-','symb','t-mo','teli',
+            'tim-','tosh','tsm-','upg1','upsi','vk-v','voda','wap-','wapa','wapi','wapp','wapr','webc','winw','winw','xda','xda-'
+        );
+
+        if (in_array($mobile_ua, $mobile_agents)) {
+            $is_mobile = 1;
+        }
+
+        if (isset($_SERVER['ALL_HTTP'])) {
+            if (strpos(strtolower($_SERVER['ALL_HTTP']),'OperaMini') > 0) {
+                $is_mobile = 1;
+            }
+        }
+
+        if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']),'windows') > 0) {
+            $is_mobile = 0;
+        }
+
+        return $is_mobile;
+    }
+
+    function isIphone()
+    {
+        if (preg_match('/iphone/', strtolower($_SERVER['HTTP_USER_AGENT']))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function isIpad()
+    {
+        if (preg_match('/ipad/', strtolower($_SERVER['HTTP_USER_AGENT']))) {
+            return true;
+        }
+
+        return false;
+    }
+
 }
 
