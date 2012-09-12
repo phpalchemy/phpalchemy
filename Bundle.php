@@ -45,6 +45,7 @@ class Bundle
     protected $locateDirs = array();
     protected $fromCache = false;
     protected $path = '';
+    protected $vendorDir = '';
 
     public function __construct()
     {
@@ -107,11 +108,6 @@ class Bundle
         }
     }
 
-    public function isFromCache()
-    {
-        return $this->fromCache;
-    }
-
     public function setLocateDir($dir)
     {
         if (is_array($dir)) {
@@ -121,9 +117,91 @@ class Bundle
         }
     }
 
+    public function setVendorDir($vendorDir)
+    {
+        $this->vendorDir = rtrim(realpath($vendorDir), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;;
+    }
+
+    public function isFromCache()
+    {
+        return $this->fromCache;
+    }
+
     public function getOutput()
     {
         return $this->output;
+    }
+
+    /**
+     * This method adds a asset and import a asset library is was requested
+     * @param mutable some params can be passed with some valid prefixes like file:some_file, filter:some_filter_name
+     *                and import:some_import_dir_or_pattern, the order of params doesn't matter
+     *
+     * example:
+     *  $this->register('file:css/bootstrap.css', 'import:twitter/bootstrap/*')
+     *  $this->register('import:twitter/jquery/*.js', 'file:css/bootstrap.css')
+     */
+    public function register()
+    {
+        $numArgs = func_get_args();
+
+        if ($numArgs === 0) {
+            throw new \RuntimeException("Assets Bundle Error: Register error, missing params.");
+        }
+
+        $args = func_get_args();
+        $params = array();
+
+        if (count($args) === 1) {
+            if (strpos($args[0], ':') === false) {
+                $args[0] = 'file:' . $args[0];
+            }
+        }
+
+        foreach ($args as $i => $arg) {
+            if (strpos($args[0], ':') === false) {
+                throw new \RuntimeException(sprintf(
+                    "Assets Bundle Error: Invalid param, multiple params must be " .
+                    "prefixed for a valid key (file|filter|import). %s", print_r($args, true)
+                ));
+            }
+
+            list($key, $value) = explode(':', $arg);
+            $params[trim($key)] = trim($value);
+
+            if (! in_array($key, array('file', 'filter', 'import'))) {
+                throw new \RuntimeException(sprintf(
+                    "Assets Bundle Error: Invalid key '%s', valid keys are: (%s).", $key, 'file|filter|import'
+                ));
+            }
+        }
+
+        if (! array_key_exists('file', $params)) {
+            throw new \RuntimeException("Assets Bundle Error: asset file name param is missing.");
+        }
+
+        if (array_key_exists('filter', $params) && ! ($params['filter'] instanceof FilterInterface)) {
+            throw new \RuntimeException("Assets Bundle Error: Invalid Filter, it must implement FilterInterface.");
+        } else {
+            $params['filter'] = null;
+        }
+
+        if (array_key_exists('import', $params)) {
+            // do import
+            if (strpos($params['import'], '->') !== false) {
+                list($source, $target) = explode('->', $params['import']);
+                $source = trim($source);
+                $target = trim($target);
+            } else {
+                $source = $params['import'];
+                $target = '';
+            }
+
+            $this->import($source, $target);
+        }
+
+        // add asset
+        $this->add($params['file'], $params['filter']);
     }
 
     public function add($filename, $filter = null)
@@ -304,7 +382,54 @@ class Bundle
             }
         }
 
-        throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exist!", $src));
+        throw new \RuntimeException(sprintf("Runtime Exception: File '%s' does not exist! on %s", $src, print_r($this->locateDirs, true)));
+    }
+
+    public function import($vendor, $targetDir = '')
+    {
+        if (empty($targetDir)) {
+            if (strpos($vendor, '*') !== false) {
+                $parts =  explode(DIRECTORY_SEPARATOR, $vendor);
+                $i = 0;
+                while (strpos($parts[$i], '*') === false) {
+                    $targetDir = $parts[$i++];
+                }
+            } else {
+                $targetDir = basename($vendor);
+            }
+        }
+
+        $target = $this->baseDir . 'assets/lib/'.$targetDir.'/';
+
+        if (is_dir($target)) {
+            return true;
+        }
+
+        self::createDir($target);
+
+        ///
+        $vendorExists = false;
+        if (strpos($vendor, '*') !== false && ($files = glob($this->vendorDir . $vendor, GLOB_ERR)) !== false) {
+            $vendorExists = true;
+        } elseif (is_dir($this->vendorDir . $vendor) || is_file($this->vendorDir . $vendor)) {
+            $files = $this->vendorDir . $vendor;
+            $vendorExists = true;
+        }
+
+        if (! $vendorExists) {
+            throw new \RuntimeException(sprintf(
+                "Assets Bundle Error: Vendor '%' does not exist.",
+                $vendor
+            ));
+        }
+
+        if (is_array($files)) {
+            foreach ($files as $f) {
+                self::smartCopy($f, $target);
+            }
+        } else {
+            self::smartCopy($files, $target);
+        }
     }
 
     protected static function createDir($strPath, $rights = 0777)
@@ -328,5 +453,96 @@ class Bundle
         umask($oldumask);
     }
 
+    protected static function rcopy($path, $dest)
+    {
+        if (is_array($path)) {
+            foreach ($path as $file) {
+                self::rcopy($path, $dest);
+            }
+        } elseif (is_dir($path)){
+            if (! is_dir($dest)) {
+                self::createDir($dest);
+            }
+            $objects = scandir($path);
+
+            if (count($objects) > 0) {
+                foreach ($objects as $file) {
+                    if ($file == "." || $file == "..") {
+                        continue;
+                    }
+                    // go on
+                    if (is_dir($path.DIRECTORY_SEPARATOR.$file)) {
+                        self::rcopy($path.DIRECTORY_SEPARATOR.$file, $dest.DIRECTORY_SEPARATOR.$file);
+                    } else {
+                        copy($path.DIRECTORY_SEPARATOR.$file, $dest.DIRECTORY_SEPARATOR.$file);
+                    }
+                }
+            }
+
+            return true;
+        } elseif (is_file($path)) {
+            return copy($path, $dest);
+        } else {
+            return false;
+        }
+    }
+
+    protected static function smartCopy($source, $dest, $options = array('folderPermission'=>0755,'filePermission'=>0755))
+    {
+        $result = false;
+
+        if (is_file($source)) {
+            if ($dest[strlen($dest)-1] == '/') {
+                if (! file_exists($dest)) {
+                    self::createDir($dest, $options['folderPermission']);
+                }
+
+                $newDest = $dest."/".basename($source);
+            } else {
+                $newDest = $dest;
+            }
+
+            $result = copy($source, $newDest);
+            chmod($newDest, $options['filePermission']);
+        } elseif (is_dir($source)) {
+            if ($dest[strlen($dest)-1] == '/') {
+                if ($source[strlen($source)-1] == '/') {
+                    //Copy only contents
+                } else {
+                    //Change parent itself and its contents
+                    $dest = $dest.basename($source);
+                    @mkdir($dest);
+                    chmod($dest, $options['filePermission']);
+                }
+            } else {
+                if ($source[strlen($source)-1] == '/') {
+                    //Copy parent directory with new name and all its content
+                    @mkdir($dest, $options['folderPermission']);
+                    chmod($dest, $options['filePermission']);
+                } else {
+                    //Copy parent directory with new name and all its content
+                    @mkdir($dest, $options['folderPermission']);
+                    chmod($dest, $options['filePermission']);
+                }
+            }
+
+            $dirHandle = opendir($source);
+            while ($file = readdir($dirHandle)) {
+                if ($file != "." && $file != "..") {
+                    if (!is_dir($source."/".$file)) {
+                        $newDest = $dest."/".$file;
+                    } else {
+                        $newDest = $dest."/".$file;
+                    }
+                    $result = self::smartCopy($source."/".$file, $newDest, $options);
+                }
+            }
+            closedir($dirHandle);
+        } else {
+            $result = false;
+        }
+
+        return $result;
+    }
 }
 
