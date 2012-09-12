@@ -26,6 +26,11 @@
     @var javascript alert('{id}');
 @end
 
+## CHECKBOX ##
+@block checkbox
+    @var html <label><input type="checkbox" @@attributes({attributes}) /> {label}</label>
+@end
+
 ### SELECT
 @block select
     @var html <<<
