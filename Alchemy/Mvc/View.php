@@ -25,11 +25,11 @@ abstract class View
     protected $data = array();
 
     /**
-     * Contains the absolute path where the engine can found all templates
+     * Contains the absolute paths where templates are stored
      *
-     * @var string
+     * @var array
      */
-    protected $templateDir = '';
+    protected $templateDir = array();
 
     /**
      * Contains the absolute path where the engine store the cache files
@@ -113,7 +113,7 @@ abstract class View
      */
     public function setTemplateDir($path)
     {
-        $this->templateDir = $path;
+        $this->templateDir[] = $path;
     }
 
     /**

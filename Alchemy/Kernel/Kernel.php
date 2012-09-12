@@ -296,6 +296,11 @@ class Kernel implements KernelInterface
 
             $response = new Response($responseContent, 404);
         } catch (\Exception $e) {
+            echo $e->getMessage();
+            echo "<br><pre>";
+            echo $e->getTraceAsString();
+            die;
+
             $exceptionHandler = new Exception\Handler();
 
             if ($request->isXmlHttpRequest()) {
@@ -382,7 +387,22 @@ class Kernel implements KernelInterface
         $uiBundle   = $annotation->bundle;
 
         // setting uiEngine Object
-        $this->uiEngine->setTargetBundle($annotation->bundle);
+
+        // if any ui-bundle wasn't especified on action's annotation
+        if (empty($uiBunle)) {
+            // read defaults bundles from configuration for desktop & mobile platform
+            if ($request->isMobile()) {
+                if ($request->isIpad()) {
+                    $uiBundle = $this->config->get('ui-bundle.default_mobile');
+                } else {
+                    $uiBundle = $this->config->get('ui-bundle.default_mobile');
+                }
+            } else {
+                $uiBundle = $this->config->get('ui-bundle.default_desktop');
+            }
+        }
+
+        $this->uiEngine->setTargetBundle($uiBundle);
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
 
         // tell to uiEngine object build the ui requested
@@ -393,22 +413,8 @@ class Kernel implements KernelInterface
             $element->setId($annotation->id);
         }
 
-        // if any ui-bundle wasn't especified on action's annotation
-        if (empty($uiBunle)) {
-            // read defaults bundles from configuration for desktop & mobile platform
-            if ($request->isMobile()) {
-                if ($request->isIpad()) {
-                    $uiBunle = $this->config->get('ui-bundle.default_desktop');
-                } else {
-                    $uiBunle = $this->config->get('ui-bundle.default_mobile');
-                }
-            } else {
-                $uiBunle = $this->config->get('ui-bundle.default_desktop');
-            }
-        }
-
         $filename = empty($targetView) ? 'form_page' : 'form';
-        $template = 'uigen/' . $uiBunle . '/' . $filename;
+        $template = $filename;
 
         // creating a new view object
         $view = $this->createView($template, $data);
@@ -564,6 +570,7 @@ class Kernel implements KernelInterface
         $conf->template     = $template;
         $conf->engine       = empty($engine) ? $this->config->get('templating.default_engine') : $engine;
         $conf->templateDir  = $this->config->get('app.view_templates_dir') . DS;
+        $conf->layoutsDir   = $this->config->get('app.view_layouts_dir') . DS;
         $conf->webDir       = $this->config->get('app.web_dir');
         $conf->vendorDir    = $this->config->get('app.vendor_dir');
         $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
@@ -598,8 +605,23 @@ class Kernel implements KernelInterface
             $conf->template .= '.' . $tplExtension; // concatenate it with default extension from configuration
         }
 
+        // read defaults bundles from configuration for desktop & mobile platform
+        if ($this->request->isMobile()) {
+            if ($this->request->isIpad()) {
+                $layoutsDir = $conf->layoutsDir . $this->config->get('ui-bundle.default_mobile') . DS;
+            } else {
+                $layoutsDir = $conf->layoutsDir . $this->config->get('ui-bundle.default_mobile') . DS;
+            }
+        } else {
+            $layoutsDir = $conf->layoutsDir . $this->config->get('ui-bundle.default_desktop') . DS;
+        }
+
         // check if template file exists
         if (file_exists($conf->templateDir . $conf->template)) {
+            // if relative path was given
+        } elseif (file_exists($conf->layoutsDir . $conf->template)) {
+            // if relative path was given
+        } elseif (file_exists($layoutsDir . $conf->template)) {
             // if relative path was given
         } elseif (file_exists($conf->template)) {
             // if absolute path was given
@@ -638,8 +660,12 @@ class Kernel implements KernelInterface
         $view->enableDebug($conf->debug);
         $view->enableCache($conf->cacheEnabled);
         $view->setCacheDir($conf->cacheDir);
-        $view->setTemplateDir($conf->templateDir);
         $view->setCharset($conf->charset);
+
+        // setting templates directories
+        $view->setTemplateDir($conf->templateDir);
+        $view->setTemplateDir($layoutsDir);
+
 
         $baseurl = '/' . $this->request->getBaseUrl();
 
