@@ -19,6 +19,7 @@ class Checkbox extends Widget
     public $editable;
     public $readonly;
 
+    protected $label = 'ss';
     protected $checked = false;
 
     public function __construct(array $attributes = array())
@@ -35,6 +36,16 @@ class Checkbox extends Widget
     public function getChecked()
     {
         return $this->checked;
+    }
+
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
+    public function getLabel()
+    {
+    	return $this->label;
     }
 }
 

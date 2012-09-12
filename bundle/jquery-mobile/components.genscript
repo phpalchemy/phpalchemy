@@ -1,0 +1,66 @@
+/**
+ * HTML Components generator script
+ */
+
+// Settings
+@def global version 1.0
+
+// Setting as default block to: '_default'
+@def setconf default_block _default
+
+// Iterators definition
+@def iterator attributes.tpl {_key}="{_value}"
+@def iterator attributes.sep " "
+
+@def iterator options.tpl <option name="{name}">{value}</option>
+@def iterator options.sep "\n"
+
+@def iterator form_items.tpl {_value}
+@def iterator form_items.sep "\n"
+
+/** Components blocks */
+
+## TEXTBOX ##
+@block textbox
+    @var html <input type="text" id="{id}" value="{value}" @@attributes({attributes}) class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"/>
+@end
+
+## CHECKBOX ##
+@block checkbox
+    @var html <label><input type="checkbox" @@attributes({attributes}) />{label}</label>
+@end
+
+## SELECT ##
+@block select
+    @var html <<<
+<select type="{xtype}" id="{id}" @@attributes({attributes})>
+  @@options({options})
+</select>
+>>>
+@end
+
+## TEXTAREA ##
+@block textarea
+    @var html <<<
+<textarea type="{xtype}" id="{id}" @@attributes({attributes})>
+  {value}
+</textarea>
+>>>
+@end
+
+## FORM ##
+@block form
+
+@var html <<<
+<form @@attributes({attributes})>
+@@form_items({items})
+</form>
+>>>
+
+@end
+
+
+## DEFAULT BLOCK
+@block _default
+    @var html <input type="{xtype}" id="{id}" @@attributes({attributes})/>
+@end
