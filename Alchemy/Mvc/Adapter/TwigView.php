@@ -101,13 +101,15 @@ class AssetExtension implements \Twig_ExtensionInterface
     }
 
     // additional functionalities
-    public function fn($assetPath, $filter = null)
+    public function fn()
     {
         if (empty($this->assetsHandler)) {
             return $assetPath;
         }
 
-        $this->assetsHandler->add($assetPath, $filter);
+        //$this->assetsHandler->register(func_get_args());
+
+        call_user_func_array(array($this->assetsHandler, 'register'), func_get_args());
         $this->assetsHandler->handle();
         $this->assetsHandler->setForceReset(true);
 

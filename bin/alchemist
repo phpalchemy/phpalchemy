@@ -5,7 +5,8 @@ $conf['phpalchemy']['root_dir'] = realpath(__DIR__ . DIRECTORY_SEPARATOR . '../'
 $conf['app']['root_dir']        = realpath(getcwd());
 
 try {
-    include_once $conf['phpalchemy']['root_dir'] . DIRECTORY_SEPARATOR . 'autoload.php';
+    //include_once $conf['phpalchemy']['root_dir'] . DIRECTORY_SEPARATOR . 'autoload.php';
+    include_once $conf['app']['root_dir'] . DIRECTORY_SEPARATOR . 'autoload.php';
 
     $alchemist = new Alchemy\Console\Alchemist(
         new Alchemy\Config($conf)

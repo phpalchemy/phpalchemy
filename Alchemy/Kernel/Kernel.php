@@ -378,7 +378,7 @@ class Kernel implements KernelInterface
         }
 
         $filename = empty($targetView) ? 'form_page' : 'form';
-        $template = 'uigen' . DS . $filename;
+        $template = 'uigen/' . $annotation->bundle . '/' . $filename;
 
         $view = $this->createView($template, $data);
 
@@ -510,11 +510,13 @@ class Kernel implements KernelInterface
         $conf->engine       = empty($engine) ? $this->config->get('templating.default_engine') : $engine;
         $conf->templateDir  = $this->config->get('app.view_templates_dir') . DS;
         $conf->webDir       = $this->config->get('app.web_dir');
+        $conf->vendorDir    = $this->config->get('app.vendor_dir');
         $conf->cacheDir     = $this->config->get('templating.cache_dir') . DS;
         $conf->cacheEnabled = $this->config->get('templating.cache_enabled');
         $conf->extension    = $this->config->get('templating.extension');
         $conf->charset      = $this->config->get('templating.charset');
         $conf->debug        = $this->config->get('templating.debug');
+
         $conf->assetsLocate = $this->config->get('assets_location');
         $conf->assetsPrecedence = explode(' ', $this->config->get('assets.precedence'));
 
@@ -562,6 +564,18 @@ class Kernel implements KernelInterface
             ));
         }
 
+        // resolving assets location
+        $locateDir = $this->config->prepare($conf->assetsLocate);
+        $locateDirPrecedence = array();
+
+        foreach ($conf->assetsPrecedence as $assetItem) {
+            if (array_key_exists($assetItem, $locateDir)) {
+                $locateDirPrecedence[$assetItem] = $locateDir[$assetItem];
+            } else {
+                $locateDirPrecedence[$assetItem] = $conf->webDir.'/assets/'.$assetItem;
+            }
+        }
+
         // create view object
         $view = new $viewClass($conf->template, $this->assetsHandler);
 
@@ -586,9 +600,10 @@ class Kernel implements KernelInterface
 
         // setting & registering assets handler on view
         $view->assetsHandler->setBaseDir($conf->webDir);
-        $view->assetsHandler->setLocateDir($this->config->prepare($conf->assetsLocate));
+        $view->assetsHandler->setLocateDir($locateDirPrecedence);
         $view->assetsHandler->setCacheDir($conf->cacheDir);
         $view->assetsHandler->setOutputDir('assets/compiled');
+        $view->assetsHandler->setVendorDir($conf->vendorDir);
 
         return $view;
     }

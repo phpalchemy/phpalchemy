@@ -9,7 +9,7 @@ class SmartyView extends View
 
     public function __construct($tpl = '')
     {
-        require_once '3rd-party/smarty/libs/Smarty.class.php';
+        require_once 'smarty/smarty/libs/Smarty.class.php';
         parent::__construct($tpl);
 
         $this->smarty = new \Smarty();
