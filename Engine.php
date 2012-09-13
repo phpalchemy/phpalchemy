@@ -145,7 +145,7 @@ class Engine
             $data = $this->mapElementInformation($widget);
 
             // generate the code
-            $generated = $this->parser->generate($xtypeTarget, $data);
+            $generated = $this->parser->generate($data['xtype'], $data);
 
             // setting generate code on widget property
             $widget->setGenerated($generated);
