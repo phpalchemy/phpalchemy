@@ -17,6 +17,11 @@ return array(
                 }
             )
         ),
+        "listbox" => array(
+            "xtype" => array(
+                "value" => 'select'
+            )
+        ),
 
     ),
     ":defaults:" => array(

@@ -27,6 +27,7 @@ class YamlReader extends Reader
     {
         $yaml = new Yaml();
         $data = (array) $yaml->load($this->filepath);
+        //pr($data); die;
 
         if (!is_array($data)) {
             throw new \Exception("Invalid UI definition");
@@ -54,7 +55,7 @@ class YamlReader extends Reader
 
         // getting items
         if (isset($data['items']) && is_array($data['items'])) {
-            $data = $data['items'];
+            $items = $data['items'];
         }
 
         $elementClass = 'Alchemy\Component\UI\Element\\' . ucfirst($keys[0]);
@@ -67,8 +68,8 @@ class YamlReader extends Reader
 
         $this->element = new $elementClass($this->attributes);
 
-        foreach ($data as $item) {
-            if (!is_array($item)) {
+        foreach ($items as $item) {
+            if (! is_array($item)) {
                 continue;
             }
 
@@ -91,6 +92,8 @@ class YamlReader extends Reader
 
             $this->element->add($widget);
         }
+
+        //pr($this->element); die;
     }
 }
 

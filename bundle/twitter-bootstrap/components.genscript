@@ -12,7 +12,7 @@
 @def iterator attributes.tpl {_key}="{_value}"
 @def iterator attributes.sep " "
 
-@def iterator options.tpl <option name="{name}">{value}</option>
+@def iterator options.tpl <option name="{value}">{label}</option>
 @def iterator options.sep "\n"
 
 @def iterator form_items.tpl {_value}
@@ -35,7 +35,7 @@
 @block select
     @var html <<<
 <select type="{xtype}" id="{id}" @@attributes({attributes})>
-  @@options({options})
+  @@options({items})
 </select>
 >>>
 @end
