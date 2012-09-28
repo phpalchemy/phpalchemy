@@ -511,50 +511,6 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * This method prepares the request parameters to be consumed by Controller Resolver
-     * @param  array $data   array containing all request params.
-     * @return array $params array containing all prepared params included _controller,
-     *                       _action params, _controllerClass and _controllerMethod
-     */
-    protected function prepareRequestParams(array $data)
-    {
-        $params    = array();
-        $namespace = $this->config->get('app.namespace');
-
-        foreach ($data as $listParams) {
-            $params = array_merge($params, $listParams);
-        }
-
-        // verify controller's name is underscored or not
-        if (strpos($params['_controller'], '_') === false) {
-            //just ensure first characted to uppercase
-            $params['_controller'] = ucfirst($params['_controller']);
-        } else {
-            // camelize the controller's name (to camelcase)
-            $params['_controller'] = str_replace(
-                ' ', '', ucwords(str_replace('_', ' ', $params['_controller']))
-            );
-        }
-
-        // verify if action's name is underscored or not
-        if (strpos($params['_action'], '_') !== false) {
-            // camileze the action's name (to camelcase)
-            $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $params['_action'])));
-            // this is to ensure first charcater to lowercase,
-            // because by php standard coding says function name should starts with lowercase
-            $params['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
-            unset($tmp);
-        }
-
-        // composing controller class & method real names
-        $params['_controllerClass']  = '\\'.$namespace.'\Application\Controller\\'.$params['_controller'].'Controller';
-        $params['_controllerMethod'] = $params['_action'] . 'Action';
-        $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
-
-        return $params;
-    }
-
-    /**
      * Create a view object for a determinated engine.
      *
      * @param  string $template view template filename
@@ -687,6 +643,50 @@ class Kernel implements KernelInterface
         $view->assetsHandler->setVendorDir($conf->vendorDir);
 
         return $view;
+    }
+
+    /**
+     * This method prepares the request parameters to be consumed by Controller Resolver
+     * @param  array $data   array containing all request params.
+     * @return array $params array containing all prepared params included _controller,
+     *                       _action params, _controllerClass and _controllerMethod
+     */
+    protected function prepareRequestParams(array $data)
+    {
+        $params    = array();
+        $namespace = $this->config->get('app.namespace');
+
+        foreach ($data as $listParams) {
+            $params = array_merge($params, $listParams);
+        }
+
+        // verify controller's name is underscored or not
+        if (strpos($params['_controller'], '_') === false) {
+            //just ensure first characted to uppercase
+            $params['_controller'] = ucfirst($params['_controller']);
+        } else {
+            // camelize the controller's name (to camelcase)
+            $params['_controller'] = str_replace(
+                ' ', '', ucwords(str_replace('_', ' ', $params['_controller']))
+            );
+        }
+
+        // verify if action's name is underscored or not
+        if (strpos($params['_action'], '_') !== false) {
+            // camileze the action's name (to camelcase)
+            $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $params['_action'])));
+            // this is to ensure first charcater to lowercase,
+            // because by php standard coding says function name should starts with lowercase
+            $params['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
+            unset($tmp);
+        }
+
+        // composing controller class & method real names
+        $params['_controllerClass']  = '\\'.$namespace.'\Application\Controller\\'.$params['_controller'].'Controller';
+        $params['_controllerMethod'] = $params['_action'] . 'Action';
+        $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
+
+        return $params;
     }
 
     /**

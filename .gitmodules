@@ -1,24 +1,24 @@
 [submodule "Alchemy/Component/Yaml"]
 	path = Alchemy/Component/Yaml
-	url = git://github.com/eriknyk/Yaml
+	url = git@phpalchemy.org:Yaml
 [submodule "Alchemy/Component/EventDispatcher"]
 	path = Alchemy/Component/EventDispatcher
-	url = git://github.com/eriknyk/EventDispatcher
+	url = git@phpalchemy.org:EventDispatcher
 [submodule "Alchemy/Component/Http"]
 	path = Alchemy/Component/Http
-	url = git://github.com/eriknyk/Http
+	url = git@phpalchemy.org:Http
 [submodule "Alchemy/Component/UI"]
 	path = Alchemy/Component/UI
-	url = git://github.com/eriknyk/UI
+	url = git@phpalchemy.org:UI
 [submodule "Alchemy/Component/Routing"]
 	path = Alchemy/Component/Routing
-	url = git://github.com/eriknyk/Routing
+	url = git@phpalchemy.org:Routing
 [submodule "Alchemy/Component/ClassLoader"]
 	path = Alchemy/Component/ClassLoader
-	url = git://github.com/eriknyk/ClassLoader
+	url = git@phpalchemy.org:ClassLoader
 [submodule "Alchemy/Component/DiContainer"]
 	path = Alchemy/Component/DiContainer
-	url = git://github.com/eriknyk/DiContainer
+	url = git@phpalchemy.org:DiContainer
 [submodule "Alchemy/Component/WebAssets"]
 	path = Alchemy/Component/WebAssets
-	url = git://github.com/eriknyk/WebAssets.git
+	url = git@phpalchemy.org:WebAssets.git
