@@ -35,10 +35,9 @@ class Parser
         // set this->file property and parse genscript file
         if (! empty($file)) {
             $this->file = $file;
+            // parse file
             $this->parse();
         }
-
-
     }
 
     public function setScriptFile($file)
@@ -120,9 +119,11 @@ class Parser
         $generated  = array();
 
         foreach ($this->currentBlock as $varName => $template) {
-            $content = $this->buildIterators($template);
-            $content = $this->replaceData($content, $data);
-            $generated[$varName] = $content;
+            $fn = \Haanga::compile($template);
+            $generated[$varName] = $fn($data);
+            //$content = $this->buildIterators($template);
+            //$content = $this->replaceData($content, $data);
+            //$generated[$varName] = $content;
         }
 
         return $generated;

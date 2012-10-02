@@ -31,7 +31,7 @@ class Form extends Element
 
     public function add(WidgetInterface $w)
     {
-        $this->widgets[$w->getId()] = $w;
+        $this->widgets[] = $w;
     }
 
     public function getXtype()

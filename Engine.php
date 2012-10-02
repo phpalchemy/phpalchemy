@@ -134,7 +134,16 @@ class Engine
 
         foreach ($element->getWidgets() as $widget) {
             if ($widget->getId() === '') {
-                $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
+                if ($widget->name === '') {
+                    $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
+                    $widget->name = $widget->getId();
+                } else {
+                    $widget->setId($widget->name);
+                }
+            } else {
+                if ($widget->name === '') {
+                    $widget->name = $widget->getId();
+                }
             }
 
             // getting xtype name, before mapping

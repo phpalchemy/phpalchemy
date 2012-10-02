@@ -13,29 +13,18 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   Alchemy/Component/UI
  */
-class Menulist extends Widget
+class Radiogroup extends Widget
 {
     public $disabled;
     public $editable;
-    public $emptytext;
-    public $readonly;
 
     protected $items = array();
+    protected $inline = false;
 
     public function __construct(array $attributes = array())
     {
-        // call parent constructor
         parent::__construct($attributes);
-    }
-
-    public function setItems(array $items)
-    {
-        $this->items = $items;
-    }
-
-    public function getItems()
-    {
-        return $this->items;
+        $this->setXtype('radiogroup');
     }
 }
 

@@ -46,7 +46,7 @@ class YamlReader extends Reader
             unset($data['attributes']);
         } else {
             foreach ($data as $key => $value) {
-                if (!is_numeric($key) && is_string($key) && !is_array($value)) {
+                if (! is_numeric($key) && is_string($key) && ! is_array($value)) {
                     $this->attributes[$key] = $value;
                     unset($data[$key]);
                 }
