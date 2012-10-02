@@ -382,6 +382,7 @@ class Kernel implements KernelInterface
 
         // getting configuration
         $metaPath   = $this->config->get('app.meta_dir');
+        $elementName = $annotation->name;
         $metaFile   = $annotation->metaFile;
         $attributes = $annotation->attributes;
         $uiBundle   = $annotation->bundle;
@@ -406,7 +407,12 @@ class Kernel implements KernelInterface
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
 
         // tell to uiEngine object build the ui requested
-        $element = $this->uiEngine->build();
+        $elementData = array();
+        if (array_key_exists($elementName, $data) && is_array($data[$elementName])) {
+            $elementData = $data[$elementName];
+        }
+
+        $element = $this->uiEngine->build($elementData);
         $element->setAttribute($attributes);
 
         if (! empty($annotation->id)) {
