@@ -116,7 +116,7 @@ class Engine
     /**
      * Build Web UI
      */
-    public function build($targetBundle = '', $metaFile = '')
+    public function build(array $data, $targetBundle = '', $metaFile = '')
     {
         if (! empty($targetBundle)) {
             $this->setTargetBundle($targetBundle);
@@ -146,15 +146,16 @@ class Engine
                 }
             }
 
-            // getting xtype name, before mapping
-            // is important get xtype here, because more down this value can bechanged on mapping process
-            $xtypeTarget = $widget->getXtype();
+            // setting widget data
+            if (array_key_exists($widget->name, $data)) {
+                $widget->setValue($data[$widget->name]);
+            }
 
             // mapping element attributes
-            $data = $this->mapElementInformation($widget);
+            $info = $this->mapElementInformation($widget);
 
             // generate the code
-            $generated = $this->parser->generate($data['xtype'], $data);
+            $generated = $this->parser->generate($info['xtype'], $info);
 
             // setting generate code on widget property
             $widget->setGenerated($generated);
@@ -167,17 +168,17 @@ class Engine
 
             $this->generated['widgets'][$widget->getId()] = array(
                 'object' => $widget,
-                'data'   => $data,
+                'info'   => $info,
                 'generated' => $generated
             );
         }
 
-        $data = $this->mapElementInformation($element);
-        $data['items'] = $elementItems;
+        $info = $this->mapElementInformation($element);
+        $info['items'] = $elementItems;
 
         $generated = $this->parser->generate(
             $element->getXtype(),
-            $data
+            $info
         );
 
         $this->generated['element'] = $generated;

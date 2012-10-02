@@ -47,9 +47,12 @@
   <input
     type="checkbox"
     id="{{ id }}"
-    {% for at_name,at_value in attributes %}
-    {{ at_name }}="{{ at_value }}"
+    {% for at_name, at_value in attributes %}
+      {{ at_name }}="{{ at_value }}"
     {% endfor %}
+    {% if value %}
+      checked="checked"
+    {% endif %}
   />
   {{ label }}
 </label>
@@ -66,12 +69,15 @@
 
     @var html <<<
 <div class="controls">
-{% for item in items %}
+{% for i, item in items %}
 <label class="checkbox{% if inline == "true" %} inline{% endif %}">
   <input
     type="checkbox"
     name="{{ item['name'] }}"
     value="{{ item['value'] }}"
+    {% if value[i] %}
+    checked="checked"
+    {% endif %}
   >
   {{ item['label'] }}
 </label>
@@ -94,7 +100,9 @@
     type="radio"
     name="{{ attributes['name'] }}"
     value="{{ item['value'] }}"
-    checked
+    {% if item['value'] == value %}
+      checked="checked"
+    {% endif %}
   >
   {{ item['label'] }}
 </label>
@@ -113,13 +121,24 @@
 <div class="controls">
   <select
     id="{{ id }}"
-    {% for at_name,at_value in attributes %}
+    {% for at_name, at_value in attributes %}
     {{ at_name }}="{{ at_value }}"
     {% endfor %}
   >
-  {% for item in items %}
-  <option name="{{ item['value'] }}">{{ item['label'] }}</option>
-  {% endfor %}
+    {% for item in items %}
+    <option
+      name="{{ item['value'] }}"
+      {% if value | isarray %}
+        {% if item['value'] in value %}
+          selected="selected"
+        {% endif %}
+      {% else %}
+        {% if item['value'] == value %}
+          selected="selected"
+        {% endif %}
+      {% endif %}
+    >{{ item['label'] }}</option>
+    {% endfor %}
   </select>
 </div>
 >>>
