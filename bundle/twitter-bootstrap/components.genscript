@@ -1,28 +1,24 @@
-/*
- * HTML Components generator script
- */
+/*****************************************************************************
+ *                     HTML Components generator script
+ *****************************************************************************/
 
-/*
- * Setting as default block to: '_default'
- */
+// Setting as default block to: '_default'
 @def global version 1.0
 
-/*
- * Setting as default block to: '_default'
- */
+// Setting as default block to: '_default'
 @def setconf default_block _default
 
 
-/****************************************************************************
- *                       *** Components blocks  ***
- ****************************************************************************/
+/*
+ *  *** Components blocks  ***
+ */
 
 /*
  * Texbox html widget
  */
 @block textbox
 
-    @var html <<<
+@var html <<<
 <div class="controls">
   <input type="text" id="{{ id }}" value="{{ value }}"
 {% for at_name,at_value in attributes %}
@@ -41,7 +37,7 @@
  */
 @block checkbox
 
-    @var html <<<
+@var html <<<
 <div class="controls">
 <label class="checkbox">
   <input
@@ -67,7 +63,7 @@
  */
 @block checkgroup
 
-    @var html <<<
+@var html <<<
 <div class="controls">
 {% for i, item in items %}
 <label class="checkbox{% if inline == "true" %} inline{% endif %}">
@@ -76,7 +72,7 @@
     name="{{ item['name'] }}"
     value="{{ item['value'] }}"
     {% if value[i] %}
-    checked="checked"
+      checked="checked"
     {% endif %}
   >
   {{ item['label'] }}
@@ -92,7 +88,7 @@
  */
 @block radiogroup
 
-    @var html <<<
+@var html <<<
 <div class="controls">
 {% for item in items %}
 <label class="radio{% if inline == "true" %} inline{% endif %}">
@@ -117,12 +113,12 @@
  */
 @block select
 
-    @var html <<<
+@var html <<<
 <div class="controls">
   <select
     id="{{ id }}"
     {% for at_name, at_value in attributes %}
-    {{ at_name }}="{{ at_value }}"
+      {{ at_name }}="{{ at_value }}"
     {% endfor %}
   >
     {% for item in items %}
@@ -150,12 +146,12 @@
  */
 @block textarea
 
-    @var html <<<
+@var html <<<
 <div class="controls">
 <textarea
   id="{{ id }}"
   {% for at_name,at_value in attributes %}
-  {{ at_name }}="{{ at_value }}"
+    {{ at_name }}="{{ at_value }}"
   {% endfor %}
 >
 {{ value }}
@@ -183,14 +179,14 @@
  */
 @block _default
 
-    @var html <<<
+@var html <<<
 <div class="controls">
   <input
     type="{{ xtype }}"
     id="{{ id }}"
     value="{{ value }}"
     {% for at_name,at_value in attributes %}
-    {{ at_name }}="{{ at_value }}"
+      {{ at_name }}="{{ at_value }}"
     {% endfor %}
   />
 </div>
