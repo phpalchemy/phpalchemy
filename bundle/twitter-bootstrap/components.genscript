@@ -8,10 +8,7 @@
 // Setting as default block to: '_default'
 @def setconf default_block _default
 
-
-/*
- *  *** Components blocks  ***
- */
+/*    *** Components blocks  ***    */
 
 /*
  * Texbox html widget
@@ -21,14 +18,14 @@
 @var html <<<
 <div class="controls">
   <input type="text" id="{{ id }}" value="{{ value }}"
-{% for at_name,at_value in attributes %}
-  {{ at_name }}="{{ at_value }}"
-{% endfor %}
+  {% for at_name, at_value in attributes %}
+    {{ at_name }}="{{ at_value }}"
+  {% endfor %}
  />
 </div>
 >>>
 
-    @var javascript alert('{id}');
+@var javascript alert('{id}');
 
 @end
 
@@ -150,7 +147,7 @@
 <div class="controls">
 <textarea
   id="{{ id }}"
-  {% for at_name,at_value in attributes %}
+  {% for at_name, at_value in attributes %}
     {{ at_name }}="{{ at_value }}"
   {% endfor %}
 >
@@ -185,7 +182,7 @@
     type="{{ xtype }}"
     id="{{ id }}"
     value="{{ value }}"
-    {% for at_name,at_value in attributes %}
+    {% for at_name, at_value in attributes %}
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
   />
