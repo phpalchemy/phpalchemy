@@ -27,7 +27,7 @@ class Handler
         $data = array();
         $data['message'] = $exception->getMessage();
 
-        if (class_exists('\Haanga')) {
+        if (false) { //(class_exists('\Haanga')) {
             $view = new HaangaView();
             $tplFileExt = 'djt';
         } else {
