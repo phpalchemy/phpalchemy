@@ -381,14 +381,13 @@ class Kernel implements KernelInterface
         $annotation->prepare();
 
         // getting configuration
-        $metaPath   = $this->config->get('app.meta_dir');
+        $metaPath    = $this->config->get('app.meta_dir');
         $elementName = $annotation->name;
-        $metaFile   = $annotation->metaFile;
-        $attributes = $annotation->attributes;
-        $uiBundle   = $annotation->bundle;
+        $metaFile    = $annotation->metaFile;
+        $attributes  = $annotation->attributes;
+        $uiBundle    = $annotation->bundle;
 
         // setting uiEngine Object
-
         // if any ui-bundle wasn't especified on action's annotation
         if (empty($uiBunle)) {
             // read defaults bundles from configuration for desktop & mobile platform

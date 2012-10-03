@@ -123,18 +123,18 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
                 );
             }
 
-            $mapper->connect(
-                'asset_resource',
-                new Route(
-                    '/assets/{filename}',
-                    array(
-                        '_controller' => 'assetsDispatcher',
-                        '_action' => 'index',
-                        '_type' => 'x-asset-request'
-                    ),
-                    array('filename' => '(.+)')
-                )
-            );
+            // $mapper->connect(
+            //     'asset_resource',
+            //     new Route(
+            //         '/assets/{filename}',
+            //         array(
+            //             '_controller' => 'assetsDispatcher',
+            //             '_action' => 'index',
+            //             '_type' => 'x-asset-request'
+            //         ),
+            //         array('filename' => '(.+)')
+            //     )
+            // );
 
             return $mapper;
         });
