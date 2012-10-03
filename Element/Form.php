@@ -19,6 +19,7 @@ class Form extends Element
     public $action = '';
     public $method = 'post';
     public $title = '';
+    public $buttons = array();
 
     protected $xtype = 'form';
 
@@ -37,6 +38,11 @@ class Form extends Element
     public function getXtype()
     {
         return $this->xtype;
+    }
+
+    public function getButtons()
+    {
+        return $this->buttons;
     }
 
     protected function build()

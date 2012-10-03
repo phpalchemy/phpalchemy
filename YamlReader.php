@@ -46,16 +46,10 @@ class YamlReader extends Reader
             unset($data['attributes']);
         } else {
             foreach ($data as $key => $value) {
-                if (! is_numeric($key) && is_string($key) && ! is_array($value)) {
+                if (! is_numeric($key) && is_string($key)) {
                     $this->attributes[$key] = $value;
-                    unset($data[$key]);
                 }
             }
-        }
-
-        // getting items
-        if (isset($data['items']) && is_array($data['items'])) {
-            $items = $data['items'];
         }
 
         $elementClass = 'Alchemy\Component\UI\Element\\' . ucfirst($keys[0]);
@@ -64,6 +58,12 @@ class YamlReader extends Reader
             throw new \RuntimeException(
                 sprintf("Runtime Error: Undefined UI Element Class '%s'.", ucfirst($this->root->nodeName)
             ));
+        }
+
+        // getting items
+        $items = array();
+        if (isset($this->attributes['items']) && is_array($this->attributes['items'])) {
+            $items = $this->attributes['items'];
         }
 
         $this->element = new $elementClass($this->attributes);

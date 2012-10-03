@@ -106,6 +106,17 @@
 @end
 
 /*
+ * buttongroup html widget
+ */
+@block buttongroup
+
+@var html <<<
+ss
+>>>
+
+@end
+
+/*
  * Select html widget
  */
 @block select
