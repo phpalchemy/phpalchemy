@@ -13,8 +13,21 @@ return array(
         "textbox" => array(
             "xtype" => array(
                 "value" => function($widget) {
-                    return $widget->multiline ? 'textarea' : 'text';
+                    if ($widget->multiline)
+                        return 'textarea';
+                    elseif ($widget->type == 'password')
+                        return 'password';
+                    else
+                        return 'text';
                 }
+            )
+        ),
+        "listbox" => array(
+            "xtype" => array(
+                "value" => 'select'
+            ),
+            "multiple" => array(
+                "value" => "multiple"
             )
         ),
 

@@ -1,54 +1,177 @@
-/**
- * HTML Components generator script
- */
+/*****************************************************************************
+ *                     HTML Components generator script
+ *****************************************************************************/
 
-// Settings
+// Setting as default block to: '_default'
 @def global version 1.0
 
 // Setting as default block to: '_default'
 @def setconf default_block _default
 
-// Iterators definition
-@def iterator attributes.tpl {_key}="{_value}"
-@def iterator attributes.sep " "
+/*    *** Components blocks  ***    */
 
-@def iterator options.tpl <option name="{name}">{value}</option>
-@def iterator options.sep "\n"
-
-@def iterator form_items.tpl {_value}
-@def iterator form_items.sep "\n"
-
-/** Components blocks */
-
-## TEXTBOX ##
+/*
+ * Texbox html widget
+ */
 @block textbox
-    @var html <input type="text" id="{id}" value="{value}" @@attributes({attributes}) class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"/>
+
+@var html <<<
+<div class="controls">
+  <input type="text" id="{{ id }}" value="{{ value }}"
+  {% for at_name, at_value in attributes %}
+    {{ at_name }}="{{ at_value }}"
+  {% endfor %}
+ />
+</div>
+>>>
+
+@var javascript alert('{id}');
+
 @end
 
-## CHECKBOX ##
+/*
+ * Checkbox html widget
+ */
 @block checkbox
-    @var html <label><input type="checkbox" @@attributes({attributes}) />{label}</label>
+
+@var html <<<
+<div class="controls">
+<label class="checkbox">
+  <input
+    type="checkbox"
+    id="{{ id }}"
+    {% for at_name, at_value in attributes %}
+      {{ at_name }}="{{ at_value }}"
+    {% endfor %}
+    {% if value %}
+      checked="checked"
+    {% endif %}
+  />
+  {{ label }}
+</label>
+</div>
+>>>
+
 @end
 
-## SELECT ##
+
+/*
+ * Checkgroup html widget
+ */
+@block checkgroup
+
+@var html <<<
+<div class="controls">
+{% for i, item in items %}
+<label class="checkbox{% if inline == "true" %} inline{% endif %}">
+  <input
+    type="checkbox"
+    name="{{ item['name'] }}"
+    value="{{ item['value'] }}"
+    {% if value[i] %}
+      checked="checked"
+    {% endif %}
+  >
+  {{ item['label'] }}
+</label>
+{% endfor %}
+</div>
+>>>
+
+@end
+
+/*
+ * Radiogroup html widget
+ */
+@block radiogroup
+
+@var html <<<
+<div class="controls">
+{% for item in items %}
+<label class="radio{% if inline == "true" %} inline{% endif %}">
+  <input
+    type="radio"
+    name="{{ attributes['name'] }}"
+    value="{{ item['value'] }}"
+    {% if item['value'] == value %}
+      checked="checked"
+    {% endif %}
+  >
+  {{ item['label'] }}
+</label>
+{% endfor %}
+</div>
+>>>
+
+@end
+
+/*
+ * buttongroup html widget
+ */
+@block buttongroup
+
+@var html <<<
+ss
+>>>
+
+@end
+
+/*
+ * Select html widget
+ */
 @block select
-    @var html <<<
-<select type="{xtype}" id="{id}" @@attributes({attributes})>
-  @@options({options})
-</select>
+
+@var html <<<
+<div class="controls">
+  <select
+    id="{{ id }}"
+    {% for at_name, at_value in attributes %}
+      {{ at_name }}="{{ at_value }}"
+    {% endfor %}
+  >
+    {% for item in items %}
+    <option
+      name="{{ item['value'] }}"
+      {% if value | isarray %}
+        {% if item['value'] in value %}
+          selected="selected"
+        {% endif %}
+      {% else %}
+        {% if item['value'] == value %}
+          selected="selected"
+        {% endif %}
+      {% endif %}
+    >{{ item['label'] }}</option>
+    {% endfor %}
+  </select>
+</div>
 >>>
+
 @end
 
-## TEXTAREA ##
+/*
+ * Textarea html widget
+ */
 @block textarea
-    @var html <<<
-<textarea type="{xtype}" id="{id}" @@attributes({attributes})>
-  {value}
+
+@var html <<<
+<div class="controls">
+<textarea
+  id="{{ id }}"
+  {% for at_name, at_value in attributes %}
+    {{ at_name }}="{{ at_value }}"
+  {% endfor %}
+>
+{{ value }}
 </textarea>
+</div>
 >>>
+
 @end
 
-## FORM ##
+/*
+ * Form html widget
+ */
 @block form
 
 @var html <<<
@@ -59,8 +182,32 @@
 
 @end
 
-
-## DEFAULT BLOCK
+/*
+ * Default block
+ */
 @block _default
-    @var html <input type="{xtype}" id="{id}" @@attributes({attributes})/>
+
+@var html <<<
+<div class="controls">
+  <input
+    type="{{ xtype }}"
+    id="{{ id }}"
+    value="{{ value }}"
+    class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"
+    {% for at_name, at_value in attributes %}
+      {{ at_name }}="{{ at_value }}"
+    {% endfor %}
+  />
+</div>
+>>>
+
 @end
+
+
+
+
+
+
+
+
+
