@@ -29,8 +29,7 @@ return array(
             "multiple" => array(
                 "value" => "multiple"
             )
-        ),
-
+        )
     ),
     ":defaults:" => array(
         "disabled" => array(

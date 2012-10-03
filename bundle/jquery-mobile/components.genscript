@@ -150,6 +150,40 @@ ss
 @end
 
 /*
+ * Flipswitch html widget
+ */
+@block flipswitch
+
+@var html <<<
+<div class="controls">
+  <select
+    id="{{ id }}"
+    data-role="slider"
+    {% for at_name, at_value in attributes %}
+      {{ at_name }}="{{ at_value }}"
+    {% endfor %}
+  >
+    {% for item in items %}
+    <option
+      name="{{ item['value'] }}"
+      {% if value | isarray %}
+        {% if item['value'] in value %}
+          selected="selected"
+        {% endif %}
+      {% else %}
+        {% if item['value'] == value %}
+          selected="selected"
+        {% endif %}
+      {% endif %}
+    >{{ item['label'] }}</option>
+    {% endfor %}
+  </select>
+</div>
+>>>
+
+@end
+
+/*
  * Textarea html widget
  */
 @block textarea
@@ -193,7 +227,6 @@ ss
     type="{{ xtype }}"
     id="{{ id }}"
     value="{{ value }}"
-    class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"
     {% for at_name, at_value in attributes %}
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
