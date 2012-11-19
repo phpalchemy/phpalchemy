@@ -65,15 +65,7 @@ abstract class Element
     {
         $result = array();
         $refl   = new \ReflectionObject($this);
-        $attributes  = $refl->getProperties(\ReflectionProperty::IS_PUBLIC);
-
-        foreach ($attributes as $att) {
-            $value = $att->getValue($this);
-
-            if ($value !== null) {
-                $result['attributes'][$att->getName()] = $att->getValue($this);
-            }
-        }
+        $result['attributes'] = $this->getAttributes();
 
         $properties  = $refl->getProperties(\ReflectionProperty::IS_PROTECTED);
         foreach ($properties as $pro) {
@@ -83,6 +75,23 @@ abstract class Element
 
             if ($value !== null) {
                 $result[$pro->getName()] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    public function getAttributes()
+    {
+        $result = array();
+        $refl   = new \ReflectionObject($this);
+        $attributes  = $refl->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+        foreach ($attributes as $att) {
+            $value = $att->getValue($this);
+
+            if ($value !== null) {
+                $result[$att->getName()] = $att->getValue($this);
             }
         }
 
