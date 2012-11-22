@@ -15,6 +15,6 @@ try {
     $alchemist->run();
 
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e->getMessage() . EOL;
 }
 
