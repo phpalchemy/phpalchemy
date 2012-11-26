@@ -69,7 +69,7 @@ class InitAppCommand extends Command
         $cnnType = self::canConnect("getcomposer.org") ? 'online' : 'offline';
         $output->writeln(sprintf("<info>(%s)</info>", $cnnType));
 
-        $output->write("* <info>Building project ...</info>");
+        $output->write("* <info>Building project ... </info>");
 
         // get checksum from framework cache
         $cachedMetadata = self::getCachedVendorsMetadata();
@@ -78,12 +78,12 @@ class InitAppCommand extends Command
         $checksum = self::getVendorsChecksum();
 
         if ($cnnType === 'online' && $checksum !== $cachedMetadata->checksum) {
-            $output->writeln(" (from packagist)");
+            $output->writeln("(from packagist)");
 
             self::remoteBuild();
             self::saveVendorPkgs($checksum);
         } else {
-            $output->writeln(" (local)");
+            $output->writeln("(local)");
 
             self::localBuild();
         }
@@ -97,7 +97,25 @@ class InitAppCommand extends Command
 
     protected static function localBuild()
     {
-        echo 'TODO' . PHP_EOL;
+        // define framework cache dir. on user home directory
+        $cacheHomeDir = getenv("HOME") . DS . '.phpalchemy' . DS . 'cache' . DS . 'composer' . DS;
+
+        require_once 'Archive_Tar/Archive/Tar.php';
+
+        \Alchemy\Console\Alchemist::createDir(getcwd() . '/vendor');
+
+        $filter = new \Zend\Filter\Decompress(array(
+            'adapter' => 'Tar',
+            'options' => array(
+                'archive' => $cacheHomeDir . 'vendor.tar',
+                'target' => getcwd(),
+            )
+        ));
+
+        $compressed = $filter->filter($cacheHomeDir . 'vendor.tar');
+
+        copy($cacheHomeDir . 'composer.phar', getcwd() . '/composer.phar');
+        copy($cacheHomeDir . 'composer.lock', getcwd() . '/composer.lock');
     }
 
     protected static function saveVendorPkgs($checksum = '')
