@@ -82,40 +82,16 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             //return new Annotations($app['config']);
         });
 
-        $this['mapper'] = $this->share(function () use ($app){
-            $mapper = new Mapper();
+        $this['mapper'] = $this->share(function () use ($app) {
             $config = $app['config'];
+            $routesDir = $config->get('app.root_dir') . DS .'config' . DS;
 
-            if (file_exists($config->get('app.root_dir') . DS .'config' . DS . 'routes.php')) {
-                $routesInc = include $config->get('app.root_dir') . DS .'config' . DS . 'routes.php';
-
-                if ($routesInc instanceof Mapper) {
-                    $routesInc = $mapper;
-                } elseif ($routesInc instanceof \Closure) {
-                    $addRoutes($mapper);
-                } else {
-                    throw new \InvalidArgumentException("ERROR: file routes.php does not return valid data.");
-                }
-            } elseif (file_exists($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml')) {
-                $routesList = $app['yaml']->load($config->get('app.root_dir') . DS . 'config' . DS . 'routes.yaml');
-
-                foreach ($routesList as $rname => $rconf) {
-                    $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
-                    $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
-                    $type         = isset($rconf['type'])         ? $rconf['type']         : '';
-                    $resourcePath = isset($rconf['resourcePath']) ? $rconf['resourcePath'] : '';
-
-                    if (! array_key_exists('pattern', $rconf)) {
-                        throw new \InvalidArgumentException(sprintf(
-                            'Runtime Error: Route pattern for "%s" route is missing.', $rname
-                        ));
-                    }
-
-                    $mapper->connect(
-                        $rname,
-                        new Route($rconf['pattern'], $defaults, $requirements, $type, $resourcePath
-                    ));
-                }
+            if (file_exists($routesDir . 'routes.php')) {
+                $mapper = include $routesDir . 'routes.php';
+            } elseif (file_exists($routesDir . 'routes.yaml')) {
+                $mapper = new Mapper($app['yaml']);
+                $mapper->setCacheDir($config->get('app.cache_dir'));
+                $mapper->loadFrom($routesDir . 'routes.yaml');
             } else {
                 throw new \Exception(
                     "Application Error: No routes found for this app.\n" .
@@ -331,6 +307,32 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         foreach ($phpIniSettings as $name => $value) {
             ini_set($name, $value);
         }
+    }
+
+    protected function loadMapperFromYaml($app, $file)
+    {
+        $mapper = new Mapper();
+        $routesList = $app['yaml']->load($file);
+
+        foreach ($routesList as $rname => $rconf) {
+            $defaults     = isset($rconf['defaults'])     ? $rconf['defaults']     : array();
+            $requirements = isset($rconf['requirements']) ? $rconf['requirements'] : array();
+            $type         = isset($rconf['type'])         ? $rconf['type']         : '';
+            $resourcePath = isset($rconf['resourcePath']) ? $rconf['resourcePath'] : '';
+
+            if (! array_key_exists('pattern', $rconf)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Runtime Error: Route pattern for "%s" route is missing.', $rname
+                ));
+            }
+
+            $mapper->connect(
+                $rname,
+                new Route($rconf['pattern'], $defaults, $requirements, $type, $resourcePath
+            ));
+        }
+
+        return $mapper;
     }
 
     /**
