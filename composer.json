@@ -29,12 +29,8 @@
         "pear-pear.php.net/pear":               "*",
         "pear/archive_tar": "1.3.*"
     },
+    "minimum-stability": "dev",
     "autoload": {
         "psr-0": { "Alchemy": "./" }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0.x-dev"
-        }
     }
 }
