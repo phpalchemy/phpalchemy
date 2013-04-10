@@ -31,6 +31,6 @@
     },
     "minimum-stability": "dev",
     "autoload": {
-        "psr-0": { "Alchemy": "./" }
+        "psr-0": { "Alchemy": "Alchemy/" }
     }
 }
