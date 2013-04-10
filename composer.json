@@ -1,4 +1,15 @@
 {
+    "name": "eriknyk/phpalchemy",
+    "description": "The PHP framework",
+    "keywords": ["php framework"],
+    "homepage": "http://phpalchemy.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Erik Amaru Ortiz",
+            "email": "aortiz.erik@gmail.com"
+        }
+    ],
     "repositories": [
         {
             "type": "composer",
@@ -17,5 +28,13 @@
         "zendframework/zend-filter": "2.0.*",
         "pear-pear.php.net/pear":               "*",
         "pear/archive_tar": "1.3.*"
+    },
+    "autoload": {
+        "psr-0": { "Alchemy": "./" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
     }
 }
