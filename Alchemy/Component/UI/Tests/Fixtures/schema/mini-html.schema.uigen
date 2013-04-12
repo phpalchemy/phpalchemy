@@ -1,0 +1,53 @@
+################################################################################
+#                       HTML schema generator script                           #
+################################################################################
+
+# ITERATORS DEFINITIONS
+
+@def global version 1.0
+@def global html5 true
+
+@def iterator attributes.tpl {_key}="{_value}"
+@def iterator attributes.sep " "
+
+@def iterator options.tpl <option name="{name}">{value}</option>
+@def iterator options.sep "\n"
+
+@def iterator form_items.tpl {_value}
+@def iterator form_items.sep "\n"
+
+# END ITERATORS DEF
+
+## SELECT
+@block select
+
+@var javascript alert('{id}');
+
+@var html <<<
+<select type="{xtype}" id="{id}" @@attributes({attributes})>
+  @@options({options})
+</select>
+>>>
+
+@end
+
+## TEXTBOX
+@block textbox
+    @var html <input type="text" id="{id}" name="{name}" @@attributes({attributes})/>
+@end
+
+## FORM
+@block form
+
+@var html <<<
+<form @@attributes({attributes})>
+@@form_items({items})
+</form>
+>>>
+
+@end
+
+## _DEFAULT
+@block _default
+    @var html <input type="{xtype}" id="{id}" name="{name}" @@attributes({attributes})/>
+@end

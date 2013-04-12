@@ -1,0 +1,310 @@
+<?php
+namespace Alchemy\Component\UI;
+
+use Alchemy\Component\UI\Widget\WidgetInterface;
+use Alchemy\Component\UI\Element\Element;
+use Alchemy\Component\UI\ReaderFactory;
+use Alchemy\Component\UI\Parser;
+
+/**
+ * Class Parser
+ *
+ * @version   1.0
+ * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ * @link      https://github.com/eriknyk/phpalchemy
+ * @copyright Copyright 2012 Erik Amaru Ortiz
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @package   Alchemy/Component/Routing
+ */
+class Engine
+{
+    protected $cacheDir = './';
+    protected $targetBundle = '';
+    protected $metaFile = '';
+    protected $mapping  = array();
+    protected $readerFactory = null;
+    protected $reader = null;
+    protected $parser = null;
+
+    protected $generated = array();
+    protected $build = array();
+
+    /**
+     * UI\Engine Constructor
+     *
+     * @param string $bundle bundle name to generate a its output based on its generation script and mapping rules
+     * @param Reader $reader meta file source reader
+     * @param Parser $parser metafile source parser
+     */
+    public function __construct(ReaderFactory $readerFactory, Parser $parser)
+    {
+        $this->readerFactory = $readerFactory;
+        $this->parser = $parser;
+    }
+
+    /**
+     * Prepare all engine dependencies
+     */
+    public function prepare()
+    {
+        if (empty($this->targetBundle)) {
+            throw new \RuntimeException(sprintf(
+                "Runtime Error: Any Bundle was selected for ui generation."
+            ));
+        }
+
+        $bundleDir = __DIR__ . DIRECTORY_SEPARATOR . 'bundle' . DIRECTORY_SEPARATOR . $this->targetBundle . DIRECTORY_SEPARATOR;
+
+        if (!is_dir($bundleDir)) {
+            throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $this->targetBundle));
+        }
+
+        $genscriptFilename = $bundleDir . DIRECTORY_SEPARATOR . 'components.genscript';
+        $mappingFilename   = $bundleDir . DIRECTORY_SEPARATOR . 'mapping.php';
+
+        //verify if the bundle is registered
+        if (! file_exists($genscriptFilename)) {
+            throw new \Exception(sprintf("Error: genscript file for '%s' bundle is missing.", $this->targetBundle));
+        }
+
+        if (! file_exists($genscriptFilename)) {
+            throw new \Exception(sprintf("Error: mapping file for '%s' bundle is missing.", $this->targetBundle));
+        }
+
+        if (! file_exists($this->metaFile)) {
+            throw new \Exception(sprintf("Error: meta file '%s' does not exist.", $this->metaFile));
+        }
+
+        $this->parser->setScriptFile($genscriptFilename);
+        $this->parser->parse();
+        $this->mapping = include($mappingFilename);
+
+        // load reader from factory
+        $this->reader = $this->readerFactory->load($this->metaFile);
+    }
+
+    /**
+     * Sets cache directory for UI Engine
+     *
+     * @param string $path to store cache dir path
+     */
+    public static function setCacheDir($path)
+    {
+        self::$cacheDir = $path;
+    }
+
+    public function setTargetBundle($bundleName)
+    {
+        $this->targetBundle = $bundleName;
+    }
+
+    public function setMetaFile($metaFile)
+    {
+        $this->metaFile = $metaFile;
+    }
+
+    /**
+     * Stores a array containing the generated output element and widgets
+     *
+     * @return array generated output
+     */
+    public function getGenerated()
+    {
+        return $this->generated;
+    }
+
+    /**
+     * Build Web UI
+     */
+    public function build(array $data, $targetBundle = '', $metaFile = '')
+    {
+        if (! empty($targetBundle)) {
+            $this->setTargetBundle($targetBundle);
+        }
+
+        if (! empty($metaFile)) {
+            $this->setMetaFile($metaFile);
+        }
+
+        $this->prepare();
+
+        $widgestWithoutIdCounter = 0;
+        $element = $this->reader->getElement();
+        $elementItems = array();
+
+        foreach ($element->getWidgets() as $widget) {
+            if ($widget->getId() === '') {
+                if ($widget->name === '') {
+                    $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
+                    $widget->name = $widget->getId();
+                } else {
+                    $widget->setId($widget->name);
+                }
+            } else {
+                if ($widget->name === '') {
+                    $widget->name = $widget->getId();
+                }
+            }
+
+            // setting widget data
+            if (array_key_exists($widget->name, $data)) {
+                $widget->setValue($data[$widget->name]);
+            }
+
+            // mapping element attributes
+            $info = $this->mapElementInformation($widget);
+
+            // generate the code
+            $generated = $this->parser->generate($info['xtype'], $info);
+
+            // setting generate code on widget property
+            $widget->setGenerated($generated);
+
+            if (array_key_exists('html', $generated)) {
+                $elementItems[$widget->getId()] = $generated['html'];
+            } else {
+                $elementItems[$widget->getId()] = '';
+            }
+
+            $this->generated['widgets'][$widget->getId()] = array(
+                'object' => $widget,
+                'info'   => $info,
+                'generated' => $generated
+            );
+        }
+
+        $info = $this->mapElementInformation($element);
+        $info['items'] = $elementItems;
+
+        $generated = $this->parser->generate(
+            $element->getXtype(),
+            $info
+        );
+
+        $this->generated['element'] = $generated;
+
+        $element->setGenerated($generated);
+
+        return $element;
+        //$this->build[$element->getXtype()]['widgets'] = $elementItems;
+    }
+
+    /**
+     * Map the widget attributes & properties to a determinated UI languaje
+     * @param  WidgetInterface $widget widget object to map its attributes & properties
+     * @return array                   mapped widget information
+     */
+    protected function mapElementInformation(Element $widget)
+    {
+        $mapping = $this->mapping['widget_mapping'];
+        $widgetInfo = $widget->getInfo();
+
+        if (!array_key_exists($widget->getXtype(), $mapping)) {
+            return $widgetInfo;
+        }
+
+        $overrides = $mapping[$widget->getXtype()];
+
+        foreach ($overrides as $attributeName => $attribInfo) {
+            $isAttribute = false;
+
+            if (array_key_exists($attributeName, $widgetInfo)) {
+                // find on properties
+                $value = $widgetInfo[$attributeName];
+            } elseif (array_key_exists($attributeName, $widgetInfo['attributes'])) {
+                // find on attributes
+                $value = $widgetInfo['attributes'][$attributeName];
+                $isAttribute = true;
+            } else {
+                // attribute or property doesn't exist on widget class
+                // throw new \RuntimeException(sprintf(
+                //     "Runtime Error: Attribute '%s' doesn't exist on %s widget class.",
+                //     $attributeName,
+                //     ucfirst($widget->getXtype())
+                // ));
+
+                continue;
+            }
+
+            // if the attribute's name has overrides
+            if (array_key_exists('name', $attribInfo)) {
+                // the attribute name should be overridden and the original name should be removed
+
+                // removing original attribute name
+                unset($widgetInfo[$attributeName]);
+
+                // geeting the override attribute name
+                $attributeName = $this->processMappedWidgetInfo(
+                    $widget,
+                    $attribInfo['name'],
+                    $value
+                );
+            }
+
+            // if the attribute's value has overrides
+            if (array_key_exists('value', $attribInfo)) {
+                // the attribute value shoul be overridden by a composed structure
+                $widgetInfo[$attributeName] = $this->processMappedWidgetInfo(
+                    $widget,
+                    $attribInfo['value'],
+                    $value
+                );
+            }
+
+            if ($isAttribute) {
+                $widgetInfo['attributes'][$attributeName] = $widgetInfo[$attributeName];
+            } else {
+                $widgetInfo[$attributeName] = $widgetInfo[$attributeName];
+            }
+
+        }
+
+        return $widgetInfo;
+    }
+
+    /**
+     * Process the mapped widget information
+     *
+     * This method match a single mapped property or attribute of a widget
+     * it can match the property or attribute value and even attribute name itself
+     *
+     * @param  WidgetInterface $widget widget object
+     * @param  mixed           $info   can contains a array|string|Closure
+     * @param  string          $value  the property or attribute value
+     * @return string                  returns a mapped varname or value
+     */
+    private function processMappedWidgetInfo(WidgetInterface $widget, $info, $value)
+    {
+        if (is_string($info)) {
+            $result = $info;
+        } elseif (is_array($info)) {
+            $strValue = $this->toString($value);
+
+            if (array_key_exists($strValue, $info)) {
+                $result = $info[$strValue];
+            } else {
+                $result = $value;
+            }
+        } elseif ($info instanceof \Closure){
+            $result = $info($widget);
+        } else {
+            throw new \RuntimeException(sprintf(
+                "Runtime Error: invalid data type '%s' for widget attribute", gettype($value)
+            ));
+        }
+
+        return $result;
+    }
+
+    private function toString($val)
+    {
+        if ($val === true) {
+            return 'true';
+        } elseif ($val === false) {
+            return 'false';
+        } else {
+            return (string) $val;
+        }
+    }
+}
+
