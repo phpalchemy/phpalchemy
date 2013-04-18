@@ -46,7 +46,9 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
 {
     /**
      * Construct application object
-     * @param Config $config Contains all app configuration
+     * @param array $conf
+     * @throws \Exception
+     * @internal param \Alchemy\Contains $config all app configuration
      */
     public function init($conf = array())
     {
