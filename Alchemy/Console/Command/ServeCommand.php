@@ -63,14 +63,11 @@ class ServeCommand extends Command
         $env  = $input->getArgument('environment');
 
         $devServer  = $this->config->get('dev_appserver.name');
-        $cgiBinPath = '';
-        $socketPath = '';
         $homeDir    = $this->config->get('phpalchemy.root_dir');
         $appName    = $this->config->get('app.name');
-        $appRootDir = $this->config->get('app.root_dir');
         $tmpDir     = $this->config->isEmpty('app.cache_dir') ?
-                       rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR :
-                       $this->config->get('app.cache_dir') . DIRECTORY_SEPARATOR;
+                      rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR :
+                      $this->config->get('app.cache_dir') . DIRECTORY_SEPARATOR;
 
         $phpCgiBin = $this->config->isEmpty('dev_appserver.php-cgi_bin') ?
                      $this->resolveBin('php-cgi') : $this->config->get('dev_appserver.php-cgi_bin');
@@ -78,7 +75,13 @@ class ServeCommand extends Command
 
         // validations
         if (! is_dir($tmpDir)) {
-            throw new \RuntimeException(sprintf("Runtime Error: Temporal directory '%s' does not exits!", $tmpDir));
+            if (! mkdir($tmpDir, 0777, true)) {
+                throw new \RuntimeException(sprintf(
+                    "Runtime Error: Temporal directory '%s' does not exit, and is not possible create it.\n" .
+                    "Check permissions for: ",
+                    $tmpDir
+                ));
+            }
         }
 
         switch ($devServer) {
@@ -134,6 +137,7 @@ class ServeCommand extends Command
         //$output->writeln('<comment>Using "'.$env.'" environment.</comment>');
         $output->writeln(sprintf('- The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port));
         $output->writeln("- URL: <info>http://$host:$port</info>");
+        $output->writeln(PHP_EOL." (*) Press CTRL+C to stop the service.".PHP_EOL);
 
         $lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 

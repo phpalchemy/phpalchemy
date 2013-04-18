@@ -60,6 +60,10 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             $config = new Config();
             $config->load($conf);
 
+            if (! $config->exists('phpalchemy.root_dir')) {
+                $config->set('phpalchemy.root_dir', realpath(__DIR__.'/../'));
+            }
+
             return $config;
         });
 

@@ -20,11 +20,17 @@ class PhtmlView extends View
     public function render()
     {
         self::$instance = $this;
-        $tplFile = $this->getTemplateDir() . DIRECTORY_SEPARATOR . $this->getTpl();
+        $tplFile = '';
 
-        if (!file_exists($tplFile)) {
-            echo 'ERROR: Layout template file '.$tplFile.' does not exist!';
-            die;
+        foreach ($this->getTemplateDir() as $dir) {
+            if (file_exists($dir . DIRECTORY_SEPARATOR . $this->getTpl())) {
+                $tplFile = $dir . DIRECTORY_SEPARATOR . $this->getTpl();
+                break;
+            }
+        }
+
+        if (! file_exists($tplFile)) {
+            throw new \Exception('ERROR: Layout template file '.$tplFile.' does not exist!');
         }
 
         extract($this->data);
@@ -32,11 +38,17 @@ class PhtmlView extends View
         include $tplFile;
 
         if (!empty(self::$extend)) {
-            $tplFile = $this->getTemplateDir() . DIRECTORY_SEPARATOR . self::$extend . '.phtml';
+            $tplFile = ''; //$this->getTemplateDir() . DIRECTORY_SEPARATOR . self::$extend . '.phtml';
 
-            if (!file_exists($tplFile)) {
-                echo 'ERROR: Layout template file '.$tplFile.' does not exist!';
-                die;
+            foreach ($this->getTemplateDir() as $dir) {
+                if (file_exists($dir . DIRECTORY_SEPARATOR . self::$extend . '.phtml')) {
+                    $tplFile = $dir . DIRECTORY_SEPARATOR . self::$extend . '.phtml';
+                    break;
+                }
+            }
+
+            if (! file_exists($tplFile)) {
+                throw new \Exception('ERROR: Layout template file '.$tplFile.' does not exist!');
             }
 
             extract($this->data);
@@ -59,6 +71,7 @@ class PhtmlView extends View
             } else {
                 return $default;
             }
+
             return;
         } elseif ($default instanceof \Closure) {
             self::$blocks[$name] = $default;
