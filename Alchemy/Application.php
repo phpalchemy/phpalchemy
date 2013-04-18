@@ -10,9 +10,9 @@
 
 namespace Alchemy;
 
-use Alchemy\Adapter\NotojAnnotations;
+//use Alchemy\Adapter\NotojAnnotations; //<- seems it doesn't exits any more
 use Alchemy\Annotation\Reader\Adapter\NotojReader;
-use Alchemy\Component\Annotations\Annotations;
+//use Alchemy\Component\Annotations\Annotations; //<- seems it doesn't exits any more
 use Alchemy\Component\ClassLoader\ClassLoader;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
@@ -25,7 +25,7 @@ use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Engine;
 use Alchemy\Component\WebAssets;
 use Alchemy\Component\Yaml\Yaml;
-use Alchemy\Exception\Handler;
+//use Alchemy\Exception\Handler;
 use Alchemy\Kernel\EventListener;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Kernel\Kernel;
