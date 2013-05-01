@@ -44,6 +44,18 @@ use Alchemy\Mvc\ControllerResolver;
  */
 class Application extends \DiContainer implements KernelInterface, EventSubscriberInterface
 {
+    public $appDir = '';
+
+    public function setAppDir($appDir)
+    {
+        $this->appDir = $appDir;
+    }
+
+    public function getAppDir()
+    {
+        return $this->appDir;
+    }
+
     /**
      * Construct application object
      * @param array $conf
@@ -58,12 +70,16 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
 
         $this['logger'] = null;
 
-        $this['config'] = $this->share(function () use ($conf){
+        $this['config'] = $this->share(function () use ($conf, $app){
             $config = new Config();
             $config->load($conf);
 
             if (! $config->exists('phpalchemy.root_dir')) {
                 $config->set('phpalchemy.root_dir', realpath(__DIR__.'/../'));
+            }
+
+            if (! empty($app->appDir)) {
+                $config->set('app.root_dir', $app->getAppDir());
             }
 
             return $config;
