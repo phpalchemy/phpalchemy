@@ -385,24 +385,25 @@ class Kernel implements KernelInterface
         $elementName = $annotation->name;
         $metaFile    = $annotation->metaFile;
         $attributes  = $annotation->attributes;
-        $uiBundle    = $annotation->bundle;
+        $layout    = $annotation->layout;
 
         // setting uiEngine Object
-        // if any ui-bundle wasn't especified on action's annotation
-        if (empty($uiBunle)) {
+        // if any layout wasn't specified on action's annotation
+        if (empty($layout)) {
             // read defaults bundles from configuration for desktop & mobile platform
             if ($request->isMobile()) {
                 if ($request->isIpad()) {
-                    $uiBundle = $this->config->get('ui-bundle.default_mobile');
+                    // for ipad device
+                    $layout = $this->config->get('layout.mobile');
                 } else {
-                    $uiBundle = $this->config->get('ui-bundle.default_mobile');
+                    $layout = $this->config->get('layout.mobile');
                 }
             } else {
-                $uiBundle = $this->config->get('ui-bundle.default_desktop');
+                $layout = $this->config->get('layout.default');
             }
         }
 
-        $this->uiEngine->setTargetBundle($uiBundle);
+        $this->uiEngine->setTargetBundle($layout);
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
 
         // tell to uiEngine object build the ui requested
@@ -569,12 +570,12 @@ class Kernel implements KernelInterface
         // read defaults bundles from configuration for desktop & mobile platform
         if ($this->request->isMobile()) {
             if ($this->request->isIpad()) {
-                $layoutsDir = $conf->layoutsDir . $this->config->get('ui-bundle.default_mobile') . DS;
+                $layoutsDir = $conf->layoutsDir . $this->config->get('layout.mobile') . DS;
             } else {
-                $layoutsDir = $conf->layoutsDir . $this->config->get('ui-bundle.default_mobile') . DS;
+                $layoutsDir = $conf->layoutsDir . $this->config->get('layout.mobile') . DS;
             }
         } else {
-            $layoutsDir = $conf->layoutsDir . $this->config->get('ui-bundle.default_desktop') . DS;
+            $layoutsDir = $conf->layoutsDir . $this->config->get('layout.default') . DS;
         }
 
         // check if template file exists
