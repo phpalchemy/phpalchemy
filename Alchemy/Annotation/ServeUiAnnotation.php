@@ -6,7 +6,7 @@ class ServeUiAnnotation extends Annotation
     public $metaFile   = '';
     public $name         = '';
     public $attributes = array();
-    public $bundle     = '';
+    public $layout     = '';
 
     public function prepare()
     {
@@ -15,9 +15,9 @@ class ServeUiAnnotation extends Annotation
             $this->remove('data');
         }
 
-        if ($this->has('ui-bundle')) {
-            $this->bundle = $this->get('ui-bundle');
-            $this->remove('ui-bundle');
+        if ($this->has('layout')) {
+            $this->layout = $this->get('layout');
+            $this->remove('layout');
         }
 
         $params = $this->all();

@@ -385,7 +385,7 @@ class Kernel implements KernelInterface
         $elementName = $annotation->name;
         $metaFile    = $annotation->metaFile;
         $attributes  = $annotation->attributes;
-        $layout    = $annotation->layout;
+        $layout      = $annotation->layout;
 
         // setting uiEngine Object
         // if any layout wasn't specified on action's annotation
