@@ -1,0 +1,47 @@
+/*****************************************************************************
+ *                     HTML Components generator script
+ *****************************************************************************/
+
+@def global version 1.0
+
+/* TEXTBOX */
+
+@block textbox
+
+@var html <<<
+<input type="text" id="{{ id }}" value="{{ value }}"{% for k, v in attributes %} {{ k }}="{{ v }}"{% endfor %} />
+>>>
+
+@var javascript alert('textfield with id: {{ id }}');
+
+@end
+
+/*
+ * SELECT
+ */
+@block select
+
+@var html <<<
+<select id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>{% for item in items %}
+<option name="{{ item['value'] }}"{% if value | isarray %}{% if item['value'] in value %} selected="selected"{% endif %}{% else %}{% if item['value'] == value %} selected="selected"{% endif %}{% endif %}>{{ item['label'] }}</option>{% endfor %}
+</select>
+>>>
+
+@var javascript <<<
+alert('my_select_id');
+>>>
+
+@end
+
+@block _default
+
+@var html <<<
+<input type="{{ xtype }}" id="{{ id }}" value="{{ value }}" {% for k, v in attributes %}{{ k }}="{{ v }}"{% endfor %} />
+>>>
+
+@var javascript alert('{{ xtype }} with id: {{ id }}');
+
+@end
+
+
+

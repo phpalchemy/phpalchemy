@@ -1,6 +1,12 @@
 <?php
 use Alchemy\Component\UI\Parser;
 
+/*include_once 'bootstrap.php';
+$parser = new Parser(__DIR__ . '/Fixtures/schema/mini-html.genscript');
+print_r($parser->getBlocks()); die;*/
+
+
+
 /**
  * Alchemy\Component\UI\Parser - Unit Test File
  *
@@ -39,23 +45,12 @@ class ParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructor()
     {
-        $parser = new Parser(__DIR__ . '/Fixtures/schema/mini-html.schema.uigen');
+        $parser = new Parser(__DIR__ . '/Fixtures/schema/mini-html.genscript');
 
-        $this->assertCount(2, $parser->getGlobals());
-        $this->assertCount(3, $parser->getIterators());
-        $this->assertCount(4, $parser->getBlocks());
+        $this->assertCount(1, $parser->getGlobals());
+        $this->assertCount(3, $parser->getBlocks());
 
         return $parser;
-    }
-
-    /**
-     * @covers Alchemy\Component\UI\Parser::generate
-     * @depends testConstructor
-     */
-    public function testGetIterators(Parser $parser)
-    {
-        $result = $parser->getIterators();
-        $this->assertCount(3, $result);
     }
 
     /**
@@ -65,17 +60,17 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     public function testGenerateSingle(Parser $parser)
     {
         $data = array(
-            'id' => 'my_text_id',
-            'name' => 'my_text',
+            'id' => 'id1',
+            'value' => 'value1',
             'attributes' => array(
-                'size' => 25,
-                'emptyText' => 'write your text here!'
+                'size' => 15,
+                'placeholder' => 'placeholder text!'
             )
         );
 
         $expected = array();
-        $expected['html'] = '<input type="text" id="my_text_id" name="my_text" ' .
-                                'size="25" emptyText="write your text here!"/>';
+        $expected['html'] = '<input type="text" id="id1" value="value1" size="15" placeholder="placeholder text!" />';
+        $expected['javascript'] = "alert('textfield with id: id1');";
 
         $result = $parser->generate('textbox', $data);
         $this->assertEquals($expected, $result);
@@ -83,12 +78,12 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Error: Undefined template block: "undefined_tpl_block"
+     * @expectedExceptionMessage Error: Undefined template block: "undefined_block"
      * @depends testConstructor
      */
     public function testGenerateUndefinedTemplateBlockException($parser)
     {
-        $result = $parser->generate('undefined_tpl_block', array());
+        $result = $parser->generate('undefined_block', array());
     }
 
     /**
@@ -100,15 +95,16 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $parser->setDefaultBlock('_default');
 
         $data = array(
-            'id'    => 'my_checkbox_id',
-            'name'  => 'my_checkbox',
+            'id'    => 'checkbox_id',
+            'value'  => 'checkbox_value',
             'xtype' => 'checkbox',
             'attributes' => array(
                 'value' => 'some_choise'
             )
         );
         $expected = array();
-        $expected['html'] = '<input type="checkbox" id="my_checkbox_id" name="my_checkbox" value="some_choise"/>';
+        $expected['html'] = '<input type="checkbox" id="checkbox_id" value="checkbox_value" value="some_choise" />';
+        $expected['javascript'] = "alert('checkbox with id: checkbox_id');";
 
         $result = $parser->generate('checkbox', $data);
         $this->assertEquals($expected, $result);
@@ -122,25 +118,25 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     {
         $data = array(
             'id'    => 'my_select_id',
-            'name'  => 'my_select',
+            'value'  => 'my_select',
             'xtype' => 'slect',
             'attributes' => array(
                 'value' => 'some_choise'
             ),
-            'options' => array(
-                array('name' => 'one',   'value' => '1'),
-                array('name' => 'two',   'value' => '2'),
-                array('name' => 'three', 'value' => '3')
+            'items' => array(
+                array('value' => 'one',   'label' => '1'),
+                array('value' => 'two',   'label' => '2'),
+                array('value' => 'three', 'label' => '3')
             )
         );
 
         $expected = array();
         $expected['javascript'] = "alert('my_select_id');";
         $expected['html'] = <<<EOT
-<select type="slect" id="my_select_id" value="some_choise">
-  <option name="one">1</option>
-  <option name="two">2</option>
-  <option name="three">3</option>
+<select id="my_select_id" value="some_choise">
+<option name="one">1</option>
+<option name="two">2</option>
+<option name="three">3</option>
 </select>
 EOT;
         $result = $parser->generate('select', $data);
@@ -157,8 +153,8 @@ EOT;
         $parser->setDefaultBlock('_default');
 
         $data = array(
-            'id' => 'my_text_id',
-            'name' => 'my_text',
+            'id' => 'id1',
+            'value' => 'value1',
             'attributes' => array(
                 'size' => 25,
                 'emptyText' => 'write your text here!'
@@ -170,8 +166,8 @@ EOT;
         $formItems[] = $result['html'];
 
         $data = array(
-            'id'    => 'my_checkbox_id',
-            'name'  => 'my_checkbox',
+            'id'    => 'checkbox_id',
+            'value'  => 'checkbox_value',
             'xtype' => 'checkbox',
             'attributes' => array(
                 'value' => 'some_choise'
@@ -184,15 +180,14 @@ EOT;
 
         $data = array(
             'id'    => 'my_select_id',
-            'name'  => 'my_select',
-            'xtype' => 'slect',
+            'value'  => 'my_select',
             'attributes' => array(
                 'value' => 'some_choise'
             ),
-            'options' => array(
-                array('name' => 'one',   'value' => '1'),
-                array('name' => 'two',   'value' => '2'),
-                array('name' => 'three', 'value' => '3')
+            'items' => array(
+                array('value' => 'one',   'label' => '1'),
+                array('value' => 'two',   'label' => '2'),
+                array('value' => 'three', 'label' => '3')
             )
         );
 
@@ -223,6 +218,7 @@ EOT;
 EOT;
 
         $result = $parser->generate('form', $data);
+        var_dump($result);
 
         $this->assertEquals($expected, $result['html']);
     }
