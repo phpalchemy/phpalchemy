@@ -1,0 +1,10 @@
+{
+    "minimum-stability": "dev",
+    "require": {
+        "crodas/Haanga"   : "dev-master"
+    }
+}
+
+
+
+

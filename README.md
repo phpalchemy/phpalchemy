@@ -4,3 +4,7 @@ README
 
 UI generator for PHP
 ===
+
+To run tests, download haanga dep first
+
+curl -sS https://getcomposer.org/installer | php

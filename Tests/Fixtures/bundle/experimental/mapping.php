@@ -2,9 +2,6 @@
 return array(
     "widget_mapping" => array(
         "checkbox" => array(
-            "label" => array(
-                "name" => "boxlabel",
-            ),
             "disabled" => array(
                 "name" => 'deshabilitar',
                 'value' => array(
@@ -16,11 +13,23 @@ return array(
         "textbox" => array(
             "xtype" => array(
                 "value" => function($widget) {
-                    return $widget->multiline ? 'input' : 'textarea';
+                    if ($widget->multiline)
+                        return 'textarea';
+                    elseif ($widget->type == 'password')
+                        return 'password';
+                    else
+                        return 'text';
                 }
             )
         ),
-
+        "listbox" => array(
+            "xtype" => array(
+                "value" => 'select'
+            ),
+            "multiple" => array(
+                "value" => "multiple"
+            )
+        ),
     ),
     ":defaults:" => array(
         "disabled" => array(
@@ -29,22 +38,3 @@ return array(
         )
     )
 );
-
-/*return array(
-    "textbox" => array(
-        "xtype" => 'input',
-        "_callback" => function($widget) {
-            $attributes = array();
-
-            if ($widget->multiline) {
-                $attributes["xtype"] = "textarea";
-                $attributes["rows"]  = "rows1";
-            }
-
-            return $attributes;
-        }
-    ),
-    "checbox" => array(
-        "label" => "label1"
-    )
-);*/

@@ -120,7 +120,12 @@ class Parser
 
         foreach ($this->currentBlock as $varName => $template) {
             $fn = \Haanga::compile($template);
-            $generated[$varName] = $fn($data);
+            try {
+                $generated[$varName] = $fn($data);
+            } catch (\Exception $e) {
+                //print_r($data);
+                throw new \Exception('Haanga Error: ' . $e->getMessage());
+            }
             //$content = $this->buildIterators($template);
             //$content = $this->replaceData($content, $data);
             //$generated[$varName] = $content;
@@ -161,7 +166,7 @@ class Parser
             if ($stringComposing) {
                 if (substr($line, 0, 3) === '>>>') {
                     $this->blocks[$block][$name] = rtrim($value);
-                    $block = '';
+                    //$block = '';
                     $value = '';
                     $stringComposing = false;
                 } else {
@@ -192,13 +197,13 @@ class Parser
 
             $kwPattern = '^@(?<keyword>\w+)';
 
-            if (!preg_match('/'.$kwPattern.'.*/', $line, $matches)) {
+            if (! preg_match('/'.$kwPattern.'.*/', $line, $matches)) {
                 throw new \Exception(sprintf(
                     'Parse Error: Unknow keyword, lines must starts with a valid keyword, near: %s, on line %s',
                     $line, $lineCount
                 ));
             }
-
+            //var_dump($matches);
             $keyword = $matches['keyword'];
 
             switch ($keyword) {
@@ -260,6 +265,8 @@ class Parser
                             substr($line, 0, 20).'...', $lineCount
                         ));
                     }
+                    //var_dump($matches);
+
                     $block = $matches['block'];
 
                     if (!empty($nextToken)) {
@@ -296,7 +303,7 @@ class Parser
                             substr($line, 0, 20).'...', $lineCount
                         ));
                     }
-
+                    //print_r($matches);
                     $keyword = $matches['keyword'];
                     $name    = $matches['name'];
                     $value   = $matches['value'];
