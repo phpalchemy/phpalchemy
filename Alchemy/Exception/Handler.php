@@ -41,6 +41,7 @@ class Handler
         $view->setTpl('Exception.' . $tplFileExt);
 
         // setting data
+        $view->assign('exception', $exception);
         $view->assign('message', $exception->getMessage());
         $view->assign('line', $exception->getLine());
         $view->assign('file', $exception->getFile());

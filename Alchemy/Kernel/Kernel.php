@@ -296,10 +296,10 @@ class Kernel implements KernelInterface
 
             $response = new Response($responseContent, 404);
         } catch (\Exception $e) {
-            echo $e->getMessage();
-            echo "<br><pre>";
-            echo $e->getTraceAsString();
-            die;
+//            echo $e->getMessage();
+//            echo "<br><pre>";
+//            echo $e->getTraceAsString();
+//            die;
 
             $exceptionHandler = new Exception\Handler();
 

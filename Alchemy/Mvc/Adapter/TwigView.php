@@ -43,7 +43,7 @@ class TwigView extends View
         ));
 
         // adding additional functionalities
-        $this->twig->addExtension(new AssetExtension($this, $this->assetsHandler));
+        $this->twig->addExtension(new AssetExtension($this, $this->assetsHandler, $this->uiElements));
     }
 }
 
@@ -52,10 +52,11 @@ class AssetExtension implements \Twig_ExtensionInterface
     protected $view;
     protected $assetsHandler;
 
-    public function __construct($view, $assetsHandler)
+    public function __construct($view, $assetsHandler, $uiElements)
     {
         $this->view = $view;
         $this->assetsHandler = $assetsHandler;
+        $this->uiElements = $uiElements;
     }
 
     public function getName()
@@ -66,7 +67,8 @@ class AssetExtension implements \Twig_ExtensionInterface
     public function getFunctions()
     {
         return array(
-            'asset' => new \Twig_Function_Method($this, 'fn'),
+            'asset' => new \Twig_Function_Method($this, 'assetFn'),
+            'form' => new \Twig_Function_Method($this, 'formFn'),
         );
     }
 
@@ -101,7 +103,7 @@ class AssetExtension implements \Twig_ExtensionInterface
     }
 
     // additional functionalities
-    public function fn()
+    public function assetFn()
     {
         if (empty($this->assetsHandler)) {
             return $assetPath;
@@ -116,6 +118,15 @@ class AssetExtension implements \Twig_ExtensionInterface
         $baseurl = $this->view->exists('baseurl') ? $this->view->get('baseurl') : '';
 
         return $baseurl . $this->assetsHandler->getUrl();
+    }
+
+    public function formFn($formId)
+    {
+        if (! array_key_exists($formId, $this->uiElements)) {
+            throw new \Exception("Error: Form with id: $formId does not exist!");
+        }
+
+        return $this->uiElements[$formId];
     }
 }
 
