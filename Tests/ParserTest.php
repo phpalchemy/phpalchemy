@@ -1,11 +1,5 @@
 <?php
-use Alchemy\Component\UI\Parser;
-
-/*include_once 'bootstrap.php';
-$parser = new Parser(__DIR__ . '/Fixtures/schema/mini-html.genscript');
-print_r($parser->getBlocks()); die;*/
-
-
+use Alchemy\Component\UI\Parser; 
 
 /**
  * Alchemy\Component\UI\Parser - Unit Test File
@@ -73,6 +67,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $expected['javascript'] = "alert('textfield with id: id1');";
 
         $result = $parser->generate('textbox', $data);
+        
         $this->assertEquals($expected, $result);
     }
 
@@ -131,146 +126,35 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
 
         $expected = array();
-        $expected['javascript'] = "alert('my_select_id');";
-        $expected['html'] = <<<EOT
-<select id="my_select_id" value="some_choise">
-<option name="one">1</option>
-<option name="two">2</option>
-<option name="three">3</option>
-</select>
-EOT;
+        $expected['javascript'] = "alert('select with id: my_select_id');";
+        $expected['html'] = '<select id="my_select_id" value="some_choise"><option name="one">1</option><option name="two">2</option><option name="three">3</option></select>';
+        
         $result = $parser->generate('select', $data);
 
         $this->assertEquals($expected, $result);
     }
 
     /**
-     * @covers Alchemy\Component\UI\Parser::setDefaultBlock
-     * @depends testConstructor
-     */
-    public function testGenerateForm($parser)
-    {
-        $parser->setDefaultBlock('_default');
-
-        $data = array(
-            'id' => 'id1',
-            'value' => 'value1',
-            'attributes' => array(
-                'size' => 25,
-                'emptyText' => 'write your text here!'
-            )
-        );
-
-        $expected = '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="write your text here!"/>';
-        $result = $parser->generate('textbox', $data);
-        $formItems[] = $result['html'];
-
-        $data = array(
-            'id'    => 'checkbox_id',
-            'value'  => 'checkbox_value',
-            'xtype' => 'checkbox',
-            'attributes' => array(
-                'value' => 'some_choise'
-            )
-        );
-        $expected = '<input type="checkbox" id="my_checkbox_id" name="my_checkbox" value="some_choise"/>';
-
-        $result = $parser->generate('checkbox', $data);
-        $formItems[] = $result['html'];
-
-        $data = array(
-            'id'    => 'my_select_id',
-            'value'  => 'my_select',
-            'attributes' => array(
-                'value' => 'some_choise'
-            ),
-            'items' => array(
-                array('value' => 'one',   'label' => '1'),
-                array('value' => 'two',   'label' => '2'),
-                array('value' => 'three', 'label' => '3')
-            )
-        );
-
-        $result = $parser->generate('select', $data);
-        $formItems[] = $result['html'];
-
-        $data = array(
-            'attributes' => array(
-                'id'    => 'my_form_id',
-                'name'  => 'my_form',
-                'action' => 'process.php',
-                'method' => 'POST'
-            ),
-            'items' => $formItems
-        );
-
-        $expected = array();
-        $expected = <<<EOT
-<form id="my_form_id" name="my_form" action="process.php" method="POST">
-<input type="text" id="my_text_id" name="my_text" size="25" emptyText="write your text here!"/>
-<input type="checkbox" id="my_checkbox_id" name="my_checkbox" value="some_choise"/>
-<select type="slect" id="my_select_id" value="some_choise">
-  <option name="one">1</option>
-  <option name="two">2</option>
-  <option name="three">3</option>
-</select>
-</form>
-EOT;
-
-        $result = $parser->generate('form', $data);
-        var_dump($result);
-
-        $this->assertEquals($expected, $result['html']);
-    }
-
-    /**
      * @covers Alchemy\Component\UI\Parser::generate
      * @depends testConstructor
-     * @expectedException RuntimeException
+     * @expectedException Exception
+     * @expectedExceptionMessage Alchemy\Component\UI\Parse:: Undefined variable: value
      */
-    public function testGenerate1(Parser $parser)
+    public function testGenerateWithException(Parser $parser)
     {
-        $expected = array(
-            'html' => '<input type="text" id="my_text_id" name="my_text" size="25" emptyText="empty text"/>'
-        );
-
         // this array intentionally has not attribute: 'name'
         $data = array(
             'id' => 'my_text_id',
             'attributes' => array(
+                'name'=>'my_value',
                 'size' => 25,
                 'emptyText' => 'empty text'
             )
         );
 
-        //So, when trying the textbox generation an exception (RuntimeException) will trown
         $result = $parser->generate('textbox', $data);
     }
 
-    /**
-     * @covers Alchemy\Component\UI\Parser::generate
-     * @depends testConstructor
-     */
-    public function testGenerate2(Parser $parser)
-    {
-        $expected = array(
-            'html' => '<input type="text" id="my_text_id" name="" size="25" emptyText="empty text"/>'
-        );
-
-        // this array intentionally has not attribute: 'name'
-        $data = array(
-            'id' => 'my_text_id',
-            'attributes' => array(
-                'size' => 25,
-                'emptyText' => 'empty text'
-            )
-        );
-
-        // disabling strict variables.
-        $parser->setStrictVariables(false);
-
-        //So, when trying the textbox generation an exception (RuntimeException) will trown
-        $result = $parser->generate('textbox', $data);
-    }
+    
 }
 

@@ -117,14 +117,16 @@ class Parser
         $this->currentBlockName = $name;
         $this->data = $data;
         $generated  = array();
-
+        //print_r($data); 
         foreach ($this->currentBlock as $varName => $template) {
+            //var_dump($template); die;
             $fn = \Haanga::compile($template);
             try {
+                //print_r($data);
                 $generated[$varName] = $fn($data);
             } catch (\Exception $e) {
                 //print_r($data);
-                throw new \Exception('Haanga Error: ' . $e->getMessage());
+                throw new \Exception('Alchemy\Component\UI\Parse:: ' . $e->getMessage());
             }
             //$content = $this->buildIterators($template);
             //$content = $this->replaceData($content, $data);
@@ -164,13 +166,13 @@ class Parser
             $lineCount++;
 
             if ($stringComposing) {
-                if (substr($line, 0, 3) === '>>>') {
+                if (substr(ltrim($line), 0, 3) === '>>>') {
                     $this->blocks[$block][$name] = rtrim($value);
                     //$block = '';
                     $value = '';
                     $stringComposing = false;
                 } else {
-                    $value .= $line;
+                    $value .= trim($line);
                 }
 
                 continue;
@@ -392,7 +394,7 @@ class Parser
             ));
         }
 
-        if (!array_key_exists($matches['var'], $this->data)) {
+        if (! array_key_exists($matches['var'], $this->data)) {
             // if strict variables is  If set to false, Parser will silently ignore invalid variables
             // that do not exist and replace them with a empty value.
             if ($this->strictVariables === false) {
