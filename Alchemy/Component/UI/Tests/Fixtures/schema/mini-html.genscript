@@ -7,12 +7,12 @@
 /* TEXTBOX */
 
 @block textbox
-
-@var html <<<
-<input type="text" id="{{ id }}" value="{{ value }}"{% for k, v in attributes %} {{ k }}="{{ v }}"{% endfor %} />
->>>
-
-@var javascript alert('textfield with id: {{ id }}');
+    
+    @var html <<<
+        <input type="text" id="{{ id }}" value="{{ value }}"{% for k, v in attributes %} {{ k }}="{{ v }}"{% endfor %} />
+    >>>
+    
+    @var javascript alert('textfield with id: {{ id }}');
 
 @end
 
@@ -22,25 +22,38 @@
 @block select
 
 @var html <<<
-<select id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>{% for item in items %}
-<option name="{{ item['value'] }}"{% if value | isarray %}{% if item['value'] in value %} selected="selected"{% endif %}{% else %}{% if item['value'] == value %} selected="selected"{% endif %}{% endif %}>{{ item['label'] }}</option>{% endfor %}
-</select>
+    <select id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>
+    {% for item in items %}
+        <option name="{{ item['value'] }}"
+        {% if value | isarray %}
+            {% if item['value'] in value %} selected="selected"{% endif %}
+        {% else %}
+            {% if item['value'] == value %} selected="selected"{% endif %}
+        {% endif %}
+        >
+            {{ item['label'] }}
+        </option>
+    {% endfor %}
+    </select>
 >>>
 
 @var javascript <<<
-alert('my_select_id');
+    alert('select with id: {{ id }}');
 >>>
 
 @end
 
+/**
+ * DEFAULT BLOCK
+ */
+
 @block _default
 
 @var html <<<
-<input type="{{ xtype }}" id="{{ id }}" value="{{ value }}" {% for k, v in attributes %}{{ k }}="{{ v }}"{% endfor %} />
+    <input type="{{ xtype }}" id="{{ id }}" value="{{ value }}" {% for k, v in attributes %}{{ k }}="{{ v }}"{% endfor %} />
 >>>
 
-@var javascript alert('{{ xtype }} with id: {{ id }}');
-
+    @var javascript alert('{{ xtype }} with id: {{ id }}');
 @end
 
 
