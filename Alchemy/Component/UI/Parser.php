@@ -117,15 +117,20 @@ class Parser
         $this->currentBlockName = $name;
         $this->data = $data;
         $generated  = array();
-        //print_r($data); 
+
         foreach ($this->currentBlock as $varName => $template) {
-            //var_dump($template); die;
             $fn = \Haanga::compile($template);
+            
             try {
-                //print_r($data);
-                $generated[$varName] = $fn($data);
+                $generatedContent = $fn($data);
+                
+                if ($varName == 'html') {
+                    $generatedContent = self::minifyHtml($fn($data));
+                }
+                
+                $generated[$varName] = $generatedContent;
+
             } catch (\Exception $e) {
-                //print_r($data);
                 throw new \Exception('Alchemy\Component\UI\Parse:: ' . $e->getMessage());
             }
             //$content = $this->buildIterators($template);
@@ -167,12 +172,18 @@ class Parser
 
             if ($stringComposing) {
                 if (substr(ltrim($line), 0, 3) === '>>>') {
-                    $this->blocks[$block][$name] = rtrim($value);
+                    $this->blocks[$block][$name] = trim($value);
                     //$block = '';
                     $value = '';
                     $stringComposing = false;
                 } else {
-                    $value .= trim($line);
+                    // $line = trim($line);
+//                     if (substr($value, -1) != '>' && ! empty($line)) {
+//                         $line = " " . $line;
+//                     }
+                    
+                    //$value .= substr($value, -1) == '>' ? trim($line) : " " . trim($line);
+                    $value .= $line;
                 }
 
                 continue;
@@ -344,6 +355,31 @@ class Parser
                 "until end of file.", $block, $name
             ));
         }
+    }
+    
+    private static function minifyHtml($buffer) {
+
+        $search = array(
+            '/\>[^\S ]+/s',  // strip whitespaces after tags, except space
+            '/[^\S]+\>/s',  // strip whitespaces after tags, except space
+            '/[^\S ]+\</s',  // strip whitespaces before tags, except space
+            '/[^\S]+\</s',  // strip whitespaces before tags, except space
+            '/(\s)+/s',       // shorten multiple whitespace sequences
+            '/<!--.*?-->|\t|(?:\r?\n[ \t]*)+/s'
+        );
+
+        $replace = array(
+            '>',
+            '>',
+            '<',
+            '<',
+            '\\1',
+            ''
+        );
+
+        $buffer = preg_replace($search, $replace, $buffer);
+
+        return $buffer;
     }
 
     private static function castValue($val)

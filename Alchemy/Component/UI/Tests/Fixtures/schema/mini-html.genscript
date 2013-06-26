@@ -22,17 +22,13 @@
 @block select
 
 @var html <<<
-    <select id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>
+    <select id="{{ id }}"
+        {% for at_name, at_value in attributes %} 
+        {{ at_name }}="{{ at_value }}"
+        {% endfor %}
+    >
     {% for item in items %}
-        <option name="{{ item['value'] }}"
-        {% if value | isarray %}
-            {% if item['value'] in value %} selected="selected"{% endif %}
-        {% else %}
-            {% if item['value'] == value %} selected="selected"{% endif %}
-        {% endif %}
-        >
-            {{ item['label'] }}
-        </option>
+        <option name="{{ item['value'] }}">{{ item['label'] }}</option>
     {% endfor %}
     </select>
 >>>
