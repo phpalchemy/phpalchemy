@@ -40,7 +40,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         $parser = new Parser(__DIR__ . '/Fixtures/schema/mini-html.genscript');
-
+        //$parser = new Parser(__DIR__ . '/../bundle/twitter-bootstrap/components.genscript');
+//        var_dump($parser->getBlocks());
         $this->assertCount(1, $parser->getGlobals());
         $this->assertCount(3, $parser->getBlocks());
 
@@ -116,7 +117,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             'value'  => 'my_select',
             'xtype' => 'slect',
             'attributes' => array(
-                'value' => 'some_choise'
+                'value' => 'some_choise',
+                'class' => 'some_class'
             ),
             'items' => array(
                 array('value' => 'one',   'label' => '1'),
@@ -127,7 +129,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
         $expected = array();
         $expected['javascript'] = "alert('select with id: my_select_id');";
-        $expected['html'] = '<select id="my_select_id" value="some_choise"><option name="one">1</option><option name="two">2</option><option name="three">3</option></select>';
+        $expected['html'] = '<select id="my_select_id" value="some_choise" class="some_class"><option name="one">1</option><option name="two">2</option><option name="three">3</option></select>';
         
         $result = $parser->generate('select', $data);
 
