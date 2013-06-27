@@ -248,6 +248,41 @@ abstract class Reader
         }
     }
 
+    protected static function getExcludeAnnotationList()
+    {
+        return array(
+            "author",
+            "api",
+            "category",
+            "copyright",
+            "deprecated",
+            "example",
+            "filesource",
+            "global",
+            "ignore",
+            "internal",
+            "license",
+            "link",
+            "method",
+            "package",
+            "param",
+            "property-read",
+            "property-write",
+            "property",
+            "return",
+            "see",
+            "since",
+            "source",
+            "subpackage",
+            "throws",
+            "todo",
+            "uses",
+            "used-by",
+            "var",
+            "version"
+        );
+    }
+
     /**
      * Gets all anotations from a given class
      *

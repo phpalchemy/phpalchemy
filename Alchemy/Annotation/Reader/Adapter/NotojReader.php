@@ -67,9 +67,15 @@ class NotojReader extends Reader
     {
         $objects     = array();
 
+        //var_dump($annotations);
+
         foreach ($annotations as $name => $args) {
             $name = ucfirst($name);
             $class = $this->defaultNamespace . $name . 'Annotation';
+
+            if (in_array(strtolower($name), self::getExcludeAnnotationList())) {
+                continue;
+            }
 
             if (! array_key_exists($class, $objects)) {
                 if (!class_exists($class)) {
