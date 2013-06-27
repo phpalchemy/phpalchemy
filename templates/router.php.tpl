@@ -5,8 +5,10 @@
  * file: router.php
  */
 
-if (isset($_SERVER['SCRIPT_FILENAME'])) {
+if (file_exists($_SERVER['SCRIPT_FILENAME'])) {
     return false;
 } else {
+    $_SERVER['SCRIPT_FILENAME'] = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . '{srvFile}';
+    
     require '{srvFile}';
 }

@@ -19,12 +19,17 @@ use Alchemy\Kernel\KernelEvents;
  * @package   phpalchemy
  */
 
-abstract class Controller
+class Controller
 {
     /**
      * Meta object to store all data that will use on templates
      * @var [type]
      */
     public $view = null;
+
+    public function __construct()
+    {
+        $this->view = new \StdClass();
+    }
 }
 

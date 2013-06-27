@@ -74,8 +74,13 @@
     <div class="block">
 
         <ol class="traces list_exception">
-            <?php foreach ($exception->getTrace() as $line ) {
-            echo "<li>At " . $line['class'].$line['type'].$line['function'].'()</b> <br/>in '.$line['file'].' line '.$line['line'].'</li>';
+            <?php foreach ($exception->getTrace() as $line ) { 
+                if (isset($line['class'])) {
+                    echo '<li>At ' . $line['class'].$line['type'].$line['function']
+                        . '()</b> <br/>in '.$line['file'].' line '.$line['line'].'</li>';
+                } else{
+                    echo '<li>At ' . $line['function'] . '() in '.$line['file'].' line '.$line['line'].'</li>';
+                }
             } ?>
         </ol>
     </div>

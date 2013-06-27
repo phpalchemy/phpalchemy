@@ -92,6 +92,11 @@ class ServeCommand extends Command
             ));
         }
 
+        if (! is_readable($docRoot)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Document root directory "%s" is not readable', $docRoot
+            ));
+        }
 
         switch ($devServer) {
             case 'lighttpd':
@@ -127,11 +132,15 @@ class ServeCommand extends Command
                 }
 
                 $command = "$devServerBin -f $lighttpdTmpConfFile -D";
+                
                 break;
+
             case 'built-in':
                 if (PHP_VERSION_ID < 50400) {
                     throw new \Exception("Built-in server needs php version 5.4.x");
                 }
+
+                chdir($docRoot);
 
                 $routerFile = $tmpDir . 'router.php';
                 $config = array('srvFile' => 'app.php');
@@ -141,7 +150,8 @@ class ServeCommand extends Command
                     throw new \Exception("Error while creating temporal configuration file!");
                 }
 
-                $command = escapeshellcmd(sprintf('%s -S %s %s', PHP_BINARY, $host, $routerFile));
+                $command = escapeshellcmd(sprintf('%s -S %s:%s %s', PHP_BINARY, $host, $port, $routerFile));
+                
                 break;
             default:
                 throw new \Exception('Error: "dev_appserver" is not configurated yet.');
@@ -165,7 +175,8 @@ class ServeCommand extends Command
 
         //$lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 
-        system($command);
+        //system($command);
+        proc_open($command, array(STDIN, STDOUT, STDERR), $pipes);
     }
 
     protected function resolveBin($name)
