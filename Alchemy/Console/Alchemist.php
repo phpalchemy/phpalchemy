@@ -58,6 +58,10 @@ class Alchemist extends Application
                 }
             }
 
+            if (stripos($commandClass, 'initApp') !== false) {
+                continue; //TODO this command will be removed soon
+            }
+
             // adding command
             $commands[] = new $commandClass($this->config, $this);
         }

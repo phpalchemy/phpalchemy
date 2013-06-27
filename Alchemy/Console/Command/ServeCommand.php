@@ -27,6 +27,8 @@ class ServeCommand extends Command
     {
         $this->config = $config;
         parent::__construct();
+
+        defined('DS') || define('DS', DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -66,12 +68,12 @@ class ServeCommand extends Command
         $homeDir    = $this->config->get('phpalchemy.root_dir');
         $appName    = $this->config->get('app.name');
         $tmpDir     = $this->config->isEmpty('app.cache_dir') ?
-                      rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR :
-                      $this->config->get('app.cache_dir') . DIRECTORY_SEPARATOR;
+                      rtrim(sys_get_temp_dir(), DS) . DS : $this->config->get('app.cache_dir') . DS;
 
         $phpCgiBin = $this->config->isEmpty('dev_appserver.php-cgi_bin') ?
                      $this->resolveBin('php-cgi') : $this->config->get('dev_appserver.php-cgi_bin');
 
+        $docRoot = $this->config->get('app.root_dir') . '/web';
 
         // validations
         if (! is_dir($tmpDir)) {
@@ -84,15 +86,29 @@ class ServeCommand extends Command
             }
         }
 
+        if (! is_dir($docRoot)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Document root directory "%s" does not exist', $docRoot
+            ));
+        }
+
+
         switch ($devServer) {
             case 'lighttpd':
                 $devServerBin = $this->config->isEmpty('dev_appserver.lighttpd_bin') ?
                                 $this->resolveBin($devServer) : $this->config->get('dev_appserver.lighttpd_bin');
 
+                if (empty($phpCgiBin)) {
+                    throw new \Exception("php-cgi binary not found!");
+                }
+
+                if (empty($devServerBin)) {
+                    throw new \Exception("Seems Lighttpd is not installed!");
+                }
+
                 //setting lighttpd configuration variables
                 $config = array();
-                $config['doc_root']    = PHP_OS == 'WINNT' ? self::convertPathToPosix(SYS_DIR) :
-                                         $this->config->get('app.root_dir') . '/web';
+                $config['doc_root']    = PHP_OS == 'WINNT' ? self::convertPathToPosix(SYS_DIR) : $docRoot;
                 $config['host']        = $host;
                 $config['port']        = $port;
                 $config['tmp_dir']     = $tmpDir;
@@ -113,7 +129,19 @@ class ServeCommand extends Command
                 $command = "$devServerBin -f $lighttpdTmpConfFile -D";
                 break;
             case 'built-in':
-                $devServerBin = '';
+                if (PHP_VERSION_ID < 50400) {
+                    throw new \Exception("Built-in server needs php version 5.4.x");
+                }
+
+                $routerFile = $tmpDir . 'router.php';
+                $config = array('srvFile' => 'app.php');
+                $content = $this->loadTemplate($homeDir . DS . 'templates' . DS . 'router.php.tpl', $config);
+
+                if (@file_put_contents($routerFile, $content) === false) {
+                    throw new \Exception("Error while creating temporal configuration file!");
+                }
+
+                $command = escapeshellcmd(sprintf('%s -S %s %s', PHP_BINARY, $host, $routerFile));
                 break;
             default:
                 throw new \Exception('Error: "dev_appserver" is not configurated yet.');
@@ -125,12 +153,8 @@ class ServeCommand extends Command
         //     $iniConfig['tmp_path'] = self::convertPathToPosix($tmpPath);
         // }
 
-        // Binary files validations.
-        if (empty($devServerBin)) {
-            throw new \Exception("Seems Lighttpd is not installed!");
-        }
-        if (empty($phpCgiBin)) {
-            throw new \Exception("php-cgi binary not found!");
+        if (empty($command)) {
+            throw new \Exception('Error: Configuration missing!');
         }
 
         $output->writeln("\n--= PhpAlchemy Framework Cli  =--\n    (Running on " . self::getOs() . ')'. PHP_EOL);
@@ -139,7 +163,7 @@ class ServeCommand extends Command
         $output->writeln("- URL: <info>http://$host:$port</info>");
         $output->writeln(PHP_EOL." (*) Press CTRL+C to stop the service.".PHP_EOL);
 
-        $lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
+        //$lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 
         system($command);
     }
