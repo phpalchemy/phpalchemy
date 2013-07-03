@@ -1,6 +1,6 @@
 README
 =========================
-[![Build Status](https://secure.travis-ci.org/phpalchemy/phpalchemy.png?branch=master)](http://travis-ci.org/eriknyk/phpalchemy)
+[![Build Status](https://secure.travis-ci.org/phpalchemy/phpalchemy.png?branch=master)](http://travis-ci.org/phpalchemy/phpalchemy)
 
 PHP Alchemy Framework
 ------------
