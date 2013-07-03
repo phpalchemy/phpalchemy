@@ -26,4 +26,4 @@ $classLoader->register('Symfony', __DIR__ . '/vendor/symfony/console/');
 set_exception_handler(array(new Alchemy\Exception\Handler(), 'handle'));
 
 //TODO this should't be loading everytime, just when it is used.
-require_once 'crodas/haanga/lib/Haanga.php';
+require_once __DIR__ . '/vendor/crodas/haanga/lib/Haanga.php';

@@ -9,5 +9,5 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 //$loader->add('Symfony', $basePath . 'vendor/symfony/http-foundation/');
 
-//require 'autoload.php';
+require $basePath . 'autoload.php';
 
