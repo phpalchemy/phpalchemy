@@ -13,7 +13,7 @@ class TwigView extends View
     {
         parent::__construct($tpl, $assetsHandler);
 
-        if (! file_exists(require_once 'twig/twig/lib/Twig/Autoloader.php')) {
+        if (! class_exists('\Twig_Autoloader')) {
             throw new \Exception(
                 "Missing Vendor: Twig Template Engine library is not installed on project!\n" .
                 "You can solve this adding the missing vendor to composer.json and executing 'composer.phar update'"
@@ -53,6 +53,9 @@ class TwigView extends View
         $this->twig->addExtension(new AssetExtension($this, $this->assetsHandler, $this->uiElements));
     }
 }
+
+//[[[ @init class (
+if (class_exists('\Twig_Autoloader')) {
 
 class AssetExtension implements \Twig_ExtensionInterface
 {
@@ -135,5 +138,8 @@ class AssetExtension implements \Twig_ExtensionInterface
 
         return $this->uiElements[$formId];
     }
+}
+
+//) @end class ]]]
 }
 
