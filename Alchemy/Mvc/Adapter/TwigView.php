@@ -13,7 +13,14 @@ class TwigView extends View
     {
         parent::__construct($tpl, $assetsHandler);
 
+        if (! file_exists(require_once 'twig/twig/lib/Twig/Autoloader.php')) {
+            throw new \Exception(
+                "Missing Vendor: Twig Template Engine library is not installed on project!\n" .
+                "You can solve this adding the missing vendor to composer.json and executing 'composer.phar update'"
+            );
+        }
         require_once 'twig/twig/lib/Twig/Autoloader.php';
+
         \Twig_Autoloader::register();
     }
 

@@ -9,6 +9,13 @@ class SmartyView extends View
 
     public function __construct($tpl = '')
     {
+        if (! file_exists('smarty/smarty/libs/Smarty.class.php')) {
+            throw new \Exception(
+                "Missing Vendor: Smarty Template Engine library is not installed on project!\n" .
+                "You can solve this adding the missing vendor to composer.json and executing 'composer.phar update'"
+            );
+        }
+
         require_once 'smarty/smarty/libs/Smarty.class.php';
         parent::__construct($tpl);
 
