@@ -63,15 +63,23 @@ class ClassLoader
      *
      * @param string $namespace namespace of a class given
      * @param string $includePath path where the class exists
-     * @param string $excludeNsPart contais a part of class to exclude from classname passed by SPL hanlder
      */
-    public function register($namespace, $includePath, $excludeNsPart = '')
+    public function register($namespace, $includePath)
     {
-        if (!empty($excludeNsPart)) {
-            $namespace .= ',' . $excludeNsPart;
+        if (array_key_exists($namespace, $this->includePaths)) {
+            throw new \Exception("Error: Namespace '$namespace' is already registered!");
         }
 
         $this->includePaths[$namespace] = rtrim($includePath, DS) . DS;
+    }
+
+    public function registerClass($className, $includeFile)
+    {
+        if (array_key_exists($className, $this->includePaths)) {
+            throw new \Exception("Error: Class '$className' is already registered!");
+        }
+
+        $this->includePaths[$className] = $includeFile;
     }
 
     /**
@@ -96,13 +104,15 @@ class ClassLoader
 
         $filename = str_replace('_', DS, $className) . '.php';
 
-        foreach ($this->includePaths as $namespace => $includePath) {
-            if (strpos($namespace, ',') !== false) {
-                list($namespace, $excludeNsPart) = explode(',', $namespace);
-                $nsDirMapped = str_replace(NS, DS, $excludeNsPart);
-                $filename    = str_replace($nsDirMapped, '', $filename);
-            }
+        if (array_key_exists($className, $this->includePaths)) {
+            @require_once $this->includePaths[$className];
 
+            if (class_exists('\\' . trim("$className", '\\'))) {
+                return true;
+            }
+        }
+
+        foreach ($this->includePaths as $namespace => $includePath) {
             if (file_exists($includePath . $filename)) {
                 require_once $includePath . $filename;
 
