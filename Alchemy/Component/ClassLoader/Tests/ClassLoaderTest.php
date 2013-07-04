@@ -21,38 +21,39 @@ class ClassLoaderTest extends PHPUnit_Framework_TestCase
     {
         $classLoader = ClassLoader::getInstance();
         $this->assertInstanceOf('Alchemy\Component\ClassLoader\ClassLoader', $classLoader);
-
-        return $classLoader;
     }
 
     /**
      * @covers ClassLoader::getIncludePaths
-     * @depends testGetInstance
      */
-    public function testGetIncludePaths($classLoader)
+    public function testGetIncludePaths()
     {
+        $classLoader = ClassLoader::getInstance();
         $this->assertCount(0, $classLoader->getIncludePaths());
 
-        $classLoader->register('classes', HOME_PATH . 'classes' . DIRECTORY_SEPARATOR);
+        $classLoader->register('classes', HOME_PATH . 'classes/');
         $this->assertCount(1, $classLoader->getIncludePaths());
     }
 
     /**
      * @covers ClassLoader::register
-     * @depends testGetInstance
      */
-    public function testRegister($classLoader)
+    public function testRegister()
     {
+        $classLoader = ClassLoader::getInstance();
+
         // registering with end dir. separator
-        $classLoader->register('classes', HOME_PATH . 'Tests/Fixtures/classes' . DIRECTORY_SEPARATOR);
+        $classLoader->register('classes1', HOME_PATH . 'Tests/Fixtures/classes/');
 
         // registering without end dir. separator
         $classLoader->register('classes2', HOME_PATH . 'Tests/Fixtures/classes2');
 
+        $this->assertCount(3, $classLoader->getIncludePaths());
+        $this->assertTrue(class_exists('\Lib\Util\Net\Smtp'));
+        $this->assertTrue(class_exists('\Bin\ConsoleApp'));
+
         $obj = new \Lib\Util\Net\Smtp();
-        $obj2 = new \Lib\Util\Net\Smtp();
-        $obj3= new \Lib\Util\Net\Smtp();
-        $obj4 = new \Lib\Util\Net\Smtp();
+
         $this->assertInstanceOf('\Lib\Util\Net\Smtp', $obj);
 
         $obj = new \Bin\ConsoleApp();
@@ -62,11 +63,40 @@ class ClassLoaderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ClassLoader::unregister
-     * @depends testRegister
+     * @covers ClassLoader::registerClass
      */
-    public function testUnregister($classLoader)
+    public function testRegisterClass()
     {
+        $classLoader = ClassLoader::getInstance();
+        $classLoader->registerClass('MyClass', HOME_PATH . 'Tests/Fixtures/classes3/class.myclass.php');
+
+        $myClass = new \MyClass();
+
+        $this->assertTrue(class_exists('\MyClass'));
+        $this->assertInstanceOf('\MyClass', $myClass);
+    }
+
+    /**
+     * Testing when a class is registered with a relative path and is supposed that it is on standard classpath
+     *
+     * @covers ClassLoader::registerClass
+     */
+    public function testRegisterClassInClassPath()
+    {
+        set_include_path(HOME_PATH . 'Tests/Fixtures/classes4' . PATH_SEPARATOR . get_include_path());
+
+        $classLoader = ClassLoader::getInstance();
+        $classLoader->registerClass('SampleClass', 'sample/class.sampleclass.php');
+
+        $this->assertTrue(class_exists('SampleClass'));
+    }
+
+    /**
+     * @covers ClassLoader::unregister
+     */
+    public function testUnregister()
+    {
+        $classLoader = ClassLoader::getInstance();
         $classLoader->unregister();
 
         $this->assertFalse(class_exists('\Lib\Util\Net\Pop3'));
