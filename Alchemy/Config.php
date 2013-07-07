@@ -54,16 +54,16 @@ class Config
 
     public function getSection($targetSection)
     {
-        $confSection = array();
+        $config = array();
 
         foreach ($this->config as $key => $value) {
-            if (($pos = strpos($key, $targetSection)) !== false && $pos === 0) {
-                $varname = substr($key, strlen($targetSection));
-                $confSection[ltrim($varname, '.')] = $value;
+            if (substr($key, 0, strlen($targetSection)) . "." == "$targetSection.") {
+                $varname = strpos($key, '.') !== false ? ltrim(substr($key, strlen($targetSection)), '.') : $key;
+                $config[$varname] = $value;
             }
         }
 
-        return $confSection;
+        return $config;
     }
 
     public function exists($name)
@@ -102,7 +102,9 @@ class Config
             $this->config[$section] = $config;
 
             foreach ($config as $key => $value) {
-                if (substr_count($value, '%') !== 2) {
+                $kwsCount = substr_count($value, '%');
+
+                if ($kwsCount == 0) {
                     $this->set($section . '.' . $key, $value);
                     unset($configList[$section][$key]);
                 }
@@ -137,11 +139,13 @@ class Config
 
     public function prepare($value, $name = '')
     {
-        if (is_string($value) && preg_match('/.*\%(.+\..+)\%.*/', $value, $match)) {
-            try {
-                $value = str_replace("%{$match[1]}%", $this->get($match[1]), $value);
-            } catch (\Exception $e) {
-                throw new \Exception("Configuration Missing for %" . $match[1] . "%");
+        if (is_string($value) && preg_match_all('/\%([^\%]+)\%/', $value, $match)) {
+            foreach ($match[1] as $match) {
+                try {
+                    $value = str_replace("%{$match}%", $this->get($match), $value);
+                } catch (\Exception $e) {
+                    throw new \Exception("Configuration Missing for %" . $match . "%");
+                }
             }
 
             if (! empty($name) && substr($name, -4) === '_dir') {

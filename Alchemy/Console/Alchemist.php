@@ -96,6 +96,7 @@ class Alchemist extends Application
         foreach ($this->config->all() as $key => $value) {
             if (substr($key, 0, 3) === 'app' && substr($key, -4) === '_dir' && substr($key, -9) !== 'cache_dir') {
                 if (! is_dir($value)) {
+                    var_dump($value);
                     return false;
                 }
             }

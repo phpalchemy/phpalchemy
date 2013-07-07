@@ -1,13 +1,10 @@
 <?php
 // Tests/bootstrap.php
+define('HOME_DIR', realpath(__DIR__ . '/../'));
 
-$basePath = realpath(__DIR__ . '/../') . DIRECTORY_SEPARATOR;
-
-$loader = include $basePath . 'Tests/tools/autoload.php';
-$loader->add('Alchemy', $basePath);
+$loader = include HOME_DIR . '/Tests/tools/autoload.php';
+$loader->add('Alchemy', HOME_DIR . DIRECTORY_SEPARATOR);
 require_once __DIR__ . '/../vendor/autoload.php';
 
-//$loader->add('Symfony', $basePath . 'vendor/symfony/http-foundation/');
-
-require $basePath . 'autoload.php';
+require HOME_DIR . '/autoload.php';
 
