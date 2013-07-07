@@ -190,8 +190,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         // registering the aplication namespace to SPL ClassLoader
         $this['autoloader']->register(
             $this['config']->get('app.name'),
-            $this['config']->get('app.root_dir'),
-            $this['config']->get('app.namespace')
+            $this['config']->get('app.root_dir')
         );
 
         // registering the aplication Extend folder to SPL ClassLoader (if folder was created)
