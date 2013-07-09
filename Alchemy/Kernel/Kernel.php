@@ -688,7 +688,7 @@ class Kernel implements KernelInterface
         }
 
         // composing controller class & method real names
-        $params['_controllerClass']  = '\\'.$namespace.'\Application\Controller\\'.$params['_controller'].'Controller';
+        $params['_controllerClass']  = '\\'.$namespace.'\Controller\\'.$params['_controller'].'Controller';
         $params['_controllerMethod'] = $params['_action'] . 'Action';
         $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
 
