@@ -93,10 +93,13 @@ class Alchemist extends Application
 
         $this->config->load($this->projectDir . DS . 'config' . DS . 'env.ini');
 
-        foreach ($this->config->all() as $key => $value) {
+        $config = $this->config->all();
+        unset($config["app.bundle_dir"]);
+
+        foreach ($config as $key => $value) {
             if (substr($key, 0, 3) === 'app' && substr($key, -4) === '_dir' && substr($key, -9) !== 'cache_dir') {
                 if (! is_dir($value)) {
-                    var_dump($value);
+                    echo sprintf("Config path: %s -> %s, does not exist!", $key, $value);
                     return false;
                 }
             }
