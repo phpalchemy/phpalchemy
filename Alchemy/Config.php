@@ -68,7 +68,7 @@ class Config
         foreach ($this->config as $key => $value) {
             if (substr($key, 0, strlen($targetSection)) . "." == "$targetSection.") {
                 $varname = strpos($key, '.') !== false ? ltrim(substr($key, strlen($targetSection)), '.') : $key;
-                $config[$varname] = $value;
+                $config[$varname] = $this->get($key);
             }
         }
 
@@ -109,7 +109,7 @@ class Config
         }
 
         $configList = @parse_ini_file($iniFilename, true);
-        
+
         if ($configList === false) {
             throw new \Exception("Parse Error: File $iniFilename has errors.");
         }
