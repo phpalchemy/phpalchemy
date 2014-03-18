@@ -1,9 +1,9 @@
 {
-    "name": "3rd-party/Yaml",
+    "name": "phpalchemy/Yaml",
     "type": "library",
     "description": "PHP Yaml Parser",
     "keywords": ["yaml", "php", "parser"],
-    "homepage": "https://github.com/eriknyk/Yaml",
+    "homepage": "https://github.com/phpalchemy/Yaml",
     "license": "MIT",
     "require": {
         "php": ">=5.0"
