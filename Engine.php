@@ -28,6 +28,7 @@ class Engine
 
     protected $generated = array();
     protected $build = array();
+    protected $bundleExtensionDir = "";
 
     /**
      * UI\Engine Constructor
@@ -40,6 +41,8 @@ class Engine
     {
         $this->readerFactory = $readerFactory;
         $this->parser = $parser;
+        
+        defined("DS") || define("DS", DS);
     }
 
     /**
@@ -47,20 +50,23 @@ class Engine
      */
     public function prepare()
     {
-        if (empty($this->targetBundle)) {
+        if (empty($this->targetBundle) && empty($this->bundleExtensionDir)) {
             throw new \RuntimeException(sprintf(
                 "Runtime Error: Any Bundle was selected for ui generation."
             ));
         }
 
-        $bundleDir = __DIR__ . DIRECTORY_SEPARATOR . 'bundle' . DIRECTORY_SEPARATOR . $this->targetBundle . DIRECTORY_SEPARATOR;
+        $bundleDir = empty($this->targetBundle) ? $this->bundleExtensionDir.DS : $this->bundleExtensionDir.DS.$this->targetBundle.DS;
 
-        if (!is_dir($bundleDir)) {
-            throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $this->targetBundle));
+        if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
+            $bundleDir = __DIR__ . DS . 'bundle' . DS . $this->targetBundle . DS;
+            if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
+                throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $this->targetBundle));
+            }
         }
 
-        $genscriptFilename = $bundleDir . DIRECTORY_SEPARATOR . 'components.genscript';
-        $mappingFilename   = $bundleDir . DIRECTORY_SEPARATOR . 'mapping.php';
+        $genscriptFilename = $bundleDir . 'components.genscript';
+        $mappingFilename   = $bundleDir . 'mapping.php';
 
         //verify if the bundle is registered
         if (! file_exists($genscriptFilename)) {
@@ -81,6 +87,11 @@ class Engine
 
         // load reader from factory
         $this->reader = $this->readerFactory->load($this->metaFile);
+    }
+
+    public function setBundleExtensionDir($dir)
+    {
+        $this->bundleExtensionDir = rtrim($dir, DS);
     }
 
     /**
