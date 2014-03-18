@@ -30,5 +30,10 @@ class Flipswitch extends Widget
             array('value' => 0, 'label' => 'Off')
         );
     }
+
+    public function setValue($value)
+    {
+        $this->value = $value == "On" ? 1 : 0;
+    }
 }
 

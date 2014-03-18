@@ -23,8 +23,14 @@ class Form extends Element
     protected  $buttons = array();
     protected $xtype = 'form';
 
+    /**
+     * @var \Alchemy\Component\UI\Widget\Widget[]
+     */
     private $widgets = array();
 
+    /**
+     * @return \Alchemy\Component\UI\Widget\Widget[]
+     */
     public function getWidgets()
     {
         return $this->widgets;
