@@ -4,7 +4,7 @@ $components = array("UI", "Routing", "ClassLoader", "Yaml", "WebAssets", "Http",
 
 if (isset($argv[1])) {
     $target = $argv[1];
-    if (isset($components[$target])) {
+    if (in_array($target, $components)) {
         $components = array($target);
     } else{
         echo "ERROR: component: '$target' not found!";
