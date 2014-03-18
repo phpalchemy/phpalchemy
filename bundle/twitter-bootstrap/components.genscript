@@ -65,12 +65,12 @@
 {% for i, item in items %}
 <label class="checkbox{% if inline == "true" %} inline{% endif %}">
   <input
-    type="checkbox"
-    name="{{ item['name'] }}"
-    value="{{ item['value'] }}"
-    {% if value[i] %}
-      checked="checked"
-    {% endif %}
+      type="checkbox"
+      name="{{ item['name'] }}"
+      value="{{ item['value'] }}"
+      {% if item['value'] in value %}
+        checked="checked"
+      {% endif %}
   >
   {{ item['label'] }}
 </label>

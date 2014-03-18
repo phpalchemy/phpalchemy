@@ -63,7 +63,7 @@
     type="checkbox"
     name="{{ item['name'] }}"
     value="{{ item['value'] }}"
-    {% if value[i] %}
+    {% if item['value'] in value %}
       checked="checked"
     {% endif %}
   >
