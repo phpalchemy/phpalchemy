@@ -14,7 +14,7 @@ if (isset($argv[1])) {
 
 foreach ($components as $component) {
     echo `git pull -s subtree git@github.com:phpalchemy/$component.git master`;
-    echo PHP_EOL." -> tracked subtree: $component .... ok ".PHP_EOL;
+    echo "-> tracked subtree: $component .... ok ".PHP_EOL;
 }
 
 
