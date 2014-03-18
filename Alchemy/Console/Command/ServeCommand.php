@@ -175,8 +175,8 @@ class ServeCommand extends Command
 
         //$lighttpdTmpConfFile = PHP_OS == 'WINNT' ? self::convertPathToPosix($lighttpdTmpConfFile): $lighttpdTmpConfFile;
 
-        //system($command);
-        proc_open($command, array(STDIN, STDOUT, STDERR), $pipes);
+        system($command);
+        //proc_open($command, array(STDIN, STDOUT, STDERR), $pipes);
     }
 
     protected function resolveBin($name)

@@ -164,6 +164,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             return new Parser();
         });
 
+        /** @var \Alchemy\Component\UI\Engine */
         $this['ui_engine'] = $this->share(function () use ($app) {
             return new Engine(
                 $app['ui_reader_factory'],

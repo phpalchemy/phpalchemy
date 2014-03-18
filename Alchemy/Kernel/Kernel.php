@@ -47,49 +47,49 @@ class Kernel implements KernelInterface
 {
     /**
      * Routing mapper object
-     * @var Alchemy\Component\Routing\Mapper
+     * @var \Alchemy\Component\Routing\Mapper
      */
     protected $mapper    = null;
 
     /**
      * Controller resolver object
-     * @var Alchemy\Mvc\ControllerResolver
+     * @var \Alchemy\Mvc\ControllerResolver
      */
     protected $resolver   = null;
 
     /**
      * Event dispatcher object
-     * @var Alchemy\Component\EventDispatcher\EventDispatcher
+     * @var \Alchemy\Component\EventDispatcher\EventDispatcher
      */
     protected $dispatcher = null;
 
     /**
      * Configuration object
-     * @var Alchemy\Config
+     * @var \Alchemy\Config
      */
     protected $config     = null;
 
     /**
      * Annotations Reader object
-     * @var Alchemy\Annotation\Reader\Reader
+     * @var \Alchemy\Annotation\Reader\Reader
      */
     protected $annotationReader = null;
 
     /**
      * UI Generator Engine
-     * @var Alchemy\Component\UI\Engine
+     * @var \Alchemy\Component\UI\Engine
      */
     protected $uiEngine   = null;
 
     /**
      * Request handler object
-     * @var Alchemy\Component\Http\Request
+     * @var \Alchemy\Component\Http\Request
      */
     public $request = null;
 
     /**
      * Assets handler object
-     * @var Alchemy\Component\WebAssets\Bundle
+     * @var \Alchemy\Component\WebAssets\Bundle
      */
     public $assetsHandler = null;
 
@@ -402,7 +402,8 @@ class Kernel implements KernelInterface
                 $layout = $this->config->get('layout.default');
             }
         }
-
+        //var_dump($layout); die;
+        //$this->uiEngine->setBundleExtensionDir();
         $this->uiEngine->setTargetBundle($layout);
         $this->uiEngine->setMetaFile($metaPath . DS . $annotation->metaFile);
 
@@ -541,7 +542,7 @@ class Kernel implements KernelInterface
         $conf->charset      = $this->config->get('templating.charset');
         $conf->debug        = $this->config->get('templating.debug');
 
-        $conf->assetsLocate = $this->config->get('assets_location');
+        $conf->assetsLocate = $this->config->getSection('assets_location');
         $conf->assetsPrecedence = explode(' ', $this->config->get('assets.precedence'));
 
         // File extension validation
@@ -569,13 +570,21 @@ class Kernel implements KernelInterface
 
         // read defaults bundles from configuration for desktop & mobile platform
         if ($this->request->isMobile()) {
-            if ($this->request->isIpad()) {
-                $layoutsDir = $conf->layoutsDir . $this->config->get('layout.mobile') . DS;
+            if ($this->config->exists('layout.mobile') && ! $this->config->isEmpty('layout.mobile')) {
+                if ($this->request->isIpad()) {
+                    $layoutsDir = $conf->layoutsDir . $this->config->get('layout.mobile') . DS;
+                } else {
+                    $layoutsDir = $conf->layoutsDir . $this->config->get('layout.mobile') . DS;
+                }
             } else {
-                $layoutsDir = $conf->layoutsDir . $this->config->get('layout.mobile') . DS;
+                $layoutsDir = $conf->layoutsDir;
             }
         } else {
-            $layoutsDir = $conf->layoutsDir . $this->config->get('layout.default') . DS;
+            if ($this->config->exists('layout.default') && ! $this->config->isEmpty('layout.default')) {
+                $layoutsDir = $conf->layoutsDir . $this->config->get('layout.default') . DS;
+            } else {
+                $layoutsDir = $conf->layoutsDir;
+            }
         }
 
         // check if template file exists
@@ -604,12 +613,11 @@ class Kernel implements KernelInterface
         }
 
         // resolving assets location
-        $locateDir = $this->config->prepare($conf->assetsLocate);
         $locateDirPrecedence = array();
 
         foreach ($conf->assetsPrecedence as $assetItem) {
-            if (array_key_exists($assetItem, $locateDir)) {
-                $locateDirPrecedence[$assetItem] = $locateDir[$assetItem];
+            if (array_key_exists($assetItem, $conf->assetsLocate)) {
+                $locateDirPrecedence[$assetItem] = $conf->assetsLocate[$assetItem];
             } else {
                 $locateDirPrecedence[$assetItem] = $conf->webDir.'/assets/'.$assetItem;
             }
