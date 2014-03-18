@@ -1,6 +1,14 @@
 {
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/phpalchemy/Yaml.git"
+        }
+    ],
     "minimum-stability": "dev",
+
     "require": {
+        "phpalchemy/Yaml": "1.0.*",
         "crodas/Haanga"   : "dev-master"
     }
 }
