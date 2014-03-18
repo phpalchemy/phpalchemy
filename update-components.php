@@ -7,7 +7,7 @@ if (isset($argv[1])) {
     if (in_array($target, $components)) {
         $components = array($target);
     } else{
-        echo "ERROR: component: '$target' not found!";
+        echo "ERROR: component: '$target' not found!".PHP_EOL;
         die();
     }
 }
