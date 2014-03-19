@@ -14,7 +14,7 @@ use Alchemy\Component\UI\Parser;
  * @link      https://github.com/eriknyk/phpalchemy
  * @copyright Copyright 2012 Erik Amaru Ortiz
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @package   Alchemy/Component/Routing
+ * @package   Alchemy/Component/UI
  */
 class Engine
 {
@@ -23,6 +23,9 @@ class Engine
     protected $metaFile = '';
     protected $mapping  = array();
     protected $readerFactory = null;
+    /**
+     * @var \Alchemy\Component\UI\Reader
+     */
     protected $reader = null;
     protected $parser = null;
 
@@ -41,8 +44,8 @@ class Engine
     {
         $this->readerFactory = $readerFactory;
         $this->parser = $parser;
-        
-        defined("DS") || define("DS", DS);
+
+        defined("DS") || define("DS", DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -126,8 +129,10 @@ class Engine
 
     /**
      * Build Web UI
+     *
+     * @return \Alchemy\Component\UI\Element\Element
      */
-    public function build(array $data, $targetBundle = '', $metaFile = '')
+    public function build(array $data = array(), $targetBundle = '', $metaFile = '')
     {
         if (! empty($targetBundle)) {
             $this->setTargetBundle($targetBundle);
@@ -140,20 +145,22 @@ class Engine
         $this->prepare();
 
         $widgestWithoutIdCounter = 0;
-        $element = $this->reader->getElement();
         $elementItems = array();
+
+        /** @var \Alchemy\Component\UI\Element\Form $element */
+        $element = $this->reader->getElement();
 
         foreach ($element->getWidgets() as $widget) {
             if ($widget->getId() === '') {
                 if ($widget->name === '') {
                     $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
-                    $widget->name = $widget->getId();
+                    $widget->setAttribute("name", $widget->getId());
                 } else {
                     $widget->setId($widget->name);
                 }
             } else {
                 if ($widget->name === '') {
-                    $widget->name = $widget->getId();
+                    $widget->setAttribute("name", $widget->getId());
                 }
             }
 
@@ -164,6 +171,7 @@ class Engine
 
             // mapping element attributes
             $info = $this->mapElementInformation($widget);
+           // var_dump($info);
 
             // generate the code
             $generated = $this->parser->generate($info['xtype'], $info);
@@ -171,11 +179,25 @@ class Engine
             // setting generate code on widget property
             $widget->setGenerated($generated);
 
-            if (array_key_exists('html', $generated)) {
-                $elementItems[$widget->getId()] = $generated['html'];
-            } else {
-                $elementItems[$widget->getId()] = '';
+//            if (array_key_exists('html', $generated)) {
+//                $elementItems[$widget->getId()] = $generated['html'];
+//            } else {
+//                $elementItems[$widget->getId()] = '';
+//            }
+            $elementItems[$widget->getId()] = array(
+                "source" => array("html" => "", "js" => ""),
+                "label" => $widget->getFieldLabel()
+            );
+
+            foreach ($generated as $type => $src) {
+                $elementItems[$widget->getId()]["source"][$type] = $src;
             }
+
+            // fallback
+            if (! isset($elementItems[$widget->getId()]["source"]) || ! isset($elementItems[$widget->getId()]["source"]["html"])) {
+                $elementItems[$widget->getId()]["source"]["html"] = "";
+            }
+
 
             $this->generated['widgets'][$widget->getId()] = array(
                 'object' => $widget,
@@ -185,7 +207,9 @@ class Engine
         }
 
         $info = $this->mapElementInformation($element);
+        //var_dump($info); die;
         $info['items'] = $elementItems;
+
 
         $generated = $this->parser->generate(
             $element->getXtype(),
@@ -210,7 +234,7 @@ class Engine
         $mapping = $this->mapping['widget_mapping'];
         $widgetInfo = $widget->getInfo();
 
-        if (!array_key_exists($widget->getXtype(), $mapping)) {
+        if (! array_key_exists($widget->getXtype(), $mapping)) {
             return $widgetInfo;
         }
 

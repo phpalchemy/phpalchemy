@@ -26,5 +26,15 @@ class Listbox extends Widget
         parent::__construct($attributes);
         $this->setXtype('listbox');
     }
+
+    function getAttributes() {
+        $attributes = parent::getAttributes();
+
+        if ($this->multiple) {
+            $attributes["name"] .= "[]";
+        }
+
+        RETURN $attributes;
+    }
 }
 

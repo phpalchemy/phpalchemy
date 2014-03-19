@@ -209,8 +209,8 @@ ss
 @block form
 
 @var html <<<
-<form @@attributes({attributes})>
-@@form_items({items})
+<form id="{{ id }}">
+
 </form>
 >>>
 

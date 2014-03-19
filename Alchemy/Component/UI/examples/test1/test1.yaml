@@ -1,0 +1,68 @@
+form:
+    title: Basic Form
+    action: index.php
+    id: form1
+    name: form1
+    buttons:
+        - {label: Save, type: submit}
+    items:
+        - textbox:
+            name: textbox1
+            fieldLabel: text field
+            placeholder: sample
+            required: true
+
+        - textbox:
+            name: password_textbox2
+            fieldLabel: password field
+            placeholder: your password
+            type: password
+
+        - textbox:
+            name: testarea_textbox3
+            fieldLabel: Multiline textbox field
+            multiline: true
+
+        - flipswitch:
+            name: flipswitch1
+            fieldLabel: flipswitch field
+
+        - listbox:
+            name: listbox1
+            fieldLabel: listbox field
+            items:
+                - {value: 1, label: item1}
+                - {value: 2, label: item2}
+                - {value: 3, label: item3}
+
+        - listbox:
+            name: multiple_listbox2
+            fieldLabel: Multiple listbox field
+            multiple: true
+            items:
+                - {value: 1, label: item1}
+                - {value: 2, label: item2}
+                - {value: 3, label: item3}
+
+        - checkbox:
+            name: checkbox1
+            fieldLabel: single checkbox field
+            label: chk1
+
+        - checkgroup:
+            name: checkgroup1
+            fieldLabel: checkgroup field
+            inline: false
+            items:
+                - {name: one, value: 1, label: chk1}
+                - {name: two, value: 2, label: chk2}
+                - {name: three, value: 3, label: chk3}
+
+        - radiogroup:
+            name: radiogroup1
+            fieldLabel: Radiogroup field
+            inline: true
+            items:
+                - {value: 1, label: opt1}
+                - {value: 2, label: opt2}
+
