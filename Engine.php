@@ -62,10 +62,15 @@ class Engine
             ));
         }
 
-        $bundleDir = empty($this->targetBundle) ? $this->bundleExtensionDir.DS : $this->bundleExtensionDir.DS.$this->targetBundle.DS;
+        // load reader from factory
+        $this->reader = $this->readerFactory->load($this->metaFile);
+        $elementType = $this->reader->getElement()->getXtype();
+        $bundleDir = empty($this->targetBundle)
+            ? $this->bundleExtensionDir . DS . $elementType . DS
+            : $this->bundleExtensionDir . DS . $this->targetBundle . $elementType . DS;
 
         if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
-            $bundleDir = __DIR__ . DS . 'bundle' . DS . $this->targetBundle . DS;
+            $bundleDir = __DIR__ . DS . 'bundle' . DS . $this->targetBundle . DS . $elementType . DS;
             if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
                 throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $this->targetBundle));
             }
@@ -91,8 +96,7 @@ class Engine
         $this->parser->parse();
         $this->mapping = include($mappingFilename);
 
-        // load reader from factory
-        $this->reader = $this->readerFactory->load($this->metaFile);
+
     }
 
     /**
