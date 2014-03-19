@@ -1,7 +1,5 @@
 <?php
-namespace Alchemy\Component\UI\Widget;
-
-use Alchemy\Component\UI\Widget\WidgetInterface;
+namespace Alchemy\Component\UI\Element\Form\Widget;
 
 /**
  * Class Textbox

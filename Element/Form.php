@@ -1,7 +1,7 @@
 <?php
 namespace Alchemy\Component\UI\Element;
 
-use Alchemy\Component\UI\Widget\WidgetInterface;
+use Alchemy\Component\UI\Element\WidgetInterface;
 
 /**
  * Class Form
@@ -24,12 +24,12 @@ class Form extends Element
     protected $xtype = 'form';
 
     /**
-     * @var \Alchemy\Component\UI\Widget\Widget[]
+     * @var \Alchemy\Component\UI\Element\Form\Widget\Widget[]
      */
     private $widgets = array();
 
     /**
-     * @return \Alchemy\Component\UI\Widget\Widget[]
+     * @return \Alchemy\Component\UI\Element\Form\Widget\Widget[]
      */
     public function getWidgets()
     {
@@ -39,11 +39,6 @@ class Form extends Element
     public function add(WidgetInterface $w)
     {
         $this->widgets[] = $w;
-    }
-
-    public function getXtype()
-    {
-        return $this->xtype;
     }
 
     public function getButtons()

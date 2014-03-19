@@ -1,5 +1,5 @@
 <?php
-namespace Alchemy\Component\UI\Widget;
+namespace Alchemy\Component\UI\Element;
 
 /**
  * Class WidgetInterface

@@ -22,6 +22,7 @@ abstract class Element
     public  $class;
 
     protected $id = '';
+    protected $xtype = 'form';
     protected $generated = array();
 
     public function __construct(array $attributes = array())
@@ -41,6 +42,11 @@ abstract class Element
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getXtype()
+    {
+        return $this->xtype;
     }
 
     public function setAttribute($name, $value = '')

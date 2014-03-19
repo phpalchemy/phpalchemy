@@ -11,15 +11,15 @@ $rootDir = realpath(__DIR__ . "/../");
 
 require $rootDir . "/Element/Element.php";
 require $rootDir . "/Element/Form.php";
-require $rootDir . "/Widget/WidgetInterface.php";
-require $rootDir . "/Widget/Widget.php";
+require $rootDir . "/Element/WidgetInterface.php";
+require $rootDir . "/Element/Form/Widget/Widget.php";
 
-require $rootDir . "/Widget/Checkbox.php";
-require $rootDir . "/Widget/Checkgroup.php";
-require $rootDir . "/Widget/Flipswitch.php";
-require $rootDir . "/Widget/Listbox.php";
-require $rootDir . "/Widget/Radiogroup.php";
-require $rootDir . "/Widget/Textbox.php";
+require $rootDir . "/Element/Form/Widget/Checkbox.php";
+require $rootDir . "/Element/Form/Widget/Checkgroup.php";
+require $rootDir . "/Element/Form/Widget/Flipswitch.php";
+require $rootDir . "/Element/Form/Widget/Listbox.php";
+require $rootDir . "/Element/Form/Widget/Radiogroup.php";
+require $rootDir . "/Element/Form/Widget/Textbox.php";
 
 require $rootDir . "/vendor/phpalchemy/Yaml/Yaml.php";
 require $rootDir . "/vendor/crodas/haanga/lib/Haanga.php";
