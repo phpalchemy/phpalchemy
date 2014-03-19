@@ -32,7 +32,25 @@ class Listbox extends Widget
             $attributes["name"] .= "[]";
         }
 
-        RETURN $attributes;
+        return $attributes;
     }
+
+    /**
+     * @param array $items
+     */
+    public function setItems($items)
+    {
+        $this->items = $items;
+    }
+
+    /**
+     * @return array
+     */
+    public function getItems()
+    {
+        return $this->items;
+    }
+
+
 }
 

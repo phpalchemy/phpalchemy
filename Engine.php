@@ -164,62 +164,66 @@ class Engine
 
         /** @var \Alchemy\Component\UI\Element\Form $element */
         $element = $this->reader->getElement();
+        $subElements = $element->getSubElements();
+        $elementInfo = $this->mapElementInformation($element);
 
-        foreach ($element->getWidgets() as $widget) {
-            if ($widget->getId() === '') {
-                if ($widget->name === '') {
-                    $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
-                    $widget->setAttribute("name", $widget->getId());
+        foreach ($subElements as $subElementType => $subElement) {
+            foreach ($subElement as $widget) {
+                if ($widget->getId() === '') {
+                    if ($widget->name === '') {
+                        $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
+                        $widget->setAttribute("name", $widget->getId());
+                    } else {
+                        $widget->setId($widget->name);
+                    }
                 } else {
-                    $widget->setId($widget->name);
+                    if ($widget->name === '') {
+                        $widget->setAttribute("name", $widget->getId());
+                    }
                 }
-            } else {
-                if ($widget->name === '') {
-                    $widget->setAttribute("name", $widget->getId());
+
+                // setting widget data
+                if (array_key_exists($widget->name, $data)) {
+                    $widget->setValue($data[$widget->name]);
                 }
+
+                // mapping element attributes
+                $info = $this->mapElementInformation($widget);
+
+                // generate the code
+                $generated = $this->parser->generate($info['xtype'], $info);
+
+                // setting generate code on widget property
+                $widget->setGenerated($generated);
+
+                $elementItems[$widget->getId()] = array(
+                    "source" => array("html" => "", "js" => ""),
+                    "label" => $widget->getFieldLabel()
+                );
+
+                foreach ($generated as $type => $src) {
+                    $elementItems[$widget->getId()]["source"][$type] = $src;
+                }
+
+                // fallback
+                if (! isset($elementItems[$widget->getId()]["source"]) || ! isset($elementItems[$widget->getId()]["source"]["html"])) {
+                    $elementItems[$widget->getId()]["source"]["html"] = "";
+                }
+
+                $this->generated['widgets'][$widget->getId()] = array(
+                    'object' => $widget,
+                    'info'   => $info,
+                    'generated' => $generated
+                );
             }
 
-            // setting widget data
-            if (array_key_exists($widget->name, $data)) {
-                $widget->setValue($data[$widget->name]);
-            }
-
-            // mapping element attributes
-            $info = $this->mapElementInformation($widget);
-
-            // generate the code
-            $generated = $this->parser->generate($info['xtype'], $info);
-
-            // setting generate code on widget property
-            $widget->setGenerated($generated);
-
-            $elementItems[$widget->getId()] = array(
-                "source" => array("html" => "", "js" => ""),
-                "label" => $widget->getFieldLabel()
-            );
-
-            foreach ($generated as $type => $src) {
-                $elementItems[$widget->getId()]["source"][$type] = $src;
-            }
-
-            // fallback
-            if (! isset($elementItems[$widget->getId()]["source"]) || ! isset($elementItems[$widget->getId()]["source"]["html"])) {
-                $elementItems[$widget->getId()]["source"]["html"] = "";
-            }
-
-            $this->generated['widgets'][$widget->getId()] = array(
-                'object' => $widget,
-                'info'   => $info,
-                'generated' => $generated
-            );
+            $elementInfo[$subElementType] = $elementItems;
         }
 
-        $info = $this->mapElementInformation($element);
-        $info['items'] = $elementItems;
-
+        //var_dump($info); die;
         $generated = $this->parser->generate(
             $element->getXtype(),
-            $info
+            $elementInfo
         );
 
         $this->generated['element'] = $generated;

@@ -14,7 +14,7 @@ datatable:
         - {id: 0, value: Disabled}
         - {id: 1, value: Enabled}
 
-  items:
+  columns:
     - {id: name, label: Name}
     - {id: lastname, label: Lastname}
     - {id: options, label: Options}

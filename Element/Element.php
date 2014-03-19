@@ -18,15 +18,35 @@ use Alchemy\Component\UI\Engine;
  */
 abstract class Element
 {
-    public  $name = '';
-    public  $class;
-
-    protected $id = '';
-    protected $xtype = 'form';
+    /**
+     * @var string
+     */
+    public  $name = "";
+    /**
+     * @var
+     */
+    public  $class = "";
+    /**
+     * @var string
+     */
+    protected $id = "";
+    /**
+     * @var string
+     */
+    protected $xtype = "";
+    /**
+     * @var array
+     */
     protected $generated = array();
+    /**
+     * @var \ReflectionObject
+     */
+    private $meta;
 
     public function __construct(array $attributes = array())
     {
+        $this->meta = new \ReflectionObject($this);
+
         if (!empty($attributes)) {
             foreach ($attributes as $key => $value) {
                 $this->setAttribute($key, $value);
@@ -34,32 +54,55 @@ abstract class Element
         }
     }
 
+    /**
+     * @param $id
+     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
+    /**
+     * @return string
+     */
     public function getId()
     {
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function getXtype()
     {
         return $this->xtype;
     }
 
+    /**
+     * @param $name
+     * @param string $value
+     * @return bool|string
+     */
     public function setAttribute($name, $value = '')
     {
         if (is_array($name)) {
-            return $this->setAttributesFromArray($name);
+            $this->setAttributesFromArray($name);
+            return true;
         }
 
         if (property_exists($this, $name)) {
-            return $this->{$name} = $value;
+            if ($this->isProtected($name)) {
+                $fn = "set" . ucfirst($name);
+                return $this->$fn($value);
+            } else {
+                return $this->{$name} = $value;
+            }
         }
     }
 
+    /**
+     * @param array $attributes
+     */
     protected function setAttributesFromArray(array $attributes)
     {
         foreach ($attributes as $name => $value) {
@@ -67,13 +110,15 @@ abstract class Element
         }
     }
 
+    /**
+     * @return array
+     */
     public function getInfo()
     {
         $result = array();
-        $refl   = new \ReflectionObject($this);
         $result['attributes'] = $this->getAttributes();
+        $properties  = $this->meta->getProperties(\ReflectionProperty::IS_PROTECTED);
 
-        $properties  = $refl->getProperties(\ReflectionProperty::IS_PROTECTED);
         foreach ($properties as $pro) {
             $pro->setAccessible(true);
             $value = $pro->getValue($this);
@@ -87,11 +132,13 @@ abstract class Element
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public function getAttributes()
     {
         $result = array();
-        $refl   = new \ReflectionObject($this);
-        $attributes  = $refl->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $attributes  = $this->meta->getProperties(\ReflectionProperty::IS_PUBLIC);
 
         foreach ($attributes as $att) {
             $value = $att->getValue($this);
@@ -104,6 +151,26 @@ abstract class Element
         return $result;
     }
 
+    public function getSubElements()
+    {
+        return array();
+    }
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function isProtected($name)
+    {
+        $property = $this->meta->getProperty($name);
+
+        return $property->isProtected();
+    }
+
+    /**
+     * @param $type
+     * @param string $content
+     */
     public function setGenerated($type, $content = '')
     {
         if (is_array($type)) {
@@ -115,6 +182,10 @@ abstract class Element
         }
     }
 
+    /**
+     * @param string $type
+     * @return array
+     */
     public function getGenerated($type = '')
     {
         if (empty($type)) {
@@ -124,6 +195,10 @@ abstract class Element
         }
     }
 
+    /**
+     * @param $val
+     * @return string
+     */
     private function toString($val)
     {
         if ($val === true) {
