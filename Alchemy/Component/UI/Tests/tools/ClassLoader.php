@@ -11,7 +11,7 @@ namespace Alchemy\Component\ClassLoader;
  *
  * @version   1.0
  * @author    Erik Amaru Ortiz <aortiz.erik@gmail.com>
- * @link      https://github.com/eriknyk/phpalchemy
+ * @link      https://github.com/phpalchemy/phpalchemy
  * @copyright Copyright 2012 Erik Amaru Ortiz
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   Alchemy/Component/ClassLoader
@@ -28,8 +28,6 @@ class ClassLoader
 
     /**
      * Creates a new SplClassLoader and installs the class on the SPL autoload stack
-     *
-     * @param string $ns The namespace to use.
      */
     public function __construct()
     {
@@ -86,7 +84,7 @@ class ClassLoader
      * Loads the given class or interface.
      *
      * @param string $className The name of the class to load.
-     * @return void
+     * @return boolean
      */
     protected function loadClass($className)
     {
@@ -99,13 +97,12 @@ class ClassLoader
         foreach ($this->includePaths as $namespace => $includePath) {
             if (strpos($namespace, ',') !== false) {
                 list($namespace, $excludeNsPart) = explode(',', $namespace);
-                $nsDirMapped = str_replace(NS, DS, $excludeNsPart);
+                $nsDirMapped = ltrim(str_replace(NS, DS, $excludeNsPart), DS);
                 $filename    = str_replace($nsDirMapped, '', $filename);
             }
-
+            //var_dump($includePath . $filename);
             if (file_exists($includePath . $filename)) {
                 require_once $includePath . $filename;
-
                 return true;
             }
         }

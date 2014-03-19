@@ -1,7 +1,5 @@
 <?php
-namespace Alchemy\Component\UI\Widget;
-
-use Alchemy\Component\UI\Widget\WidgetInterface;
+namespace Alchemy\Component\UI\Element\Form\Widget;
 
 /**
  * Class Textbox
@@ -13,28 +11,27 @@ use Alchemy\Component\UI\Widget\WidgetInterface;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   Alchemy/Component/UI
  */
-class Listbox extends Widget
+class Flipswitch extends Widget
 {
     public $disabled;
     public $editable;
-    public $multiple;
 
     protected $items = array();
 
     public function __construct(array $attributes = array())
     {
         parent::__construct($attributes);
-        $this->setXtype('listbox');
+        $this->setXtype('flipswitch');
+
+        $this->items = array(
+            array('value' => 1, 'label' => 'On'),
+            array('value' => 0, 'label' => 'Off')
+        );
     }
 
-    function getAttributes() {
-        $attributes = parent::getAttributes();
-
-        if ($this->multiple) {
-            $attributes["name"] .= "[]";
-        }
-
-        RETURN $attributes;
+    public function setValue($value)
+    {
+        $this->value = $value == "On" ? 1 : 0;
     }
 }
 

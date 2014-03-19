@@ -1,8 +1,7 @@
 <?php
-namespace Alchemy\Component\UI\Widget;
+namespace Alchemy\Component\UI\Element\Form\Widget;
 
-use Alchemy\Component\UI\Element\Element;
-use Alchemy\Component\UI\ElementInterface;
+use Alchemy\Component\UI\Element;
 
 /**
  * Abstract Class Widget
@@ -14,7 +13,7 @@ use Alchemy\Component\UI\ElementInterface;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   Alchemy/Component/UI
  */
-abstract class Widget extends Element implements WidgetInterface
+abstract class Widget extends Element\Element implements Element\WidgetInterface
 {
     protected $value = '';
     protected $xtype = '';

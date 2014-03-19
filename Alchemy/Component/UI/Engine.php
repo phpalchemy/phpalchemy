@@ -1,7 +1,7 @@
 <?php
 namespace Alchemy\Component\UI;
 
-use Alchemy\Component\UI\Widget\WidgetInterface;
+use Alchemy\Component\UI\Element\WidgetInterface;
 use Alchemy\Component\UI\Element\Element;
 use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Parser;
@@ -18,7 +18,7 @@ use Alchemy\Component\UI\Parser;
  */
 class Engine
 {
-    protected $cacheDir = './';
+    protected static $cacheDir = './';
     protected $targetBundle = '';
     protected $metaFile = '';
     protected $mapping  = array();
@@ -36,9 +36,8 @@ class Engine
     /**
      * UI\Engine Constructor
      *
-     * @param string $bundle bundle name to generate a its output based on its generation script and mapping rules
-     * @param Reader $reader meta file source reader
-     * @param Parser $parser metafile source parser
+     * @param \Alchemy\Component\UI\ReaderFactory $readerFactory
+     * @param \Alchemy\Component\UI\Parser $parser metafile source parser
      */
     public function __construct(ReaderFactory $readerFactory, Parser $parser)
     {
@@ -50,6 +49,10 @@ class Engine
 
     /**
      * Prepare all engine dependencies
+     *
+     * @throws \RuntimeException
+     * @throws \Exception
+     * @return void
      */
     public function prepare()
     {
@@ -59,10 +62,15 @@ class Engine
             ));
         }
 
-        $bundleDir = empty($this->targetBundle) ? $this->bundleExtensionDir.DS : $this->bundleExtensionDir.DS.$this->targetBundle.DS;
+        // load reader from factory
+        $this->reader = $this->readerFactory->load($this->metaFile);
+        $elementType = $this->reader->getElement()->getXtype();
+        $bundleDir = empty($this->targetBundle)
+            ? $this->bundleExtensionDir . DS . $elementType . DS
+            : $this->bundleExtensionDir . DS . $this->targetBundle . $elementType . DS;
 
         if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
-            $bundleDir = __DIR__ . DS . 'bundle' . DS . $this->targetBundle . DS;
+            $bundleDir = __DIR__ . DS . 'bundle' . DS . $this->targetBundle . DS . $elementType . DS;
             if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
                 throw new \Exception(sprintf("Error: Bundle '%s' does not exist!.", $this->targetBundle));
             }
@@ -88,10 +96,14 @@ class Engine
         $this->parser->parse();
         $this->mapping = include($mappingFilename);
 
-        // load reader from factory
-        $this->reader = $this->readerFactory->load($this->metaFile);
+
     }
 
+    /**
+     * Set Bundle Extension directory, usually used to set user's bundles
+     *
+     * @param $dir
+     */
     public function setBundleExtensionDir($dir)
     {
         $this->bundleExtensionDir = rtrim($dir, DS);
@@ -130,6 +142,9 @@ class Engine
     /**
      * Build Web UI
      *
+     * @param array $data
+     * @param string $targetBundle
+     * @param string $metaFile
      * @return \Alchemy\Component\UI\Element\Element
      */
     public function build(array $data = array(), $targetBundle = '', $metaFile = '')
@@ -171,7 +186,6 @@ class Engine
 
             // mapping element attributes
             $info = $this->mapElementInformation($widget);
-           // var_dump($info);
 
             // generate the code
             $generated = $this->parser->generate($info['xtype'], $info);
@@ -179,11 +193,6 @@ class Engine
             // setting generate code on widget property
             $widget->setGenerated($generated);
 
-//            if (array_key_exists('html', $generated)) {
-//                $elementItems[$widget->getId()] = $generated['html'];
-//            } else {
-//                $elementItems[$widget->getId()] = '';
-//            }
             $elementItems[$widget->getId()] = array(
                 "source" => array("html" => "", "js" => ""),
                 "label" => $widget->getFieldLabel()
@@ -198,7 +207,6 @@ class Engine
                 $elementItems[$widget->getId()]["source"]["html"] = "";
             }
 
-
             $this->generated['widgets'][$widget->getId()] = array(
                 'object' => $widget,
                 'info'   => $info,
@@ -207,9 +215,7 @@ class Engine
         }
 
         $info = $this->mapElementInformation($element);
-        //var_dump($info); die;
         $info['items'] = $elementItems;
-
 
         $generated = $this->parser->generate(
             $element->getXtype(),
@@ -217,17 +223,16 @@ class Engine
         );
 
         $this->generated['element'] = $generated;
-
         $element->setGenerated($generated);
 
         return $element;
-        //$this->build[$element->getXtype()]['widgets'] = $elementItems;
     }
 
     /**
-     * Map the widget attributes & properties to a determinated UI languaje
-     * @param  WidgetInterface $widget widget object to map its attributes & properties
-     * @return array                   mapped widget information
+     * Map the widget attributes & properties to a determined UI language
+     *
+     * @param \Alchemy\Component\UI\Element\Element $widget widget object to map its attributes & properties
+     * @return array mapped widget information
      */
     protected function mapElementInformation(Element $widget)
     {
@@ -261,14 +266,12 @@ class Engine
                 continue;
             }
 
-            // if the attribute's name has overrides
+            // if the name of attribute has overrides
             if (array_key_exists('name', $attribInfo)) {
                 // the attribute name should be overridden and the original name should be removed
+                unset($widgetInfo[$attributeName]); // removing original attribute name
 
-                // removing original attribute name
-                unset($widgetInfo[$attributeName]);
-
-                // geeting the override attribute name
+                // getting the override attribute name
                 $attributeName = $this->processMappedWidgetInfo(
                     $widget,
                     $attribInfo['name'],
@@ -276,9 +279,9 @@ class Engine
                 );
             }
 
-            // if the attribute's value has overrides
+            // if the value of attribute has overrides
             if (array_key_exists('value', $attribInfo)) {
-                // the attribute value shoul be overridden by a composed structure
+                // the attribute value should be overridden by a composed structure
                 $widgetInfo[$attributeName] = $this->processMappedWidgetInfo(
                     $widget,
                     $attribInfo['value'],
@@ -288,9 +291,9 @@ class Engine
 
             if ($isAttribute) {
                 $widgetInfo['attributes'][$attributeName] = $widgetInfo[$attributeName];
-            } else {
+            }/* else {
                 $widgetInfo[$attributeName] = $widgetInfo[$attributeName];
-            }
+            }*/
 
         }
 
@@ -303,10 +306,11 @@ class Engine
      * This method match a single mapped property or attribute of a widget
      * it can match the property or attribute value and even attribute name itself
      *
-     * @param  WidgetInterface $widget widget object
-     * @param  mixed           $info   can contains a array|string|Closure
-     * @param  string          $value  the property or attribute value
-     * @return string                  returns a mapped varname or value
+     * @param  \Alchemy\Component\UI\Element\WidgetInterface $widget widget object
+     * @param  mixed $info can contains a array|string|Closure
+     * @param  string $value the property or attribute value
+     * @throws \RuntimeException
+     * @return string returns a mapped varname or value
      */
     private function processMappedWidgetInfo(WidgetInterface $widget, $info, $value)
     {
@@ -331,6 +335,12 @@ class Engine
         return $result;
     }
 
+    /**
+     * Internal function that make a boolean to string
+     *
+     * @param $val
+     * @return string
+     */
     private function toString($val)
     {
         if ($val === true) {

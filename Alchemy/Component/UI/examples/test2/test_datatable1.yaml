@@ -1,0 +1,21 @@
+datatable:
+  id: table1
+  title: Test Datatable
+  data_source: /data-proxy.php
+
+  filters:
+    - {id: name, type: text, placeholder: Name}
+    - {id: lastname, type: text, placeholder: Lastname}
+    -
+      id: status,
+      type: select,
+      placeholder: Select Status
+      data:
+        - {id: 0, value: Disabled}
+        - {id: 1, value: Enabled}
+
+  items:
+    - {id: name, label: Name}
+    - {id: lastname, label: Lastname}
+    - {id: options, label: Options}
+

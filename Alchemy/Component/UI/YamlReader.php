@@ -27,7 +27,7 @@ class YamlReader extends Reader
     {
         $yaml = new Yaml();
         $data = (array) $yaml->load($this->filepath);
-        //pr($data); die;
+        //echo "<pre>"; print_r($data); die;
 
         if (!is_array($data)) {
             throw new \Exception("Invalid UI definition");
@@ -56,7 +56,7 @@ class YamlReader extends Reader
 
         if (! class_exists($elementClass)) {
             throw new \RuntimeException(
-                sprintf("Runtime Error: Undefined UI Element Class '%s'.", ucfirst($this->root->nodeName)
+                sprintf("Runtime Error: Undefined UI Element Class '%s'.", ucfirst($elementClass)
             ));
         }
 
@@ -68,14 +68,22 @@ class YamlReader extends Reader
 
         $this->element = new $elementClass($this->attributes);
 
+        //var_dump($this->element); die;
         foreach ($items as $item) {
             if (! is_array($item)) {
                 continue;
             }
 
             list($type) = array_keys($item);
+            $elementType = $this->element->getXtype();
 
-            $widgetClass = 'Alchemy\Component\UI\Widget\\' . ucfirst($type);
+            switch ($elementType) {
+                case "form":
+                    $widgetClass = 'Alchemy\Component\UI\Element\\'.ucfirst($elementType).'\Widget\\' . ucfirst($type);
+                    break;
+            }
+
+            //var_dump($widgetClass); die;
 
             if (! class_exists($widgetClass)) {
                 throw new \RuntimeException(

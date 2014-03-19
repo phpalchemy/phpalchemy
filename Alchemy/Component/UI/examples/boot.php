@@ -8,25 +8,9 @@ if (! is_dir(__DIR__.'/../vendor')) {
     );
 }
 $rootDir = realpath(__DIR__ . "/../");
+require $rootDir . "/Tests/tools/ClassLoader.php";
+$loader = new \Alchemy\Component\ClassLoader\ClassLoader();
+$loader->register("Alchemy", $rootDir, '\Alchemy\Component\UI\\');
+$loader->register("Yaml", $rootDir . "/vendor/phpalchemy/Yaml");
+$loader->register("Haanga", $rootDir . "/vendor/crodas/haanga/lib");
 
-require $rootDir . "/Element/Element.php";
-require $rootDir . "/Element/Form.php";
-require $rootDir . "/Widget/WidgetInterface.php";
-require $rootDir . "/Widget/Widget.php";
-
-require $rootDir . "/Widget/Checkbox.php";
-require $rootDir . "/Widget/Checkgroup.php";
-require $rootDir . "/Widget/Flipswitch.php";
-require $rootDir . "/Widget/Listbox.php";
-require $rootDir . "/Widget/Radiogroup.php";
-require $rootDir . "/Widget/Textbox.php";
-
-require $rootDir . "/vendor/phpalchemy/Yaml/Yaml.php";
-require $rootDir . "/vendor/crodas/haanga/lib/Haanga.php";
-
-require $rootDir . "/Engine.php";
-require $rootDir . "/Parser.php";
-require $rootDir . "/Reader.php";
-require $rootDir . "/ReaderFactory.php";
-require $rootDir . "/XmlReader.php";
-require $rootDir . "/YamlReader.php";
