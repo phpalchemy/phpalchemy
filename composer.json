@@ -1,0 +1,12 @@
+{
+    "name": "phpalchemy/ClassLoader",
+    "type": "library",
+    "description": "PHP ClassLoader",
+    "keywords": ["classloader", "php", "class", "loader", "psr"],
+    "homepage": "https://github.com/phpalchemy/ClassLoader",
+    "author": "Erik Amaru Ortiz <aortiz.erik@gmail.com>",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.0"
+    }
+}
