@@ -17,5 +17,10 @@ abstract class Reader
     }
 
     abstract public function parse();
+
+    protected static function toCamelCase($str)
+    {
+        return strpos($str, "_") !== false ? lcfirst(str_replace(" ", "", ucwords(str_replace("_", " ", $str)))) : $str;
+    }
 }
 

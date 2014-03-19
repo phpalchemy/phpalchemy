@@ -19,6 +19,7 @@ class Parser
     protected $defaultBlock = '';
     protected $currentBlock = array();
     protected $strictVariables = true;
+    protected $enableMinify = false;
 
     protected $data = array();
 
@@ -100,7 +101,7 @@ class Parser
             return $this->blocks[$name];
         }
 
-        if (!empty($this->defaultBlock)) {
+        if (! empty($this->defaultBlock)) {
             return $this->blocks[$this->defaultBlock];
         }
 
@@ -110,10 +111,10 @@ class Parser
     public function generate($name, $data)
     {
         if (($default = $this->getDefConf('default_block')) !== '') {
-            $this->setDefaultBlock($default);
+            $this->defaultBlock = $default;
         }
 
-        $this->currentBlock     = $this->getBlock($name);
+        $this->currentBlock = $this->getBlock($name);
         $this->currentBlockName = $name;
         $this->data = $data;
         $generated  = array();
@@ -125,7 +126,7 @@ class Parser
                 $generatedContent = $fn($data);
                 
                 if ($varName == 'html') {
-                    $generatedContent = self::minifyHtml($fn($data));
+                    $generatedContent = $this->enableMinify ? self::minifyHtml($fn($data)) : $fn($data);
                 }
                 
                 $generated[$varName] = $generatedContent;
@@ -133,9 +134,6 @@ class Parser
             } catch (\Exception $e) {
                 throw new \Exception('Alchemy\Component\UI\Parse:: ' . $e->getMessage());
             }
-            //$content = $this->buildIterators($template);
-            //$content = $this->replaceData($content, $data);
-            //$generated[$varName] = $content;
         }
 
         return $generated;

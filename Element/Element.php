@@ -1,11 +1,6 @@
 <?php
 namespace Alchemy\Component\UI\Element;
 
-use Alchemy\Component\UI\WidgetCollection;
-use Alchemy\Component\UI\Widget\WidgetInterface;
-
-use Alchemy\Component\UI\Engine;
-
 /**
  * Class Element
  *
@@ -81,7 +76,7 @@ abstract class Element
     /**
      * @param $name
      * @param string $value
-     * @return bool|string
+     * @return bool|void
      */
     public function setAttribute($name, $value = '')
     {

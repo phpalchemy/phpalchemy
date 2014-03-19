@@ -181,9 +181,7 @@
   {% for at_name, at_value in attributes %}
     {{ at_name }}="{{ at_value }}"
   {% endfor %}
->
-{{ value }}
-</textarea>
+>{{ value }}</textarea>
 >>>
 
 @end
@@ -196,17 +194,17 @@
 @var html <<<
 <form id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>
     <table>
-    {% for item in items %}
-    <tr>
-    <td>{{ item['label'] | safe }}: </td><td>{{ item['source']['html'] | safe }}</td>
-    </tr>
-    {% endfor %}
-    <tr colspan="2" align="center">
-    {% for button in buttons %}
-    <td><button type="{{ button['type'] }}">{{ button['type'] }}</td>
-    {% endfor %}
-    <td><button type="reset">Reset</td>
-    </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item['label'] | safe }}: </td><td>{{ item['source']['html'] | safe }}</td>
+        </tr>
+        {% endfor %}
+        <tr colspan="2" align="center">
+            {% for button in buttons %}
+            <td><button type="{{ button['type'] }}">{{ button['type'] }}</td>
+            {% endfor %}
+            <td><button type="reset">Reset</td>
+        </tr>
     </table>
 </form>
 >>>
