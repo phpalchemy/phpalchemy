@@ -23,7 +23,7 @@
         }
     }],
     "require": {
-        "haanga/haanga"   : "1.0.4",
+        "haanga/haanga"   : "1.0.5",
         "crodas/Notoj"    : "0.1.13",
         "symfony/console" : "2.2.*"
     },
