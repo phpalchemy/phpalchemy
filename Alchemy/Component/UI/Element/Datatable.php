@@ -13,8 +13,90 @@ namespace Alchemy\Component\UI\Element;
  */
 class Datatable extends Element
 {
+    protected $xtype = 'datatable';
     protected $title = "";
     protected $dataSourceUri = "";
     protected $columns = array();
+    protected $data = array();
+
+    /**
+     * @param string $xtype
+     */
+    public function setXtype($xtype)
+    {
+        $this->xtype = $xtype;
+    }
+
+    /**
+     * @return string
+     */
+    public function getXtype()
+    {
+        return $this->xtype;
+    }
+
+    /**
+     * @param array $columns
+     */
+    public function setColumns($columns)
+    {
+        $this->columns = $columns;
+    }
+
+    /**
+     * @return array
+     */
+    public function getColumns()
+    {
+        return $this->columns;
+    }
+
+    /**
+     * @param string $dataSourceUri
+     */
+    public function setDataSourceUri($dataSourceUri)
+    {
+        $this->dataSourceUri = $dataSourceUri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDataSourceUri()
+    {
+        return $this->dataSourceUri;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
 
 }

@@ -20,25 +20,54 @@ class Form extends Element
     public $method = 'post';
     public $title = '';
 
-    protected  $buttons = array();
+    protected $buttons = array();
     protected $xtype = 'form';
 
     /**
      * @var \Alchemy\Component\UI\Element\Form\Widget\Widget[]
      */
-    private $widgets = array();
+    protected $items = array();
+    //private $widgets = array();
 
     /**
-     * @return \Alchemy\Component\UI\Element\Form\Widget\Widget[]
+     * @param array
      */
-    public function getWidgets()
+    public function setItems($items)
     {
-        return $this->widgets;
+        $this->items = $items;
+    }
+
+    public function getItems()
+    {
+        return $this->items;
+    }
+
+    public function getSubElements()
+    {
+        $subElements = array();
+        $items = array();
+
+        foreach ($this->getItems() as $itemData) {
+            $itemClass = 'Alchemy\Component\UI\Element\Form\Widget\\' . ucfirst($itemData["xtype"]);
+            unset($itemData["xtype"]);
+            $items[] = new $itemClass($itemData);
+        }
+
+        $subElements["items"] = $items;
+
+        //var_dump($subElements); die;
+
+        return $subElements;
     }
 
     public function add(WidgetInterface $w)
     {
-        $this->widgets[] = $w;
+        $this->items[] = $w;
+    }
+
+    public function setButtons($buttons)
+    {
+        $this->buttons = $buttons;
     }
 
     public function getButtons()

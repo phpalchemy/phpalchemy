@@ -65,9 +65,10 @@ class Engine
         // load reader from factory
         $this->reader = $this->readerFactory->load($this->metaFile);
         $elementType = $this->reader->getElement()->getXtype();
+
         $bundleDir = empty($this->targetBundle)
             ? $this->bundleExtensionDir . DS . $elementType . DS
-            : $this->bundleExtensionDir . DS . $this->targetBundle . $elementType . DS;
+            : $this->bundleExtensionDir . DS . $this->targetBundle . DS . $elementType . DS;
 
         if (! file_exists($bundleDir . 'components.genscript') && ! file_exists($bundleDir . 'mapping.php')) {
             $bundleDir = __DIR__ . DS . 'bundle' . DS . $this->targetBundle . DS . $elementType . DS;
@@ -94,9 +95,7 @@ class Engine
 
         $this->parser->setScriptFile($genscriptFilename);
         $this->parser->parse();
-        $this->mapping = include($mappingFilename);
-
-
+        $this->mapping = file_exists($mappingFilename) ? include($mappingFilename) : null;
     }
 
     /**
@@ -165,61 +164,69 @@ class Engine
         /** @var \Alchemy\Component\UI\Element\Form $element */
         $element = $this->reader->getElement();
 
-        foreach ($element->getWidgets() as $widget) {
-            if ($widget->getId() === '') {
-                if ($widget->name === '') {
-                    $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
-                    $widget->setAttribute("name", $widget->getId());
-                } else {
-                    $widget->setId($widget->name);
-                }
-            } else {
-                if ($widget->name === '') {
-                    $widget->setAttribute("name", $widget->getId());
-                }
-            }
-
-            // setting widget data
-            if (array_key_exists($widget->name, $data)) {
-                $widget->setValue($data[$widget->name]);
-            }
-
-            // mapping element attributes
-            $info = $this->mapElementInformation($widget);
-
-            // generate the code
-            $generated = $this->parser->generate($info['xtype'], $info);
-
-            // setting generate code on widget property
-            $widget->setGenerated($generated);
-
-            $elementItems[$widget->getId()] = array(
-                "source" => array("html" => "", "js" => ""),
-                "label" => $widget->getFieldLabel()
-            );
-
-            foreach ($generated as $type => $src) {
-                $elementItems[$widget->getId()]["source"][$type] = $src;
-            }
-
-            // fallback
-            if (! isset($elementItems[$widget->getId()]["source"]) || ! isset($elementItems[$widget->getId()]["source"]["html"])) {
-                $elementItems[$widget->getId()]["source"]["html"] = "";
-            }
-
-            $this->generated['widgets'][$widget->getId()] = array(
-                'object' => $widget,
-                'info'   => $info,
-                'generated' => $generated
-            );
+        foreach ($data as $key => $val) {
+            $element->setAttribute(self::toCamelCase($key), $val);
         }
 
-        $info = $this->mapElementInformation($element);
-        $info['items'] = $elementItems;
+        $subElements = $element->getSubElements();
+        $elementInfo = is_null($this->mapping) ? $element->getInfo() : $this->mapElementInformation($element);
+
+        foreach ($subElements as $subElementType => $subElement) {
+            foreach ($subElement as $widget) {
+                if ($widget->getId() === '') {
+                    if ($widget->name === '') {
+                        $widget->setId('x-gen-' . ++$widgestWithoutIdCounter);
+                        $widget->setAttribute("name", $widget->getId());
+                    } else {
+                        $widget->setId($widget->name);
+                    }
+                } else {
+                    if ($widget->name === '') {
+                        $widget->setAttribute("name", $widget->getId());
+                    }
+                }
+
+                // setting widget data
+                if (array_key_exists($widget->name, $data)) {
+                    $widget->setValue($data[$widget->name]);
+                }
+
+                // mapping element attributes
+                $info = is_null($this->mapping) ? $widget->getInfo() : $this->mapElementInformation($widget);
+
+                // generate the code
+                $generated = $this->parser->generate($info['xtype'], $info);
+
+                // setting generate code on widget property
+                $widget->setGenerated($generated);
+
+                $elementItems[$widget->getId()] = array(
+                    "source" => array("html" => "", "js" => ""),
+                    "label" => $widget->getFieldLabel()
+                );
+
+                foreach ($generated as $type => $src) {
+                    $elementItems[$widget->getId()]["source"][$type] = $src;
+                }
+
+                // fallback
+                if (! isset($elementItems[$widget->getId()]["source"]) || ! isset($elementItems[$widget->getId()]["source"]["html"])) {
+                    $elementItems[$widget->getId()]["source"]["html"] = "";
+                }
+
+                $this->generated['widgets'][$widget->getId()] = array(
+                    'object' => $widget,
+                    'info'   => $info,
+                    'generated' => $generated
+                );
+            }
+
+            $elementInfo[$subElementType] = $elementItems;
+        }
 
         $generated = $this->parser->generate(
             $element->getXtype(),
-            $info
+            $elementInfo
         );
 
         $this->generated['element'] = $generated;
@@ -317,7 +324,7 @@ class Engine
         if (is_string($info)) {
             $result = $info;
         } elseif (is_array($info)) {
-            $strValue = $this->toString($value);
+            $strValue = self::toString($value);
 
             if (array_key_exists($strValue, $info)) {
                 $result = $info[$strValue];
@@ -335,13 +342,19 @@ class Engine
         return $result;
     }
 
+    private static function toCamelCase($str)
+    {
+        return strpos($str, "_") !== false ? lcfirst(str_replace(" ", "", ucwords(str_replace("_", " ", $str)))) : $str;
+    }
+
+
     /**
      * Internal function that make a boolean to string
      *
      * @param $val
      * @return string
      */
-    private function toString($val)
+    private static function toString($val)
     {
         if ($val === true) {
             return 'true';
