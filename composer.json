@@ -11,11 +11,19 @@
         }
     ],
     "repositories": [{
-        "type": "git",
-        "url": "https://github.com/crodas/Haanga.git"
+        "type":"package",
+        "package": {
+          "name": "haanga/haanga",
+          "version":"master",
+          "source": {
+              "url": "https://github.com/crodas/Haanga.git",
+              "type": "git",
+              "reference":"master"
+            }
+        }
     }],
     "require": {
-        "crodas/Haanga"   : "1.0.4",
+        "haanga/haanga"   : "1.0.4",
         "crodas/Notoj"    : "0.1.13",
         "symfony/console" : "2.2.*"
     },
