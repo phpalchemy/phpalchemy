@@ -131,6 +131,7 @@ class ServeCommand extends Command
                     throw new \Exception("Error while creating the lighttpd configuration file!");
                 }
 
+                $usingSrv = "Lighttpd Server";
                 $command = "$devServerBin -f $lighttpdTmpConfFile -D";
                 
                 break;
@@ -150,6 +151,7 @@ class ServeCommand extends Command
                     throw new \Exception("Error while creating temporal configuration file!");
                 }
 
+                $usingSrv = "PHP built-in Server";
                 $command = escapeshellcmd(sprintf('%s -S %s:%s %s', PHP_BINARY, $host, $port, $routerFile));
                 
                 break;
@@ -170,6 +172,7 @@ class ServeCommand extends Command
         $output->writeln("\n--= PhpAlchemy Framework Cli  =--\n    (Running on " . self::getOs() . ')'. PHP_EOL);
         //$output->writeln('<comment>Using "'.$env.'" environment.</comment>');
         $output->writeln(sprintf('- The Project "<info>%s</info>" is running on port: <info>%s</info>', $appName, $port));
+        $output->writeln(sprintf('- Serving Development Environment with "<info>%s</info>"', $usingSrv));
         $output->writeln("- URL: <info>http://$host:$port</info>");
         $output->writeln(PHP_EOL." (*) Press CTRL+C to stop the service.".PHP_EOL);
 

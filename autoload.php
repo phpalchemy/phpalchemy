@@ -21,7 +21,7 @@ $classLoader = Alchemy\Component\ClassLoader\ClassLoader::getInstance();
 $classLoader->register('Alchemy', __DIR__ . DIRECTORY_SEPARATOR);
 $classLoader->register('Notoj', __DIR__ . '/vendor/crodas/Notoj/lib/');
 $classLoader->register('Symfony', __DIR__ . '/vendor/symfony/console/');
-$classLoader->registerClass('Haanga','crodas/haanga/lib/Haanga.php');
+$classLoader->registerClass('Haanga','haanga/haanga/lib/Haanga.php');
 $classLoader->registerClass('Smarty','smarty/smarty/libs/Smarty.class.php');
 //$classLoader->register('Zend\Filter\\', __DIR__ . '/vendor/zendframework/zend-filter/');
 
