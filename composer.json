@@ -10,21 +10,9 @@
             "email": "aortiz.erik@gmail.com"
         }
     ],
-    "repositories": [{
-        "type":"package",
-        "package": {
-          "name": "haanga/haanga",
-          "version":"1.0.5",
-          "source": {
-              "url": "https://github.com/crodas/Haanga.git",
-              "type": "git",
-              "reference":"master"
-            }
-        }
-    }],
     "require": {
-        "haanga/haanga"   : "1.0.5",
-        "crodas/Notoj"    : "0.1.13",
+        "phpalchemy/haanga"   : "1.0.4.*",
+        "crodas/Notoj"    : "0.1.*",
         "symfony/console" : "2.2.*"
     },
     "minimum-stability": "stable",
