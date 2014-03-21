@@ -30,13 +30,35 @@ class Request
 {
     static protected $trustProxy   = false;
 
-    public $request                = array();
-    public $query                  = array();
-    public $attributes             = array();
-    public $cookies                = array();
-    public $files                  = array();
-    public $server                 = array();
-    public $headers                = array();
+    /**
+     * @var Collection
+     */
+    public $request;
+    /**
+     * @var Collection
+     */
+    public $query;
+    /**
+     * @var Collection
+     */
+    public $attributes;
+    /**
+     * @var Collection
+     */
+    public $cookies;
+    /**
+     * @var Collection
+     */
+    public $files;
+    /**
+     * @var Collection
+     */
+    public $server;
+    /**
+     * @var Collection
+     */
+    public $headers;
+
     public $content                = array();
     public $languages              = null;
     public $charsets               = null;

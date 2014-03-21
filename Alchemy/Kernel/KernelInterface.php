@@ -1,6 +1,7 @@
 <?php
 namespace Alchemy\Kernel;
 
+use Alchemy\Application;
 use Alchemy\Component\Http\Request;
 
 /**
@@ -14,10 +15,10 @@ interface KernelInterface
      * When $catch is true, the implementation must catch all exceptions
      * and do its best to convert them to a Response instance.
      *
-     * @param  Request $request A Request instance
-     * @return Response A Response instance
-     * @throws \Exception When an Exception occurs during processing
+     * @param \Alchemy\Component\Http\Request $request A Request instance
+     * @param \Alchemy\Application $app
+     * @return \Alchemy\Component\Http\Response A Response instance
      */
-    public function handle(Request $request);
+    public function handle(Request $request, Application $app = null);
 }
 

@@ -9,6 +9,8 @@
  */
 
 /*
+ * Adapted from Symfony package
+ *
  * This Class is a adapted version of \Symfony\Component\Routing\ControllerResolver
  * Code subject to the MIT license
  * Copyright (c) 2004-2012 Fabien Potencier
@@ -17,6 +19,7 @@
 namespace Alchemy\Mvc;
 
 use Alchemy\Component\Http\Request;
+use Alchemy\Application;
 
 /**
  * ControllerResolver.
@@ -44,12 +47,10 @@ class ControllerResolver
      * the controller name (a string like ClassName::MethodName).
      *
      * @param Request $request A Request instance
-     *
+     * @throws \InvalidArgumentException If the controller can't be found
+     * @throws \Exception
      * @return mixed|Boolean A PHP callable representing the Controller,
      *                       or false if this resolver is not able to determine the controller
-     *
-     * @throws \InvalidArgumentException|\LogicException If the controller can't be found
-     *
      * @api
      */
     public function getController(Request $request)
@@ -84,12 +85,13 @@ class ControllerResolver
     /**
      * Returns the arguments to pass to the controller.
      *
-     * @param Request $request    A Request instance
-     * @param mixed   $controller A PHP callable
+     * @param Request $request A Request instance
+     * @param mixed $controller A PHP callable
      *
+     * @return array
      * @throws \RuntimeException When value for argument given is not provided
      */
-    public function getArguments(Request $request, $controller)
+    public function getArguments(Application $app, Request $request, $controller)
     {
         if (is_array($controller)) {
             $r = new \ReflectionMethod($controller[0], $controller[1]);
@@ -101,24 +103,27 @@ class ControllerResolver
             $r = new \ReflectionFunction($controller);
         }
 
-        return $this->doGetArguments($request, $controller, $r->getParameters());
+        return $this->doGetArguments($app, $request, $controller, $r->getParameters());
     }
 
     /**
      * doGetArguments function
      *
-     * @param  Request $request    User request object mapped.
-     * @param  mixed   $controller Controller name inf.
-     * @param  array   $parameters Parameters array.
-     * @return array               Parameters discovered on request objected.
+     * @param  Request $request User request object mapped.
+     * @param  mixed $controller Controller name inf.
+     * @param  array $parameters Parameters array.
+     * @throws \RuntimeException
+     * @return array Parameters discovered on request objected.
      */
-    protected function doGetArguments(Request $request, $controller, array $parameters)
+    protected function doGetArguments(Application $app, Request $request, $controller, array $parameters)
     {
         $attributes = $request->attributes->all();
         $arguments = array();
         foreach ($parameters as $param) {
             if (array_key_exists($param->getName(), $attributes)) {
                 $arguments[] = $attributes[$param->getName()];
+            } elseif ($param->getClass() && $param->getClass()->isInstance($app)) {
+                $arguments[] = $app;
             } elseif ($param->getClass() && $param->getClass()->isInstance($request)) {
                 $arguments[] = $request;
             } elseif ($param->isDefaultValueAvailable()) {

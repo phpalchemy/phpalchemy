@@ -10,6 +10,7 @@
 
 namespace Alchemy\Kernel;
 
+use Alchemy\Application;
 use Alchemy\Annotation\Reader\Reader;
 use Alchemy\Annotation\ViewAnnotation;
 use Alchemy\Config;
@@ -32,6 +33,7 @@ use Alchemy\Kernel\Event\FilterControllerEvent;
 use Alchemy\Kernel\KernelEvents;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Mvc\ControllerResolver;
+
 
 /**
  * Class Kernel
@@ -96,12 +98,13 @@ class Kernel implements KernelInterface
     /**
      * Kernel constructor
      *
-     * @param EventDispatcher     $dispatcher Event dispatcher object.
-     * @param Mapper              $mapper     Routing\Mapper object.
-     * @param ControllerResolver  $resolver   Controller resolver object.
-     * @param Config              $config     Configuration object.
-     * @param Reader              $reader     Annotation\Reader object.
-     * @param Engine              $uiEngine   UI\Engine object.
+     * @param \Alchemy\Component\EventDispatcher\EventDispatcher $dispatcher Event dispatcher object.
+     * @param \Alchemy\Component\Routing\Mapper $mapper Routing\Mapper object.
+     * @param \Alchemy\Mvc\ControllerResolver $resolver Controller resolver object.
+     * @param \Alchemy\Config $config Configuration object.
+     * @param \Alchemy\Annotation\Reader\Reader $annotationReader
+     * @param \Alchemy\Component\UI\Engine $uiEngine UI\Engine object.
+     * @param \Alchemy\Component\WebAssets\Bundle $assetsHandler
      */
     public function __construct(
         EventDispatcher $dispatcher,
@@ -130,9 +133,12 @@ class Kernel implements KernelInterface
 
     /**
      * handle the http user request
-     * @param  Request $request user hhtp request
+     *
+     * @param \Alchemy\Application $app
+     * @param \Alchemy\Component\Http\Request $request user http request
+     * @return \Alchemy\Component\Http\JsonResponse|\Alchemy\Component\Http\Response
      */
-    public function handle(Request $request)
+    public function handle(Request $request, Application $app = null)
     {
         $this->request = $request;
 
@@ -165,7 +171,7 @@ class Kernel implements KernelInterface
             if (array_key_exists('_type', $params)) {
                 if ($params['_type'] == 'x-asset-request') {
                     //$this->handleAssetRequest($params);
-                    //exit(0);n
+                    //exit(0);
                 }
             }
 
@@ -203,7 +209,7 @@ class Kernel implements KernelInterface
             // seeting annotation reader target
             $this->annotationReader->setTarget($params['_controllerClass'], $params['_controllerMethod']);
 
-            $arguments = $this->resolver->getArguments($request, $controller);
+            $arguments = $this->resolver->getArguments($app, $request, $controller);
 
             //"EVENT" FILTER_CONTROLLER
             if ($this->dispatcher->hasListeners(KernelEvents::FILTER_CONTROLLER)) {
@@ -678,10 +684,10 @@ class Kernel implements KernelInterface
 
         // verify controller's name is underscored or not
         if (strpos($params['_controller'], '_') === false) {
-            //just ensure first characted to uppercase
+            //just ensure first character to uppercase
             $params['_controller'] = ucfirst($params['_controller']);
         } else {
-            // camelize the controller's name (to camelcase)
+            // camelize the controller's name (to camelCase)
             $params['_controller'] = str_replace(
                 ' ', '', ucwords(str_replace('_', ' ', $params['_controller']))
             );
@@ -689,9 +695,9 @@ class Kernel implements KernelInterface
 
         // verify if action's name is underscored or not
         if (strpos($params['_action'], '_') !== false) {
-            // camileze the action's name (to camelcase)
+            // camelize the action's name (to camelCase)
             $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $params['_action'])));
-            // this is to ensure first charcater to lowercase,
+            // this is to ensure first character to lowercase,
             // because by php standard coding says function name should starts with lowercase
             $params['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
             unset($tmp);

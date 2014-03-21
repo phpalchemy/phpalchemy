@@ -176,6 +176,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             return new WebAssets\Bundle();
         });
 
+        /** @var \Alchemy\Kernel\Kernel */
         $this['kernel'] = $this->share(function () use ($app) {
             return new Kernel(
                 $app['dispatcher'],
@@ -248,14 +249,18 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         }
 
         $response = $this->handle($request);
-
         $response->send();
     }
 
-    public function handle(Request $request)
+    /**
+     * @param \Alchemy\Component\Http\Request $request
+     * @param \Alchemy\Application $app
+     * @return \Alchemy\Component\Http\Response
+     */
+    public function handle(Request $request, Application $app = null)
     {
         $this['request'] = $request;
-        $response = $this['kernel']->handle($request);
+        $response = $this['kernel']->handle($request, $this);
 
         return $response;
     }
