@@ -459,12 +459,14 @@ class Kernel implements KernelInterface
 
         // check if template filename is empty
         if (empty($template)) {
-            // that means it wasn't set on @view annotation
+            // that means the annotation "@view" was not set
             // Then we compose a template filename using controller class and method names but
-            // removing ...Controller & ..Action sufixes from those names
+            // removing ...Controller & ..Action suffixes from those names
             $nsSepPos  = strrpos($class, '\\');
-            $template  = substr($class, $nsSepPos + 1, -10) . DS;
-            $template .= substr($method, 0, -6);
+            $class = preg_replace('/([A-Z])/', '_$1', substr($class, $nsSepPos + 1, -10));
+            $class = strtolower(ltrim($class, "_"));
+            $method = substr($method, 0, -6);
+            $template = $class . DS . $method;
         }
 
         $view = $this->createView($template, $data, $annotation->engine);
