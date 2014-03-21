@@ -110,6 +110,10 @@ class Parser
 
     public function generate($name, $data)
     {
+        if (! class_exists("Haanga")) {
+            throw new \RuntimeException("The library 'Haanga' is not loaded for UI Generator!");
+        }
+
         if (($default = $this->getDefConf('default_block')) !== '') {
             $this->defaultBlock = $default;
         }
@@ -121,14 +125,14 @@ class Parser
 
         foreach ($this->currentBlock as $varName => $template) {
             $fn = \Haanga::compile($template);
-            
+
             try {
                 $generatedContent = $fn($data);
-                
+
                 if ($varName == 'html') {
                     $generatedContent = $this->enableMinify ? self::minifyHtml($fn($data)) : $fn($data);
                 }
-                
+
                 $generated[$varName] = $generatedContent;
 
             } catch (\Exception $e) {
@@ -179,7 +183,7 @@ class Parser
 //                     if (substr($value, -1) != '>' && ! empty($line)) {
 //                         $line = " " . $line;
 //                     }
-                    
+
                     //$value .= substr($value, -1) == '>' ? trim($line) : " " . trim($line);
                     $value .= $line;
                 }
@@ -354,7 +358,7 @@ class Parser
             ));
         }
     }
-    
+
     private static function minifyHtml($buffer) {
 
         $search = array(

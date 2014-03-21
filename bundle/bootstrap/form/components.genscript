@@ -16,16 +16,12 @@
 @block textbox
 
 @var html <<<
-<div class="controls">
-  <input type="text" id="{{ id }}" value="{{ value }}"
+  <input type="text" id="{{ id }}" class="form-control" value="{{ value }}"
   {% for at_name, at_value in attributes %}
     {{ at_name }}="{{ at_value }}"
   {% endfor %}
  />
-</div>
 >>>
-
-@var javascript alert('{id}');
 
 @end
 
@@ -35,11 +31,9 @@
 @block checkbox
 
 @var html <<<
-<div class="controls">
-<label class="checkbox">
-  <input
-    type="checkbox"
-    id="{{ id }}"
+<div class="checkbox">
+<label>
+  <input type="checkbox" id="{{ id }}"
     {% for at_name, at_value in attributes %}
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
@@ -61,21 +55,15 @@
 @block checkgroup
 
 @var html <<<
-<div class="controls">
 {% for i, item in items %}
-<label class="checkbox{% if inline == "true" %} inline{% endif %}">
-  <input
-      type="checkbox"
-      name="{{ item['name'] }}"
-      value="{{ item['value'] }}"
+<label class="checkbox{% if inline == "true" %}-inline{% endif %}">
+  <input type="checkbox" name="{{ item['name'] }}" value="{{ item['value'] }}"
       {% if item['value'] in value %}
-        checked="checked"
-      {% endif %}
-  >
+       checked="checked"
+      {% endif %}>
   {{ item['label'] }}
 </label>
 {% endfor %}
-</div>
 >>>
 
 @end
@@ -86,9 +74,8 @@
 @block radiogroup
 
 @var html <<<
-<div class="controls">
 {% for item in items %}
-<label class="radio{% if inline == "true" %} inline{% endif %}">
+<label class="radio{% if inline == "true" %}-inline{% endif %}">
   <input
     type="radio"
     name="{{ attributes['name'] }}"
@@ -100,7 +87,6 @@
   {{ item['label'] }}
 </label>
 {% endfor %}
-</div>
 >>>
 
 @end
@@ -122,8 +108,8 @@ ss
 @block select
 
 @var html <<<
-<div class="controls">
   <select
+    class="form-control"
     id="{{ id }}"
     {% for at_name, at_value in attributes %}
       {{ at_name }}="{{ at_value }}"
@@ -144,7 +130,6 @@ ss
     >{{ item['label'] }}</option>
     {% endfor %}
   </select>
-</div>
 >>>
 
 @end
@@ -155,10 +140,9 @@ ss
 @block flipswitch
 
 @var html <<<
-<div class="controls">
   <select
     id="{{ id }}"
-    class="span1"
+    class="form-control"
     {% for at_name, at_value in attributes %}
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
@@ -178,7 +162,6 @@ ss
     >{{ item['label'] }}</option>
     {% endfor %}
   </select>
-</div>
 >>>
 
 @end
@@ -189,17 +172,13 @@ ss
 @block textarea
 
 @var html <<<
-<div class="controls">
 <textarea
   id="{{ id }}"
-  class="input-xlarge"
+  class="form-control"
   {% for at_name, at_value in attributes %}
     {{ at_name }}="{{ at_value }}"
   {% endfor %}
->
-{{ value }}
-</textarea>
-</div>
+>{{ value }}</textarea>
 >>>
 
 @end
@@ -219,9 +198,8 @@ ss
     {% endfor %}
     <tr colspan="2" align="center">
     {% for button in buttons %}
-    <td><button type="{{ button['type'] }}">{{ button['type'] }}</td>
+    <td>{{ button['source']['html'] | safe }}</td>
     {% endfor %}
-    <td><button type="reset">Reset</td>
     </tr>
     </table>
 </form>
@@ -238,17 +216,15 @@ ss
 @block _default
 
 @var html <<<
-<div class="controls">
   <input
     type="{{ xtype }}"
     id="{{ id }}"
     value="{{ value }}"
-    class="input-xlarge"
+    class="form-control"
     {% for at_name, at_value in attributes %}
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
   />
-</div>
 >>>
 
 @end

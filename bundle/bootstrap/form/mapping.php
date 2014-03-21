@@ -18,7 +18,7 @@ return array(
                     elseif ($widget->type == 'password')
                         return 'password';
                     else
-                        return 'text';
+                        return 'textbox';
                 }
             )
         ),

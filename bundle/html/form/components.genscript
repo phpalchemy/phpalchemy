@@ -187,6 +187,21 @@
 @end
 
 /*
+ * Button html widget
+ */
+@block button
+
+@var html <<<
+{% if type == 'link' %}
+<a href="{{ url }}" target="{{ target }}">{{ label }}</a>
+{% else %}
+<button type="{{ type }}" target="{{ target }}" class="btn{% if type=='submit' %} btn-primary{% else %} btn-default{% endif %}">{{ label }}</button>
+{% endif %}
+>>>
+
+@end
+
+/*
  * Form html widget
  */
 @block form
@@ -201,9 +216,8 @@
         {% endfor %}
         <tr colspan="2" align="center">
             {% for button in buttons %}
-            <td><button type="{{ button['type'] }}">{{ button['type'] }}</td>
+            <td>{{ button['source']['html'] | safe }}</td>
             {% endfor %}
-            <td><button type="reset">Reset</td>
         </tr>
     </table>
 </form>

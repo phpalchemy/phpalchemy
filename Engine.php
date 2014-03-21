@@ -159,7 +159,7 @@ class Engine
         $this->prepare();
 
         $widgestWithoutIdCounter = 0;
-        $elementItems = array();
+
 
         /** @var \Alchemy\Component\UI\Element\Form $element */
         $element = $this->reader->getElement();
@@ -170,8 +170,9 @@ class Engine
 
         $subElements = $element->getSubElements();
         $elementInfo = is_null($this->mapping) ? $element->getInfo() : $this->mapElementInformation($element);
-
+        //var_dump($subElements); die;
         foreach ($subElements as $subElementType => $subElement) {
+            $elementItems = array();
             foreach ($subElement as $widget) {
                 if ($widget->getId() === '') {
                     if ($widget->name === '') {
@@ -223,7 +224,8 @@ class Engine
 
             $elementInfo[$subElementType] = $elementItems;
         }
-
+        //echo "<pre>";
+        //print_r($elementInfo);die;
         $generated = $this->parser->generate(
             $element->getXtype(),
             $elementInfo
