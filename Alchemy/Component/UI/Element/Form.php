@@ -1,7 +1,7 @@
 <?php
 namespace Alchemy\Component\UI\Element;
 
-use Alchemy\Component\UI\Element\WidgetInterface;
+use \Alchemy\Component\UI\Element\Form\Widget\Button;
 
 /**
  * Class Form
@@ -15,7 +15,7 @@ use Alchemy\Component\UI\Element\WidgetInterface;
  */
 class Form extends Element
 {
-    public $width = '250px';
+    public $width = '';
     public $action = '';
     public $method = 'post';
     public $title = '';
@@ -46,6 +46,7 @@ class Form extends Element
     {
         $subElements = array();
         $items = array();
+        $buttons = array();
 
         foreach ($this->getItems() as $itemData) {
             $itemClass = 'Alchemy\Component\UI\Element\Form\Widget\\' . ucfirst($itemData["xtype"]);
@@ -53,9 +54,14 @@ class Form extends Element
             $items[] = new $itemClass($itemData);
         }
 
-        $subElements["items"] = $items;
+        foreach ($this->getButtons() as $buttonData) {
+            $buttons[] = new Button($buttonData);
+        }
 
-        //var_dump($subElements); die;
+        $subElements["items"] = $items;
+        $subElements["buttons"] = $buttons;
+        $this->items = $items;
+        $this->buttons = $buttons;
 
         return $subElements;
     }
