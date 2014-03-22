@@ -15,7 +15,24 @@ interface ViewInterface
     public function getCharset();
     public function assign($name, $value);
     public function get($name);
+
+    /**
+     * @return string parsed template output
+     */
     public function getOutput();
+
+    /**
+     * Render Parsed Template
+     * @return string
+     */
     public function render();
+
+    /**
+     * Sets UI Element Content
+     * @param string $elementId
+     * @param string $elementContent
+     * @return mixed
+     */
+    public function setUiElement($elementId, $elementContent);
 }
 
