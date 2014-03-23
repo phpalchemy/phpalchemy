@@ -44,6 +44,10 @@
 $(document).ready(function() {
     {% if dataSourceUri %}
     $('#{{ id }}').dataTable({
+        {% if serverSide %}
+        "processing": true,
+        "serverSide": true,
+        {% endif %}
         "ajax": "{{ dataSourceUri }}"
         {% if dataSourceType == 'object' %}
         , columns: [
