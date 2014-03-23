@@ -1,7 +1,7 @@
 datatable:
   id: table1
   title: Test Datatable
-  #data_source_uri: data-proxy.php
+  data_source_uri: data-proxy.php
 
   filters:
     - {id: name, type: text, placeholder: Name}
@@ -16,6 +16,8 @@ datatable:
 
   columns:
     - {id: name, label: Name}
-    - {id: lastname, label: Lastname}
-    - {id: options, label: Options}
-
+    - {id: position, label: Position}
+    - {id: salary, label: Salary}
+    - {id: start_date, label: Start Date}
+    - {id: office, label: Office}
+    - {id: extn, label: Ext. Num.}

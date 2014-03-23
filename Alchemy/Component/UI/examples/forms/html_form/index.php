@@ -1,11 +1,11 @@
 <?php
 
-include "../boot.php";
+include "../../boot.php";
 
 $engine = new Alchemy\Component\UI\Engine(new Alchemy\Component\UI\ReaderFactory(), new Alchemy\Component\UI\Parser);
 $data = empty($_POST) ? array() : $_POST;
 
-$engine->setMetaFile("test_form1.yaml");
+$engine->setMetaFile("form2.yaml");
 $engine->setTargetBundle("html");
 $element = $engine->build($data);
 
