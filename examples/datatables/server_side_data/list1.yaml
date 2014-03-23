@@ -1,0 +1,25 @@
+datatable:
+  id: table1
+  title: Test Datatable
+  data_source_uri: data-proxy.php
+  data_source_type: object
+  server_side: true
+
+  filters:
+    - {id: name, type: text, placeholder: Name}
+    - {id: lastname, type: text, placeholder: Lastname}
+    -
+      id: status,
+      type: select,
+      placeholder: Select Status
+      data:
+        - {id: 0, value: Disabled}
+        - {id: 1, value: Enabled}
+
+  columns:
+    - {id: name, label: Name}
+    - {id: position, label: Position}
+    - {id: salary, label: Salary}
+    - {id: start_date, label: Start Date}
+    - {id: office, label: Office}
+    - {id: extn, label: Ext. Num.}
