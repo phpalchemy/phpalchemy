@@ -18,25 +18,25 @@
 
 @var html <<<
   <table cellpadding="0" cellspacing="0" border="0" class="display" id="{{ id }}" width="100%">
-  	<thead>
-  		<tr>
-  		    {% for i,column in columns%}
-  			<th id="{{ column['id'] }}">{{ column['label'] }}</th>
-  			{% endfor %}
-  		</tr>
-  	</thead>
-  	<tbody>
-  	    {% if data %}
-  	    {% for i,row in data %}
-  		<tr>
-  		    {% for value in row %}
-  			<td>{{ value|safe }}</td>
-  			{% endfor %}
-  		</tr>
-  		{% endfor %}
-  		{% endif %}
-  	</tbody>
-  	<tfoot></tfoot>
+      <thead>
+          <tr>
+              {% for i,column in columns%}
+              <th id="{{ column['id'] }}">{{ column['label'] }}</th>
+              {% endfor %}
+          </tr>
+      </thead>
+      <tbody>
+          {% if data && !dataSourceUri %}
+          {% for i,row in data %}
+          <tr>
+              {% for value in row %}
+              <td>{{ value|safe }}</td>
+              {% endfor %}
+          </tr>
+          {% endfor %}
+          {% endif %}
+      </tbody>
+      <tfoot></tfoot>
   </table>
 >>>
 
@@ -44,8 +44,12 @@
 $(document).ready(function() {
     {% if dataSourceUri %}
     $('#{{ id }}').dataTable({
-        "bProcessing": true,
-        "sAjaxSource": "{{ dataSourceUri }}"
+        "ajax": "{{ dataSourceUri }}"
+        {% if dataSourceType == 'object' %}
+        , columns: [
+            {% for i,column in columns%}{% if i != 0%},{% endif %}{"data": "{{ column['id'] }}"}{% endfor %}
+        ]
+        {% endif %}
     });
     {% else %}
     $('#{{ id }}').dataTable();

@@ -16,6 +16,7 @@ class Datatable extends Element
     protected $xtype = 'datatable';
     protected $title = "";
     protected $dataSourceUri = "";
+    protected $dataSourceType = "array";
     protected $columns = array();
     protected $data = array();
 
@@ -65,6 +66,22 @@ class Datatable extends Element
     public function getDataSourceUri()
     {
         return $this->dataSourceUri;
+    }
+
+    /**
+     * @param string $dataSourceType
+     */
+    public function setDataSourceType($dataSourceType)
+    {
+        $this->dataSourceType = $dataSourceType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDataSourceType()
+    {
+        return $this->dataSourceType;
     }
 
     /**
