@@ -1,5 +1,5 @@
 <?php
-namespace Alchemy\Util\String;
+namespace Alchemy\Util;
 
 /**
  * Class String
@@ -7,7 +7,7 @@ namespace Alchemy\Util\String;
  * @author Erik Amaru Ortiz <aortiz.erik@gmail.com
  * @copyright Copyright 2014 Erik Amaru Ortiz
  * @license http://www.opensource.org/licenses/mit-license.php MIT License
- * @package Alchemy\Util\String
+ * @package Alchemy\Util
  */
 class String
 {
