@@ -79,6 +79,7 @@ class AssetExtension implements \Twig_ExtensionInterface
         return array(
             'asset' => new \Twig_Function_Method($this, 'assetFn'),
             'form' => new \Twig_Function_Method($this, 'formFn'),
+            'dataTable' => new \Twig_Function_Method($this, 'dataTableFn')
         );
     }
 
@@ -137,6 +138,15 @@ class AssetExtension implements \Twig_ExtensionInterface
         }
 
         return $this->uiElements[$formId];
+    }
+
+    public function dataTableFn($tableId)
+    {
+        if (! array_key_exists($tableId, $this->uiElements)) {
+            throw new \Exception("Error: DataTable with id: $tableId does not exist!");
+        }
+
+        return $this->uiElements[$tableId];
     }
 }
 

@@ -371,10 +371,11 @@ class Kernel implements KernelInterface
     /**
      * This method handle a Meta-UI
      *
-     * @param  array         $data       data for view object
-     * @param  Annotation    $annotation Annotation object containing the information of @ServeUi annotation
-     * @param  ViewInterface $targetView A existent view object  (is was defined previously)
-     * @param  Request       $request    Request object containing the current request
+     * @param  array $data data for view object
+     * @param  \Alchemy\Annotation\Annotation $annotation Annotation object containing the information of @ServeUi annotation
+     * @param  \Alchemy\Mvc\View $targetView A existent view object  (is was defined previously)
+     * @param  \Alchemy\Component\Http\Request $request Request object containing the current request
+     * @return \Alchemy\Mvc\ViewInterface
      */
     protected function handleMetaUi(array $data, $annotation, $targetView, Request $request = null)
     {
@@ -426,20 +427,34 @@ class Kernel implements KernelInterface
             $element->setId($annotation->id);
         }
 
-        $filename = empty($targetView) ? 'form_page' : 'form';
-        $template = $filename;
+        $elementType = $element->getXtype();
+        $elementId = $element->getId();
+        $elementCollection = new \StdClass();
+        $elementCollection->$elementId = $element;
 
-        // creating a new view object
-        $view = $this->createView($template, $data);
-        $view->assign('form', $element);
+        $targetView->assign($elementType, $elementCollection);
 
-        // if the target view was not defined before return the new view object created.
-        if (empty($targetView)) {
-            return $view;
+        $template = empty($targetView) ? $element->getXtype() . '_page' : $element->getXtype();
+
+        //var_dump($template, file_exists($template), $this->config->get('templating.default_engine'));
+        try {
+            // creating a new view object
+            $view = $this->createView($template, $data);
+            $view->assign($element->getXtype(), $element);
+
+            // if the target view was not defined before return the new view object created.
+            if (empty($targetView)) {
+                return $view;
+            }
+
+            // a target view exists, just set the generated ui to target view
+            $targetView->setUiElement($element->getId(), $view->getOutput());
+        } catch (\Exception $e) {
+            // skip exception for template not found
+            if ($e->getCode() !== 404) {
+                throw $e;
+            }
         }
-
-        // a target view exists, just set the generated ui to target view
-        $targetView->setUiElement($element->getId(), $view->getOutput());
 
         return $targetView;
     }
@@ -447,11 +462,12 @@ class Kernel implements KernelInterface
     /**
      * handle the view layer
      *
-     * @param  string     $class      current requested controller class
-     * @param  string     $method     current requested cotroller method or action
-     * @param  array      $data       array containing all data to be assigned to view
-     * @param  Annotation $annotation annotation object containig information about for view object
-     * @return ViewInterface $view    The create dview object
+     * @param  string $class current requested controller class
+     * @param  string $method current requested controller method or action
+     * @param  array $data array containing all data to be assigned to view
+     * @param  \Alchemy\Annotation\Annotation $annotation object containing information about view object
+     * @throws \Exception
+     * @return \Alchemy\Mvc\ViewInterface $view The create view object
      */
     protected function handleView($class, $method, $data, $annotation)
     {
@@ -529,9 +545,11 @@ class Kernel implements KernelInterface
      * Create a view object for a determinated engine.
      *
      * @param  string $template view template filename
-     * @param  array  $data     array containing view data
-     * @param  string $engine   view engine name
-     * @return ViewInterface $view created view object
+     * @param  array $data array containing view data
+     * @param  string $engine view engine name
+     * @throws \RuntimeException
+     * @throws \Exception
+     * @return \Alchemy\Mvc\ViewInterface $view created view object
      */
     protected function createView($template, array $data, $engine = '')
     {
@@ -606,7 +624,7 @@ class Kernel implements KernelInterface
             // if absolute path was given
         } else {
             // file doesn't exist, throw error
-            throw new \Exception("Error: File Not Found: template file doesn't exist: '{$conf->template}'");
+            throw new \RuntimeException("Error: File Not Found: template file doesn't exist: '{$conf->template}'", 404);
         }
 
         // composing the view class string
