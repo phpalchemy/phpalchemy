@@ -30,13 +30,12 @@ class PropelServiceProvider implements ServiceProviderInterface
 
     public function register(Application $app)
     {
-        $app["propel"] = $app->share(function() use ($app) {
+        $app["propel"] = $app->protect(function() use ($app) {
             if (! class_exists('\Propel\Runtime\Propel')) {
                 throw new \Exception("Can't register Propel, it is not installed or not loaded!");
             }
 
             $this->dataSourceName = $app["config"]->get("app.namespace");
-            //var_dump("->", $this->dataSourceName); die;
 
             $this->configure($app);
             $this->initPropel();
@@ -81,8 +80,9 @@ class PropelServiceProvider implements ServiceProviderInterface
         $serviceContainer = Propel::getServiceContainer();
         $serviceContainer->setAdapterClass($this->dataSourceName, $this->config["engine"]);
         $manager = new ConnectionManagerSingle();
-        $manager->setConfiguration(array (
-            "dsn" => $this->config["engine"].":host=".$this->config["host"].";dbname=".$this->config["dbname"],
+        $port = empty($this->config["port"])? "": ";port=".$this->config["port"];
+        $manager->setConfiguration(array(
+            "dsn" => $this->config["engine"].":host=".$this->config["host"].";dbname=".$this->config["dbname"].$port,
             "user"     => $this->config["user"],
             "password" => $this->config["password"],
         ));

@@ -26,7 +26,7 @@ use Alchemy\Component\UI\ReaderFactory;
 use Alchemy\Component\UI\Engine;
 use Alchemy\Component\WebAssets;
 use Alchemy\Component\Yaml\Yaml;
-//use Alchemy\Exception\Handler;
+use Alchemy\Exception\Handler as ExceptionHandler;
 use Alchemy\Kernel\EventListener;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Kernel\Kernel;
@@ -43,7 +43,7 @@ use Alchemy\Mvc\ControllerResolver;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @package   phpalchemy
  */
-class Application extends \DiContainer implements KernelInterface, EventSubscriberInterface
+class Application extends DiContainer implements KernelInterface, EventSubscriberInterface
 {
     public $appDir = '';
     protected $providers = array();
@@ -72,7 +72,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
 
         $this['logger'] = null;
 
-        $this['config'] = $this->share(function () use ($conf, $app){
+        $this['config'] = function() use ($conf, $app){
             $config = new Config();
             $config->load($conf);
 
@@ -85,7 +85,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             }
 
             return $config;
-        });
+        };
 
         // load configuration ini files
         $this->loadAppConfigurationFiles();
@@ -93,20 +93,20 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         // apply configurated php settings
         $this->applyPhpSettings();
 
-        $this['autoloader'] = $this->share(function () {
+        $this['autoloader'] = function() {
             return new ClassLoader();
-        });
+        };
 
-        $this['yaml'] = $this->share(function () {
+        $this['yaml'] = function () {
             return new Yaml();
-        });
+        };
 
-        $this['annotation'] = $this->share(function () use ($app) {
+        $this['annotation'] = function () use ($app) {
             return new NotojReader();
             //return new Annotations($app['config']);
-        });
+        };
 
-        $this['mapper'] = $this->share(function () use ($app) {
+        $this['mapper'] = function () use ($app) {
             $config = $app['config'];
             $routesDir = $config->get('app.root_dir') . DS .'config' . DS;
 
@@ -137,13 +137,13 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             // );
 
             return $mapper;
-        });
+        };
 
         //TODO $this['exception_handler'] = $this->share(function () {
         //     return new ExceptionHandler();
         // });
 
-        $this['dispatcher'] = $this->share(function () use ($app) {
+        $this['dispatcher'] = function () use ($app) {
             $dispatcher = new EventDispatcher();
             $dispatcher->addSubscriber($app);
 
@@ -152,34 +152,34 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             //TODO $dispatcher->addSubscriber(new LocaleListener($app['locale'], $urlMatcher));
 
             return $dispatcher;
-        });
+        };
 
-        $this['resolver'] = $this->share(function () use ($app) {
+        $this['resolver'] = function () use ($app) {
             return new ControllerResolver($app, $app['logger']);
-        });
+        };
 
-        $this['ui_reader_factory'] = $this->share(function () use ($app) {
+        $this['ui_reader_factory'] = function () use ($app) {
             return new ReaderFactory();
-        });
+        };
 
-        $this['ui_parser'] = $this->share(function () use ($app) {
+        $this['ui_parser'] = function () use ($app) {
             return new Parser();
-        });
+        };
 
         /** @var \Alchemy\Component\UI\Engine */
-        $this['ui_engine'] = $this->share(function () use ($app) {
+        $this['ui_engine'] = function () use ($app) {
             return new Engine(
                 $app['ui_reader_factory'],
                 $app['ui_parser']
             );
-        });
+        };
 
-        $this['assetsHandler'] = $this->share(function () use ($app) {
+        $this['assetsHandler'] = function () use ($app) {
             return new WebAssets\Bundle();
-        });
+        };
 
         /** @var \Alchemy\Kernel\Kernel */
-        $this['kernel'] = $this->share(function () use ($app) {
+        $this['kernel'] = function () use ($app) {
             return new Kernel(
                 $app['dispatcher'],
                 $app['mapper'],
@@ -189,7 +189,7 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
                 $app['ui_engine'],
                 $app['assetsHandler']
             );
-        });
+        };
 
         // registering the aplication namespace to SPL ClassLoader
         $this['autoloader']->register($this['config']->get('app.name'), $this['config']->get('app.app_root_dir'));
@@ -202,26 +202,9 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
             );
         }
 
-        $this['exception_handler'] = $this->share(function() use ($app) {
-            return new ExceptionHandler;
-        });
-
-        $this->protect('logger');
-        $this->protect('config');
-        $this->protect('autoloader');
-        $this->protect('yaml');
-        $this->protect('annotation');
-        $this->protect('mapper');
-        $this->protect('logger');
-        $this->protect('dispatcher');
-        $this->protect('resolver');
-        $this->protect('ui_reader_factory');
-        $this->protect('ui_parser');
-        $this->protect('ui_engine');
-        $this->protect('resolver');
-        $this->protect('kernel');
-        $this->protect('autoloader');
-        $this->protect('exception_handler');
+        $this['exception_handler'] = function() use ($app) {
+            return new ExceptionHandler();
+        };
     }
 
     /**

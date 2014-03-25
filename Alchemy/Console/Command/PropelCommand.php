@@ -59,9 +59,37 @@ class PropelCommand extends Command
         $bin = $this->config->get("app.root_dir") . "/vendor/propel/propel/bin/propel";
 
         $inputDir = $this->config->get("propel.input_dir", $this->config->get("app.database_schema_dir"));
-        $outputClassDir = $this->config->get("propel.class_dir", $this->config->get("app.model_dir"));
         $outputSchemaDir = $this->config->get("propel.schema_dir", $this->config->get("app.database_schema_dir"));
         $dbEngineConf = $this->config->get("database.engine", "");
+
+        if (! file_exists($outputSchemaDir . "/schema.xml")) {
+            throw new \RuntimeException(sprintf(
+                "Propel Schema file is missing!" . PHP_EOL .
+                "In directory: %s", $outputSchemaDir
+            ));
+        }
+
+        libxml_use_internal_errors(true);
+        //$dom = simplexml_load_file($outputSchemaDir . "/schema.xml");
+        $dom = new \DOMDocument();
+        //var_dump($dom->getElementsByTagName('database')); die;
+        if (! $dom->load($outputSchemaDir . "/schema.xml") || ! ($root = $dom->getElementsByTagName('database'))) {
+            $errors = libxml_get_errors();
+            $errorMessage = "";
+
+            foreach ($errors as $error) {
+                echo self::display_xml_error($error, file_get_contents($outputSchemaDir . "/schema.xml"));
+            }
+
+            libxml_clear_errors();
+
+            throw new \RuntimeException("Can't parse schema.xml file, it contains errors!" . PHP_EOL . $errorMessage);
+        }
+
+        $namespace = $root->item(0)->getAttribute("namespace");
+        $defaultClassDir = empty($namespace)? $this->config->get("app.model_dir"): $this->config->get("app.app_root_dir");
+        $outputClassDir = $this->config->get("propel.class_dir", $defaultClassDir);
+
 
         //accepted values for db engine
         $dbEngines = array("mysql", "pgsql", "mssql", "oracle", "sqlite");
@@ -108,6 +136,34 @@ class PropelCommand extends Command
         //var_dump($pipes);
 
         echo PHP_EOL;
+    }
+
+    public static function display_xml_error($error, $xml)
+    {
+        $return  = $xml[$error->line - 1] . "\n";
+        $return .= str_repeat('-', $error->column) . "^\n";
+
+        switch ($error->level) {
+            case LIBXML_ERR_WARNING:
+                $return .= "Warning $error->code: ";
+                break;
+            case LIBXML_ERR_ERROR:
+                $return .= "Error $error->code: ";
+                break;
+            case LIBXML_ERR_FATAL:
+                $return .= "Fatal Error $error->code: ";
+                break;
+        }
+
+        $return .= trim($error->message) .
+            "\n  Line: $error->line" .
+            "\n  Column: $error->column";
+
+        if ($error->file) {
+            $return .= "\n  File: $error->file";
+        }
+
+        return "$return\n\n---\n\n";
     }
 }
 
