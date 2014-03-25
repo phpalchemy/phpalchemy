@@ -16,6 +16,7 @@ use Alchemy\Annotation\Reader\Adapter\NotojReader;
 use Alchemy\Component\ClassLoader\ClassLoader;
 use Alchemy\Component\EventDispatcher\EventDispatcher;
 use Alchemy\Component\EventDispatcher\EventSubscriberInterface;
+use Alchemy\Service\ServiceProviderInterface;
 use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
 use Alchemy\Component\Routing\Mapper;
@@ -45,6 +46,7 @@ use Alchemy\Mvc\ControllerResolver;
 class Application extends \DiContainer implements KernelInterface, EventSubscriberInterface
 {
     public $appDir = '';
+    protected $providers = array();
 
     public function setAppDir($appDir)
     {
@@ -237,6 +239,11 @@ class Application extends \DiContainer implements KernelInterface, EventSubscrib
         foreach ($values as $key => $value) {
             $this[$key] = $value;
         }
+    }
+
+    public function getServiceProviders()
+    {
+        return $this->providers;
     }
 
     /**

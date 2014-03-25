@@ -143,6 +143,15 @@ class Kernel implements KernelInterface
         $this->request = $request;
 
         try {
+            // init services providers
+            /** @var \Alchemy\Service\ServiceProviderInterface $providers */
+            $providers = $app->getServiceProviders();
+
+            foreach ($providers as $provider) {
+                $provider->init($app);
+            }
+
+
             /*
              * "EVENT" KernelEvents::REQUEST using GetResponse Event
              *

@@ -11,9 +11,10 @@
         }
     ],
     "require": {
-        "phpalchemy/haanga"   : "1.0.4.*",
-        "crodas/Notoj"    : "0.1.*",
-        "symfony/console" : "2.2.*"
+        "phpalchemy/haanga" : "1.0.4.*",
+        "crodas/Notoj" : "0.1.*",
+        "symfony/console" : "2.2.*",
+        "pimple/pimple" : "2.0.0"
     },
     "minimum-stability": "stable",
     "extra": {

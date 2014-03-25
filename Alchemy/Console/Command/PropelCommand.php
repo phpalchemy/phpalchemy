@@ -59,7 +59,7 @@ class PropelCommand extends Command
         $bin = $this->config->get("app.root_dir") . "/vendor/propel/propel/bin/propel";
 
         $inputDir = $this->config->get("propel.input_dir", $this->config->get("app.database_schema_dir"));
-        $outputClassDir = $this->config->get("propel.output_dir", $this->config->get("app.model_dir"));
+        $outputClassDir = $this->config->get("propel.class_dir", $this->config->get("app.model_dir"));
         $outputSchemaDir = $this->config->get("propel.schema_dir", $this->config->get("app.database_schema_dir"));
         $dbEngineConf = $this->config->get("database.engine", "");
 

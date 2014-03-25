@@ -2,7 +2,6 @@
 namespace Alchemy\Service;
 
 use Alchemy\Application;
-use Alchemy\ServiceProviderInterface;
 
 class ActiveRecordServiceProvider implements ServiceProviderInterface
 {

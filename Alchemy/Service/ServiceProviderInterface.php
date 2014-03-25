@@ -1,5 +1,7 @@
 <?php
-namespace Alchemy;
+namespace Alchemy\Service;
+
+use Alchemy\Application;
 
 /**
  * Interface that must implement all service providers.
