@@ -39,18 +39,14 @@ class CerberusCommand extends Command
     protected function configure()
     {
         $this->setName('cerberus:init')
-        ->setDescription('Init Cerberus database schema.')
+        ->setDescription('Helper for Cerberus, execute cerberus:init option')
         ->setDefinition(array(
             new InputOption(
-                'engine', 'mysql', InputOption::VALUE_OPTIONAL,
-                'Data Base Engine', ''
-            ),
-//            new InputOption(
-//                'v', '', InputOption::VALUE_OPTIONAL,
-//                'Verbose mode', ''
-//            ),
+                'init-db', 'mysql', InputOption::VALUE_OPTIONAL,
+                'Init Cerberus database', ''
+            )
         ))
-        ->setHelp('Cerberus Init');
+        ->setHelp('Cerberus Init DB Command');
     }
 
     /**
@@ -58,6 +54,8 @@ class CerberusCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        //$initDb = $input->getOption('init-db');
+
         $vendorDir = $this->config->get("app.root_dir") . "/vendor";
         $bin = $this->config->get("app.root_dir") . "/vendor/phpalchemy/cerberus/bin/cerberus";
 
@@ -77,18 +75,16 @@ class CerberusCommand extends Command
 
         $config = CerberusServiceProvider::configure($config);
 
-        $output->writeln("PhpAlchemy Helper for Cerberus RBAC/Auth. Component - ver. 1.0" . PHP_EOL);
-        echo PHP_EOL;
+        $output->writeln("PhpAlchemy Helper for Cerberus RBAC/Auth. Component - ver. 1.0");
 
         $port = isset($config["db-port"]) ? "--db-port=" . $config["db-port"] : "";
 
-        $command = sprintf("%s build --db-engine=%s --db-name=%s --db-host=\"%s\" --db-user=%s --db-password=%s %s",
+        $command = sprintf("%s build:db --db-engine=%s --db-name=%s --db-host=\"%s\" --db-user=%s --db-password=%s %s",
             $bin, $config["db-engine"], $config["db-name"], $config["db-host"], $config["db-user"], $config["db-password"], $port);
 
-        system($command);
-        $output->writeln("<info>DONE</info>");
-
-        echo PHP_EOL;
+        //system($command);
+        passthru($command);
+        //$output->writeln("<info>DONE</info>");
     }
 }
 
