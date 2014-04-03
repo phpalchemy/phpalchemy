@@ -72,7 +72,7 @@ class Application extends DiContainer implements KernelInterface, EventSubscribe
 
         $this['logger'] = null;
 
-        $this['config'] = function() use ($conf, $app){
+        $this['config'] = function() use ($conf, $app) {
             $config = new Config();
             $config->load($conf);
 
