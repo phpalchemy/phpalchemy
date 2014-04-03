@@ -19,7 +19,7 @@ use Alchemy\Config;
  * @version $Revision$
  * @author  Erik Amaru Ortiz <aortiz.erik@gmail.com>
  */
-class PropelCommand extends Command
+class PropelBuildCommand extends Command
 {
     protected $config = null;
 
@@ -36,19 +36,15 @@ class PropelCommand extends Command
      */
     protected function configure()
     {
-        $this->setName('propel')
-        ->setDescription('Helper for Propel, build fast the model classes and sql schema.')
+        $this->setName('propel:build')
+        ->setDescription('Fast build of model classes and sql schema.')
         ->setDefinition(array(
             new InputOption(
                 'engine', 'mysql', InputOption::VALUE_OPTIONAL,
                 'Data Base Engine', ''
-            ),
-//            new InputOption(
-//                'v', '', InputOption::VALUE_OPTIONAL,
-//                'Verbose mode', ''
-//            ),
+            )
         ))
-        ->setHelp('Propel ORM Helper');
+        ->setHelp('Propel ORM Helper BUILD');
     }
 
     /**
@@ -70,9 +66,8 @@ class PropelCommand extends Command
         }
 
         libxml_use_internal_errors(true);
-        //$dom = simplexml_load_file($outputSchemaDir . "/schema.xml");
         $dom = new \DOMDocument();
-        //var_dump($dom->getElementsByTagName('database')); die;
+
         if (! $dom->load($outputSchemaDir . "/schema.xml") || ! ($root = $dom->getElementsByTagName('database'))) {
             $errors = libxml_get_errors();
             $errorMessage = "";
@@ -117,23 +112,25 @@ class PropelCommand extends Command
         }
 
         $output->writeln("PhpAlchemy Helper for Propel2 ver. 1.0" . PHP_EOL);
-        $output->writeln("Propel input dir: " . $inputDir);
-        $output->writeln("Propel output class dir: " . $outputClassDir);
-        $output->writeln("Propel output sql dir: " . $outputSchemaDir);
+        $output->writeln("<comment>Directories:</comment>");
+
+        $output->writeln("       Input dir: " . $outputSchemaDir);
+        $output->writeln("Output class dir: " . $outputClassDir);
+        $output->writeln("  Sql output dir: " . $outputSchemaDir);
         echo PHP_EOL;
 
         $commands = array();
         $commands["model"] = sprintf("%s model:build --input-dir=%s --output-dir=%s", $bin, $inputDir, $outputClassDir);
         $commands["sql"] = sprintf("%s sql:build --input-dir=%s --output-dir=%s --platform=%s", $bin, $inputDir, $outputSchemaDir, $dbEngine);
 
+        $output->writeln("<comment>Execution:</comment>");
         foreach ($commands as $build => $command) {
-            $output->write(sprintf("- Building %s ... ", $build));
-            system($command);
-            $output->writeln("<info>DONE</info>");
-        }
 
-        //proc_open($command, array(STDIN, STDOUT, STDERR), $pipes);
-        //var_dump($pipes);
+            $output->write(sprintf(" %15s ... ", "Build $build"));
+            passthru($command, $stat);
+            $statMessage = $stat == 0 ? "<info>done</info>": "<error>failed</error>";
+            $output->writeln($statMessage);
+        }
 
         echo PHP_EOL;
     }
