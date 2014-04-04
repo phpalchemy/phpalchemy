@@ -58,10 +58,7 @@ class Route
         $this->setRequirements($requirements);
 
         $this->type = $type;
-        $this->parameters  = array();
         $this->resourcePath = $resourcePath;
-
-        $this->prepare();
     }
 
     public function setPattern($pattern)
@@ -142,6 +139,8 @@ class Route
 
     public function match($mixed)
     {
+        $this->prepare();
+
         $urlString = $mixed;
         $requestMethod = '';
 

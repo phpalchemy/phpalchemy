@@ -39,10 +39,98 @@ class Mapper
     public $sortRoutesEnabled = false;
 
     /**
+     * @var \Alchemy\Component\Yaml\Yaml|null
+     */
+    protected $yaml = null;
+
+    /**
+     * @var string
+     */
+    protected $cacheDir = "";
+    /**
+     * @var string
+     */
+    protected $cacheContent = "";
+
+    /**
+     * @param \Alchemy\Component\Yaml\Yaml|null $yaml
+     */
+    public function __construct(\Alchemy\Component\Yaml\Yaml $yaml = null)
+    {
+        if (! is_null($yaml)) {
+            $this->yaml = $yaml;
+        }
+    }
+
+    public function setCacheDir($cacheDir)
+    {
+        $this->cacheDir = rtrim($cacheDir, DIRECTORY_SEPARATOR);
+    }
+
+    public function getCacheDir()
+    {
+        return $this->cacheDir;
+    }
+
+    public function loadFrom($file)
+    {
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+        switch ($extension) {
+            case "yaml":
+            case "yml";
+                $filename = basename($file);
+
+                if (! empty($this->cacheDir) && $this->isCached($filename)) { // try load from cache
+                    $routesList = $this->getCached();
+                } else {
+                    if (! is_object($this->yaml)) {
+                        throw new \Exception("Yaml Parser library is not loaded");
+                    }
+
+                    $routesList = $this->yaml->load($file);
+
+                    if (! empty($this->cacheDir)) {
+                        $this->saveInCache($file, $routesList);
+                    }
+                }
+
+                foreach ($routesList as $routeData) {
+                    // validate route data
+                    if (! isset($routeData["pattern"])) {
+                        throw new \Exception("Invalid route definition, param: \"pattern\" is required.");
+                    }
+                    if (! is_string($routeData["pattern"])) {
+                        throw new \Exception("Invalid route definition, param: \"pattern\" must be a string.");
+                    }
+                    if (isset($routeData["defaults"]) && ! is_array($routeData["defaults"])) {
+                        throw new \Exception("Invalid route definition, param: \"defaults\" must be an array.");
+                    }
+                    if (isset($routeData["requirements"]) && ! is_array($routeData["requirements"])) {
+                        throw new \Exception("Invalid route definition, param: \"requirements\" must be an array.");
+                    }
+
+                    $route = new Route();
+                    $route->setPattern($routeData["pattern"]);
+
+                    if (array_key_exists("defaults", $routeData)) {
+                        $route->setDefaults($routeData["defaults"]);
+                    }
+                    if (array_key_exists("requirements", $routeData)) {
+                        $route->setRequirements($routeData["requirements"]);
+                    }
+
+                    $this->connect($routeData["pattern"], $route);
+                }
+                break;
+        }
+    }
+
+    /**
      * Enable sort routes before matching
      * @param  bool   $value boolean value to enable or not sort routes
      */
-    public function enableSortRoutes(bool $value)
+    public function enableSortRoutes($value)
     {
         $this->sortRoutesEnabled = $value;
     }
@@ -154,6 +242,59 @@ class Mapper
         $x = $a;
         $a = $b;
         $b = $x;
+    }
+
+    /**
+     * Verify is a file is cached
+     * @param $filename
+     * @return bool
+     */
+    protected function isCached($filename)
+    {
+        if (! empty($this->cacheDir)) {
+            return false;
+        }
+
+        $cacheFile = $this->cacheDir . DIRECTORY_SEPARATOR . $filename . ".cache";
+
+        if (file_exists($cacheFile)
+            && is_array($this->cacheContent = include($cacheFile))
+            && $this->cacheContent["_chk"] == filemtime($cacheFile)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get cached content
+     * @return string
+     */
+    protected function getCached()
+    {
+        return $this->cacheContent;
+    }
+
+    /**
+     * Save in cache
+     * @param $filename
+     * @return bool
+     */
+    protected function saveInCache($filename, $content)
+    {
+        if (empty($this->cacheDir) || ! is_dir($this->cacheDir) || ! is_writable($this->cacheDir)) {
+            return false;
+        }
+
+        $content["_chk"] = filemtime($filename);
+
+        file_put_contents(
+            $this->cacheDir . DIRECTORY_SEPARATOR . basename($filename) . ".cache",
+            "<?php return " . var_export($content, true) . ";"
+        );
+
+        return true;
     }
 }
 
