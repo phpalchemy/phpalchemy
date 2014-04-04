@@ -1,5 +1,5 @@
 {
-    "name": "phpalchemy/Yaml",
+    "name": "phpalchemy/yaml",
     "type": "library",
     "description": "PHP Yaml Parser",
     "keywords": ["yaml", "php", "parser"],
