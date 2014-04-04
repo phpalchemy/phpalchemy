@@ -1,0 +1,27 @@
+{
+    "name": "phpalchemy/http",
+    "type": "library",
+    "description": "PHP Alchemy Http Component",
+    "keywords": ["php http request response handler componenet phpalchemy"],
+    "homepage": "http://github.com/phpalchemy/Http",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Erik Amaru Ortiz",
+            "email": "aortiz.erik@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
+    "autoload": {
+        "psr-0": { "Alchemy\\Component\\Http\\": "" }
+    },
+    "target-dir": "Alchemy/Component/Http"
+}
