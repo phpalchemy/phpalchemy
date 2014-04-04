@@ -1,5 +1,5 @@
 {
-    "name": "phpalchemy/Http",
+    "name": "phpalchemy/http",
     "type": "library",
     "description": "PHP Alchemy Http Component",
     "keywords": ["php http request response handler componenet phpalchemy"],
