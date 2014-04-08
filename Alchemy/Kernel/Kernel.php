@@ -702,38 +702,15 @@ class Kernel implements KernelInterface
      */
     protected function prepareRequestParams(array $data)
     {
-        $params    = array();
-        $namespace = $this->config->get('app.namespace');
+        $params = array();
 
         foreach ($data as $listParams) {
             $params = array_merge($params, $listParams);
         }
 
-        // verify controller's name is underscored or not
-        if (strpos($params['_controller'], '_') === false) {
-            //just ensure first character to uppercase
-            $params['_controller'] = ucfirst($params['_controller']);
-        } else {
-            // camelize the controller's name (to camelCase)
-            $params['_controller'] = str_replace(
-                ' ', '', ucwords(str_replace('_', ' ', $params['_controller']))
-            );
-        }
-
-        // verify if action's name is underscored or not
-        if (strpos($params['_action'], '_') !== false) {
-            // camelize the action's name (to camelCase)
-            $tmp = str_replace(' ', '', ucwords(str_replace('_', ' ', $params['_action'])));
-            // this is to ensure first character to lowercase,
-            // because by php standard coding says function name should starts with lowercase
-            $params['_action'] = strtolower(substr($tmp, 0, 1)) . substr($tmp, 1);
-            unset($tmp);
-        }
-
-        // composing controller class & method real names
-        $params['_controllerClass']  = '\\'.$namespace.'\Controller\\'.$params['_controller'].'Controller';
-        $params['_controllerMethod'] = $params['_action'] . 'Action';
-        $params['_controller']       = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
+        $params['_controllerClass'] = $params['_controller'];
+        $params['_controllerMethod'] = $params['_action'];
+        $params['_controller'] = $params['_controllerClass'] . '::' . $params['_controllerMethod'];
 
         return $params;
     }
