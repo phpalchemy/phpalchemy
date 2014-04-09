@@ -9,7 +9,10 @@
  */
 namespace Alchemy\Kernel\Event;
 
+use Alchemy\Component\Http\Request;
 use Alchemy\Component\Http\Response;
+use Alchemy\Kernel\KernelInterface;
+use Alchemy\Application;
 
 /*
  * This Class is a adapted version of Symfony\Component\HttpKernel\Event\GetResponseEvent
@@ -38,14 +41,25 @@ class GetResponseEvent extends KernelEvent
 {
     /**
      * The response object
-     * @var Alchemy\Component\Http\Response
+     * @var \Alchemy\Component\Http\Response
      */
     private $response;
+    /**
+     * The running application
+     * @var \Alchemy\Application
+     */
+    private $app;
+
+    public function __construct(KernelInterface $kernel, Request $request, Application $app = null)
+    {
+        parent::__construct($kernel, $request);
+        $this->app = $app;
+    }
 
     /**
      * Returns the response object
      *
-     * @return Alchemy\Component\Http\Response
+     * @return \Alchemy\Component\Http\Response
      */
     public function getResponse()
     {
@@ -55,7 +69,7 @@ class GetResponseEvent extends KernelEvent
     /**
      * Sets a response and stops event propagation
      *
-     * @param Alchemy\Component\Http\Response $response
+     * @param \Alchemy\Component\Http\Response $response
      */
     public function setResponse(Response $response)
     {
@@ -72,6 +86,16 @@ class GetResponseEvent extends KernelEvent
     public function hasResponse()
     {
         return $this->response !== null;
+    }
+
+    /**
+     * Returns the request the kernel is currently processing
+     *
+     * @return \Alchemy\Application
+     */
+    public function getApplication()
+    {
+        return $this->app;
     }
 }
 

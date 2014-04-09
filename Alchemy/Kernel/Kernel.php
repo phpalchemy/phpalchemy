@@ -160,10 +160,11 @@ class Kernel implements KernelInterface
              * be registered outside framework logic (should be on application logic).
              */
             if ($this->dispatcher->hasListeners(KernelEvents::REQUEST)) {
-                $event = new GetResponseEvent($this, $request);
+                $event = new GetResponseEvent($this, $request, $app);
                 $this->dispatcher->dispatch(KernelEvents::REQUEST, $event);
 
                 if ($event->hasResponse()) {
+                    //var_dump($event->getResponse()); die("ee");
                     $event = new FilterResponseEvent($this, $request, $event->getResponse());
                     $this->dispatcher->dispatch(KernelEvents::RESPONSE, $event);
 
@@ -177,12 +178,6 @@ class Kernel implements KernelInterface
              * will be thrown.
              */
             $params = $this->mapper->match($request);
-            if (array_key_exists('_type', $params)) {
-                if ($params['_type'] == 'x-asset-request') {
-                    //$this->handleAssetRequest($params);
-                    //exit(0);
-                }
-            }
 
             $controllerName = $params['_controller'];
             $actionName = $params['_action'];
@@ -292,7 +287,7 @@ class Kernel implements KernelInterface
 
                 //"EVENT" VIEW dispatch all KernelEvents::VIEW events
                 if ($this->dispatcher->hasListeners(KernelEvents::VIEW)) {
-                    $event = new ViewEvent($this, $view, $request, $this->annotationReader);
+                    $event = new ViewEvent($this, $view, $request, $this->annotationReader, $app);
                     $this->dispatcher->dispatch(KernelEvents::VIEW, $event);
                     $view = $event->getView();
                 }

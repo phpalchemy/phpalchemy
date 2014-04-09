@@ -226,6 +226,7 @@ class Application extends DiContainer implements KernelInterface, EventSubscribe
         }
 
         $response = $this->handle($request);
+
         $response->send();
     }
 

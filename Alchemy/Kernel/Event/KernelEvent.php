@@ -12,16 +12,15 @@ class KernelEvent extends Event
 {
     /**
      * The kernel in which this event was thrown
-     * @var Alchemy\Component\Kernel\KernelInterface
+     * @var \Alchemy\Kernel\KernelInterface
      */
     private $kernel;
 
     /**
      * The request the kernel is currently processing
-     * @var Symfony\Component\HttpFoundation\Request
+     * @var \Alchemy\Component\Http\Request
      */
     private $request;
-
 
     public function __construct(KernelInterface $kernel, Request $request)
     {
@@ -32,7 +31,7 @@ class KernelEvent extends Event
     /**
      * Returns the kernel in which this event was thrown
      *
-     * @return Symfony\Component\HttpKernel\HttpKernelInterface
+     * @return \Alchemy\Kernel\KernelInterface
      */
     public function getKernel()
     {
@@ -42,7 +41,7 @@ class KernelEvent extends Event
     /**
      * Returns the request the kernel is currently processing
      *
-     * @return Symfony\Component\HttpFoundation\Request
+     * @return \Alchemy\Component\Http\Request
      */
     public function getRequest()
     {

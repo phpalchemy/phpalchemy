@@ -1,6 +1,7 @@
 <?php
 namespace Alchemy\Kernel\Event;
 
+use Alchemy\Application;
 use Alchemy\Kernel\KernelInterface;
 use Alchemy\Component\Http\Request;
 use Alchemy\Mvc\View;
@@ -14,12 +15,19 @@ class ViewEvent extends KernelEvent
      */
     protected $view = null;
     protected $annotationReader = null;
+    protected $app = null;
 
-    public function __construct(KernelInterface $kernel, View $view, Request $request, Reader $annotationReader)
+    public function __construct(KernelInterface $kernel, View $view, Request $request, Reader $annotationReader, Application $app = null)
     {
         parent::__construct($kernel, $request);
         $this->view = $view;
         $this->annotationReader = $annotationReader;
+        $this->app = $app;
+    }
+
+    public function getApp()
+    {
+        return $this->app;
     }
 
     public function getView()
