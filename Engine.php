@@ -165,6 +165,7 @@ class Engine
         $element = $this->reader->getElement();
 
         foreach ($data as $key => $val) {
+            if ($key == "id") continue;
             $element->setAttribute(self::toCamelCase($key), $val);
         }
 
