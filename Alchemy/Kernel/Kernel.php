@@ -178,12 +178,10 @@ class Kernel implements KernelInterface
              * will be thrown.
              */
             $params = $this->mapper->match($request);
-
-            $controllerName = $params['_controller'];
-            $actionName = $params['_action'];
+            $uriParams = $params["params"];
 
             // prepare request params.
-            $params = $this->prepareRequestParams(array($params, $request->query->all(), $request->request->all()));
+            $params = $this->prepareRequestParams(array($params["mapped"], $request->query->all(), $request->request->all()));
 
             // add prepared params to request as attributes.
             $request->attributes->add($params);
@@ -282,8 +280,9 @@ class Kernel implements KernelInterface
 
             // if there is a view adapter instance, get its contents and set to response content
             if (! empty($view)) {
-                $view->assign('_controller', $controllerName);
-                $view->assign('_action', $actionName);
+                foreach ($uriParams as $keyParam => $valParam) {
+                    $view->assign($keyParam, $valParam);
+                }
 
                 //"EVENT" VIEW dispatch all KernelEvents::VIEW events
                 if ($this->dispatcher->hasListeners(KernelEvents::VIEW)) {
