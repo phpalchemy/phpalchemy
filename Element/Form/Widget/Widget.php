@@ -18,6 +18,7 @@ abstract class Widget extends Element\Element implements Element\WidgetInterface
     protected $value = '';
     protected $xtype = '';
     protected $fieldLabel = '';
+    protected $hint = '';
 
     public function setValue($value)
     {
@@ -47,6 +48,16 @@ abstract class Widget extends Element\Element implements Element\WidgetInterface
     public function getFieldLabel()
     {
         return $this->fieldLabel;
+    }
+
+    public function setHint($hint)
+    {
+        $this->hint = $hint;
+    }
+
+    public function getHint()
+    {
+        return $this->hint;
     }
 
     public function prepare()
