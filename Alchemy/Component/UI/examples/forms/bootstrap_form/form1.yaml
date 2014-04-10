@@ -5,8 +5,9 @@ form:
     name: form1
     buttons:
         - {label: Save, type: submit}
+        - {label: "Save & Add other", url: /user/add}
         - {label: Reset, type: reset}
-        - {label: Cancel, type: link, url: "http://google.com", target: _blank}
+        - {label: Cancel, type: link, url: "/user/list", target: _blank}
     items:
         - textbox:
             name: textbox1

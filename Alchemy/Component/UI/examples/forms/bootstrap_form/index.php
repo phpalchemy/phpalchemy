@@ -33,7 +33,11 @@ $form = $engine->build($data);
     <a href="<?php echo $button->getUrl()?>" target="<?php echo $button->getTarget()?>"><?php echo $button->getLabel()?></a>
     <?php } else { ?>
     <button type="<?php echo $button->getType()?>"
-        class="btn <?php if($button->getType()=="submit") echo "btn-primary"; else echo "btn-default"?>">
+        class="btn <?php if($button->getType()=="submit") echo "btn-primary"; else echo "btn-default"?>"
+        <?php if ($button->getUrl() != "") { ?>
+        onclick="location.href='<?php echo $button->getUrl();?>'"
+        <?php } ?>
+    >
         <?php echo $button->getLabel()?>
     </button>
     <?php }} ?>
