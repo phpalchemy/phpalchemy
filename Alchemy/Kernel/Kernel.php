@@ -423,8 +423,8 @@ class Kernel implements KernelInterface
             $elementData = $data[$elementName];
         }
 
-        $element = $this->uiEngine->build($elementData);
-        $element->setAttribute($attributes);
+        $element = $this->uiEngine->build($elementData, $attributes);
+        //$element->setAttribute($attributes);
 
         if (! empty($annotation->id)) {
             $element->setId($annotation->id);
