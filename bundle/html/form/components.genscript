@@ -11,23 +11,6 @@
 /*    *** Components blocks  ***    */
 
 /*
- * Textbox html widget
- */
-@block textbox
-
-@var html <<<
-  <input type="text" id="{{ id }}" value="{{ value }}"
-  {% for at_name, at_value in attributes %}
-    {{ at_name }}="{{ at_value }}"
-  {% endfor %}
- />
->>>
-
-@var javascript alert('{id}');
-
-@end
-
-/*
  * Checkbox html widget
  */
 @block checkbox
@@ -98,21 +81,14 @@
 @end
 
 /*
- * buttongroup html widget
- */
-@block buttongroup
-
-@var html <<<
->>>
-
-@end
-
-/*
  * Select html widget
  */
 @block select
 
 @var html <<<
+{% if mode == 'view' %}
+    <span>{{ value }}</span>
+{% else %}
   <select
     id="{{ id }}"
     {% for at_name, at_value in attributes %}
@@ -134,6 +110,7 @@
     >{{ item['label'] }}</option>
     {% endfor %}
   </select>
+{% endif %}
 >>>
 
 @end
@@ -176,12 +153,16 @@
 @block textarea
 
 @var html <<<
+{% if mode == 'view' %}
+    <span>{{ value }}</span>
+{% else %}
 <textarea
   id="{{ id }}"
   {% for at_name, at_value in attributes %}
     {{ at_name }}="{{ at_value }}"
   {% endfor %}
 >{{ value }}</textarea>
+{% endif %}
 >>>
 
 @end
@@ -192,10 +173,12 @@
 @block button
 
 @var html <<<
-{% if type == 'link' %}
-<a href="{{ url }}"{% if target %} target="{{ target }}"{% endif %} class="{{ class }}">{{ label }}</a>
-{% else %}
-<button{%if url%} onclick="location.href='{{ url }}'"{% endif %} class="{{ class }}">{{ label }}</button>
+{% if mode == 'edit' %}
+  {% if type == 'link' %}
+  <a href="{{ url }}"{% if target %} target="{{ target }}"{% endif %} class="{{ class }}">{{ label }}</a>
+  {% else %}
+  <button{%if url%} onclick="location.href='{{ url }}'"{% endif %} class="{{ class }}">{{ label }}</button>
+  {% endif %}
 {% endif %}
 >>>
 
@@ -210,6 +193,16 @@
 
 @end
 
+
+/** Hidden Widget */
+@block hidden
+
+@var html <<<
+    <input type="hidden" id="{{ id }}" value="{{ value }}"
+        {% for at_name, at_value in attributes %}{{ at_name }}="{{ at_value }}"{% endfor %}/>
+>>>
+
+@end
 
 /*
  * Form html widget
@@ -246,6 +239,9 @@
 @block _default
 
 @var html <<<
+{% if mode == 'view' %}
+    <span>{{ value }}</span>
+{% else %}
   <input
     type="{{ xtype }}"
     id="{{ id }}"
@@ -254,6 +250,7 @@
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
   />
+{% endif %}
 >>>
 
 @end

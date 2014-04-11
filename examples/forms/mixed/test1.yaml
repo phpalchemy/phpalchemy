@@ -6,7 +6,7 @@ form:
     toolbar:
         - {label: toolbar button 1, url: /user/action1}
         - {label: toolbar button 2, url: /user/action2}
-        - {label: toolbar button 2, url: /user/action2, type: link, class: x-custom-class}
+        - {label: Form in view mode, url: test1.php?mode=view, type: link, class: x-custom-class}
 
     buttons:
         - {label: Save, type: submit}
@@ -15,6 +15,9 @@ form:
     items:
         - title:
             text: User Details
+
+        - hidden:
+            name: id
 
         - textbox:
             name: username
@@ -38,7 +41,6 @@ form:
             name: last_name
             fieldLabel: Last Name
             placeholder: Last Name
-            type: password
 
         - textbox:
             name: address
@@ -46,7 +48,7 @@ form:
             multiline: true
 
         - listbox:
-            name: ganre
+            name: genre
             fieldLabel: Genre
             items:
                 - {value: M, label: Male}

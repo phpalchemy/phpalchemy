@@ -23,6 +23,10 @@ class Form extends Element
     protected $buttons = array();
     protected $toolbar = array();
     protected $xtype = 'form';
+    /**
+     * @var string contains Form mode, it onl accepts values: [edit|view]
+     */
+    protected $mode = 'edit';
 
     /**
      * @var \Alchemy\Component\UI\Element\Form\Widget\Widget[]
@@ -49,15 +53,28 @@ class Form extends Element
         $items = array();
         $buttons = array();
         $tbItems = array();
+        $validModes = array("view", "edit");
 
         foreach ($this->getItems() as $itemData) {
             $itemClass = 'Alchemy\Component\UI\Element\Form\Widget\\' . ucfirst($itemData["xtype"]);
             unset($itemData["xtype"]);
-            $items[] = new $itemClass($itemData);
+            $item = new $itemClass($itemData);
+
+            if (in_array($this->mode, $validModes)) {
+                $item->setMode($this->mode);
+            }
+
+            $items[] = $item;
         }
 
         foreach ($this->getButtons() as $buttonData) {
-            $buttons[] = new Button($buttonData);
+            $button = new Button($buttonData);
+
+            if (in_array($this->mode, $validModes)) {
+                $button->setMode($this->mode);
+            }
+
+            $buttons[] = $button;
         }
 
         foreach ($this->getToolbar() as $tbItemData) {
@@ -104,6 +121,22 @@ class Form extends Element
     public function getToolbar()
     {
         return $this->toolbar;
+    }
+
+    /**
+     * @param string $mode
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->mode;
     }
 
     protected function build()

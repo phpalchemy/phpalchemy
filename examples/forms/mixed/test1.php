@@ -7,7 +7,18 @@ $engine = new Alchemy\Component\UI\Engine(new Alchemy\Component\UI\ReaderFactory
 $engine->setMetaFile("test1.yaml");
 $engine->setTargetBundle("html");
 
-$form = $engine->build();
+$data = array(
+    "id" => "00000000000001",
+    "username" => "eriknyk",
+    "password" => "admin",
+    "first_name" => "Erik",
+    "last_name" => "Amaru Ortiz",
+    "address" => "Park Avenue, N. 277.",
+    "genre" => "M"
+);
+
+$_GET["mode"] = isset($_GET["mode"]) ? $_GET["mode"] : "";
+$form = $engine->build($data, array("mode" => $_GET["mode"]));
 
 echo '<form action=',$form->action,'>';
 echo '<table width="400">';
