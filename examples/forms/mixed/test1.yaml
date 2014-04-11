@@ -1,0 +1,53 @@
+form:
+    title: Custom Form
+    action: index.php
+    name: form1
+
+    toolbar:
+        - {label: toolbar button 1, url: /user/action1}
+        - {label: toolbar button 2, url: /user/action2}
+        - {label: toolbar button 2, url: /user/action2, type: link, class: x-custom-class}
+
+    buttons:
+        - {label: Save, type: submit}
+        - {label: Cancel, url: /users/list}
+
+    items:
+        - title:
+            text: User Details
+
+        - textbox:
+            name: username
+            fieldLabel: Username
+            required: true
+
+        - textbox:
+            name: password
+            fieldLabel: Password
+            type: password
+
+        - title:
+            text: Personal Information
+
+        - textbox:
+            name: first_name
+            fieldLabel: First Name
+            placeholder: First Name
+
+        - textbox:
+            name: last_name
+            fieldLabel: Last Name
+            placeholder: Last Name
+            type: password
+
+        - textbox:
+            name: address
+            fieldLabel: Address
+            multiline: true
+
+        - listbox:
+            name: ganre
+            fieldLabel: Genre
+            items:
+                - {value: M, label: Male}
+                - {value: F, label: Famale}
