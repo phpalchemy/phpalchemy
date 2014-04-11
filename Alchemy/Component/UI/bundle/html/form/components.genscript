@@ -193,13 +193,23 @@
 
 @var html <<<
 {% if type == 'link' %}
-<a href="{{ url }}" target="{{ target }}">{{ label }}</a>
+<a href="{{ url }}"{% if target %} target="{{ target }}"{% endif %} class="{{ class }}">{{ label }}</a>
 {% else %}
-<button type="{{ type }}" target="{{ target }}" class="btn{% if type=='submit' %} btn-primary{% else %} btn-default{% endif %}">{{ label }}</button>
+<button{%if url%} onclick="location.href='{{ url }}'"{% endif %} class="{{ class }}">{{ label }}</button>
 {% endif %}
 >>>
 
 @end
+
+/** Title Widget */
+@block title
+
+@var html <<<
+    <legend>{{ text }}<legend>
+>>>
+
+@end
+
 
 /*
  * Form html widget
@@ -208,6 +218,7 @@
 
 @var html <<<
 <form id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>
+    <fieldset>
     <table>
         {% for item in items %}
         <tr>
@@ -220,6 +231,7 @@
             {% endfor %}
         </tr>
     </table>
+    </fieldset>
 </form>
 >>>
 

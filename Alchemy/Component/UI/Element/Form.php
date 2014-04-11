@@ -21,6 +21,7 @@ class Form extends Element
     public $title = '';
 
     protected $buttons = array();
+    protected $toolbar = array();
     protected $xtype = 'form';
 
     /**
@@ -47,6 +48,7 @@ class Form extends Element
         $subElements = array();
         $items = array();
         $buttons = array();
+        $tbItems = array();
 
         foreach ($this->getItems() as $itemData) {
             $itemClass = 'Alchemy\Component\UI\Element\Form\Widget\\' . ucfirst($itemData["xtype"]);
@@ -58,10 +60,17 @@ class Form extends Element
             $buttons[] = new Button($buttonData);
         }
 
+        foreach ($this->getToolbar() as $tbItemData) {
+            $tbItems[] = new Button($tbItemData);
+        }
+
         $subElements["items"] = $items;
         $subElements["buttons"] = $buttons;
+        $subElements["toolbar"] = $tbItems;
+
         $this->items = $items;
         $this->buttons = $buttons;
+        $this->toolbar = $tbItems;
 
         return $subElements;
     }
@@ -79,6 +88,22 @@ class Form extends Element
     public function getButtons()
     {
         return $this->buttons;
+    }
+
+    /**
+     * @param array $toolbarItems
+     */
+    public function setToolbar($toolbar)
+    {
+        $this->toolbar = $toolbar;
+    }
+
+    /**
+     * @return array
+     */
+    public function getToolbar()
+    {
+        return $this->toolbar;
     }
 
     protected function build()
