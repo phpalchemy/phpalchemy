@@ -19,6 +19,10 @@ abstract class Widget extends Element\Element implements Element\WidgetInterface
     protected $xtype = '';
     protected $fieldLabel = '';
     protected $hint = '';
+    /**
+     * @var string contains Form mode, it onl accepts values: [edit|view]
+     */
+    protected $mode = 'edit';
 
     public function setValue($value)
     {
@@ -58,6 +62,22 @@ abstract class Widget extends Element\Element implements Element\WidgetInterface
     public function getHint()
     {
         return $this->hint;
+    }
+
+    /**
+     * @param string $mode
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->mode;
     }
 
     public function prepare()

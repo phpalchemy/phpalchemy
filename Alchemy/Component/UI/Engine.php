@@ -141,12 +141,13 @@ class Engine
     /**
      * Build Web UI
      *
-     * @param array $data
+     * @param array $data Element data
+     * @param array $attributes Element attributes
      * @param string $targetBundle
      * @param string $metaFile
      * @return \Alchemy\Component\UI\Element\Element
      */
-    public function build(array $data = array(), $targetBundle = '', $metaFile = '')
+    public function build(array $data = array(), $attributes = array(), $targetBundle = '', $metaFile = '')
     {
         if (! empty($targetBundle)) {
             $this->setTargetBundle($targetBundle);
@@ -164,14 +165,15 @@ class Engine
         /** @var \Alchemy\Component\UI\Element\Form $element */
         $element = $this->reader->getElement();
 
-        foreach ($data as $key => $val) {
-            if ($key == "id") continue;
-            $element->setAttribute(self::toCamelCase($key), $val);
+        foreach ($attributes as $key => $val) {
+            //if ($key == "id") continue;
+            //$element->setAttribute(self::toCamelCase($key), $val);
+            $element->setAttribute($key, $val);
         }
 
         $subElements = $element->getSubElements();
         $elementInfo = is_null($this->mapping) ? $element->getInfo() : $this->mapElementInformation($element);
-        //var_dump($subElements); die;
+
         foreach ($subElements as $subElementType => $subElement) {
             $elementItems = array();
             foreach ($subElement as $widget) {
