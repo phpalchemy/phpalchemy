@@ -20,7 +20,7 @@ abstract class Element
     /**
      * @var
      */
-    public  $class = "";
+    protected $class = "";
     /**
      * @var string
      */
@@ -71,6 +71,22 @@ abstract class Element
     public function getXtype()
     {
         return $this->xtype;
+    }
+
+    /**
+     * @param mixed $class
+     */
+    public function setClass($class)
+    {
+        $this->class = $class;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClass()
+    {
+        return $this->class;
     }
 
     /**

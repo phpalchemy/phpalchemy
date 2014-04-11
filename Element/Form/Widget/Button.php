@@ -16,7 +16,7 @@ class Button extends Widget
     protected $type = "button";
     protected $label = "";
     protected $url = "";
-    protected $target = "self";
+    protected $target = "";
 
     public function __construct(array $attributes = array())
     {
