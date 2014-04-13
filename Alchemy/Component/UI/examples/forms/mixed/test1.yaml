@@ -14,7 +14,7 @@ form:
             type: split
             items:
               - {label: Config, url: /user/config?id=%id%, iconCls: cog}
-              - {label: Delete, url: /user/delete?id=%id%, iconCls: trash}
+              - {label: Delete, action: "confirm('Delete record with id: %id%?')", iconCls: trash}
 
     buttons:
         - {label: Save, type: submit}
