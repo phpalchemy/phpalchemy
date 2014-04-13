@@ -199,6 +199,9 @@
         data-toggle="dropdown"
         {% endif %}
     >
+    {% if iconCls %}
+    <span class="glyphicon glyphicon-{{ iconCls }}"></span>
+    {% endif %}
     {{ label }}
     {% if menu %}
       {% if menu['type'] == 'split' %}
@@ -215,7 +218,9 @@
       {% for menuItem in menu['items'] %}
         <li>
           <a href="{{ menuItem['url'] }}">
-            <span class="glyphicon glyphicon-{{ menuItem['class'] }}"></span>
+            {% if menuItem['iconCls'] %}
+            <span class="glyphicon glyphicon-{{ menuItem['iconCls'] }}"></span>
+            {% endif %}
             {{ menuItem['label'] }}
           </a>
         </li>
