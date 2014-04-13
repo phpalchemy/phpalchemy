@@ -195,6 +195,7 @@
     {% endif %}
     <button class="btn {%if type=='submit' %}btn-primary{% else %}btn-default{% endif %}{% if menu && menu['type'] == 'single' %} dropdown-toggle{% endif %} {{ class }}"
         {% if url %} onclick="location.href='{{ url }}'"{% endif %}
+        {% if action %} onclick="{{ action}}" {% endif %}
         {% if menu && menu['type'] == 'single' %}
         data-toggle="dropdown"
         {% endif %}
@@ -217,7 +218,9 @@
       <ul class="dropdown-menu" role="menu">
       {% for menuItem in menu['items'] %}
         <li>
-          <a href="{{ menuItem['url'] }}">
+          <a href="{% if menuItem['url'] %}{{ menuItem['url'] }}{% else %}#{% endif %}"
+            {% if menuItem['action'] %} onclick="{{ menuItem['action'] }}"{% endif %}
+          >
             {% if menuItem['iconCls'] %}
             <span class="glyphicon glyphicon-{{ menuItem['iconCls'] }}"></span>
             {% endif %}
