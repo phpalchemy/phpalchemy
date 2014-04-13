@@ -18,6 +18,7 @@ class Button extends Widget
     protected $url = "";
     protected $target = "";
     protected $menu = array();
+    protected $iconCls = "";
 
     public function __construct(array $attributes = array(), $parent = null)
     {
@@ -87,6 +88,22 @@ class Button extends Widget
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setIconCls($iconCls)
+    {
+        $this->iconCls = $iconCls;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIconCls()
+    {
+        return $this->iconCls;
     }
 
     /**
