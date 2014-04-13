@@ -170,7 +170,7 @@ class Engine
             $element->setAttribute($key, $val);
         }
 
-        $subElements = $element->getSubElements();
+        $subElements = $element->getSubElements($data);
         $elementInfo = is_null($this->mapping) ? $element->getInfo() : $this->mapElementInformation($element);
 
         foreach ($subElements as $subElementType => $subElement) {

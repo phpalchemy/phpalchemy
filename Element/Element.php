@@ -38,9 +38,13 @@ abstract class Element
      */
     private $meta;
 
-    public function __construct(array $attributes = array())
+    protected $matchData = array();
+    protected $parent;
+
+    public function __construct(array $attributes = array(), $parent = null)
     {
         $this->meta = new \ReflectionObject($this);
+        $this->parent = $parent;
 
         if (!empty($attributes)) {
             foreach ($attributes as $key => $value) {
@@ -101,6 +105,13 @@ abstract class Element
             return true;
         }
 
+        if (is_string($value)) {
+            $occCnt = substr_count($value, "%");
+            if ($occCnt > 0 && $occCnt % 2 == 0) {
+                $value = str_replace(array_keys($this->matchData), array_values($this->matchData), $value);
+            }
+        }
+
         if (property_exists($this, $name)) {
             if ($this->isProtected($name)) {
                 $fn = "set" . ucfirst($name);
@@ -114,7 +125,7 @@ abstract class Element
     /**
      * @param array $attributes
      */
-    protected function setAttributesFromArray(array $attributes)
+    public function setAttributesFromArray(array $attributes)
     {
         foreach ($attributes as $name => $value) {
             $this->setAttribute($name, $value);
@@ -204,6 +215,15 @@ abstract class Element
         } else {
             return $this->generated[$type];
         }
+    }
+
+    public function setMatchData($matchData)
+    {
+        $data = array();
+        foreach ($matchData as $k => $v) {
+            $data['%'.$k.'%'] = $v;
+        }
+        $this->matchData = $data;
     }
 
     /**

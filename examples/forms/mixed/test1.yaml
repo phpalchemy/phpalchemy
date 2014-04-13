@@ -8,11 +8,11 @@ form:
         - {label: option 2, url: /user/action2}
         -
             label: Editar
-            url: edit?id=@id
+            url: edit?id=%id%
             menu:
                 type: split
                 items:
-                  - {label: Delete, url: /delete?id=@id}
+                  - {label: Delete, url: /delete?id=%id%}
 
     buttons:
         - {label: Save, type: submit}

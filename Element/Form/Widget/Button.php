@@ -19,9 +19,9 @@ class Button extends Widget
     protected $target = "";
     protected $menu = array();
 
-    public function __construct(array $attributes = array())
+    public function __construct(array $attributes = array(), $parent = null)
     {
-        parent::__construct($attributes);
+        parent::__construct($attributes, $parent);
         $this->setXtype('button');
     }
 
