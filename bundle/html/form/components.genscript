@@ -227,6 +227,7 @@
 @var html <<<
 <form id="{{ id }}"{% for at_name, at_value in attributes %} {{ at_name }}="{{ at_value }}"{% endfor %}>
     <fieldset>
+    <legent><h1>{{ attributes['title'] }}</h1></legend>
     <table>
         {% for item in items %}
         <tr>
