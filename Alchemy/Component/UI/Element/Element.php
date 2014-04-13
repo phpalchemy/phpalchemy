@@ -106,11 +106,12 @@ abstract class Element
         }
 
         if (is_string($value)) {
-            $occCnt = substr_count($value, "%");
-            if ($occCnt > 0 && $occCnt % 2 == 0) {
-                $value = str_replace(array_keys($this->matchData), array_values($this->matchData), $value);
-            }
+            $value = $this->matchValue($value);
+        } elseif (is_array($value)) {
+            $value = $this->matchValues($value);
         }
+
+        //echo "<pre>"; print_r($value);
 
         if (property_exists($this, $name)) {
             if ($this->isProtected($name)) {
@@ -224,6 +225,30 @@ abstract class Element
             $data['%'.$k.'%'] = $v;
         }
         $this->matchData = $data;
+    }
+
+    public function matchValue($value)
+    {
+        $occCnt = substr_count($value, "%");
+
+        if ($occCnt > 0 && $occCnt % 2 == 0) {
+            $value = str_replace(array_keys($this->matchData), array_values($this->matchData), $value);
+        }
+
+        return $value;
+    }
+
+    public function matchValues($value)
+    {
+        foreach ($value as $i => $val) {
+            if (is_array($val)) {
+                $value[$i] = $this->matchValues($val);
+            } else {
+                $value[$i] = $this->matchValue($val);
+            }
+        }
+
+        return $value;
     }
 
     /**

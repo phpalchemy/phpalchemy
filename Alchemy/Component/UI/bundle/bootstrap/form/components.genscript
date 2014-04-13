@@ -213,7 +213,12 @@
       {% endif %}
       <ul class="dropdown-menu" role="menu">
       {% for menuItem in menu['items'] %}
-        <li><a href="{{ menuItem['url'] }}">{{ menuItem['label'] }}</a></li>
+        <li>
+          <a href="{{ menuItem['url'] }}">
+            <span class="glyphicon glyphicon-{{ menuItem['class'] }}"></span>
+            {{ menuItem['label'] }}
+          </a>
+        </li>
       {% endfor %}
       </ul>
     {% else %}
