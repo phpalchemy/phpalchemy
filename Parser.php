@@ -345,7 +345,7 @@ class Parser
                     break;
                 default:
                     throw new \Exception(sprintf(
-                        'Parse Error: unknow definition type: %s, on line %s', $type, $lineCount
+                        'Parse Error: Unknown definition type: %s, on line %s', $type, $lineCount
                     ));
             }
 

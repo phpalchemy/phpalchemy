@@ -4,9 +4,15 @@ form:
     name: form1
 
     toolbar:
-        - {label: toolbar button 1, url: /user/action1}
-        - {label: toolbar button 2, url: /user/action2}
-        - {label: Form in view mode, url: test1.php?mode=view, type: link, class: x-custom-class}
+        - {label: option 1, url: /user/action1}
+        - {label: option 2, url: /user/action2}
+        -
+            label: Editar
+            url: edit?id=@id
+            menu:
+                type: split
+                items:
+                  - {label: Delete, url: /delete?id=@id}
 
     buttons:
         - {label: Save, type: submit}

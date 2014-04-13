@@ -8,9 +8,13 @@ if (! is_dir(__DIR__.'/../vendor')) {
     );
 }
 $rootDir = realpath(__DIR__ . "/../");
+$loader = include $rootDir . "/vendor/autoload.php";
+
+
 require $rootDir . "/Tests/tools/ClassLoader.php";
 $loader = new \Alchemy\Component\ClassLoader\ClassLoader();
 $loader->register("Alchemy", $rootDir, '\Alchemy\Component\UI\\');
 $loader->register("Yaml", $rootDir . "/vendor/phpalchemy/Yaml");
 $loader->register("Haanga", $rootDir . "/vendor/crodas/haanga/lib");
+//$loader->register("Symfony", $rootDir . "/vendor/smfony/yaml/Symfony");
 
