@@ -188,7 +188,7 @@
 @var html <<<
 {% if mode == 'edit' %}
   {% if type == 'link' %}
-    <a href="{% if url %}{{ url }}{% else %}#{% endif %}"
+    <a {% if url %}href="{{ url }}"{% endif %}
       {% if action %} onclick="{{ action }}"{% endif %}
       {% if target %} target="{{ target }}"{% endif %} class="{{ class }}"
     >{{ label }}</a>
