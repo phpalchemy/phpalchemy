@@ -5,11 +5,12 @@
             "url": "https://github.com/phpalchemy/Yaml.git"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
 
     "require": {
         "phpalchemy/Yaml": "1.0.*",
-        "crodas/Haanga"   : "dev-master"
+        "crodas/Haanga"   : "dev-master",
+        "symfony/yaml": "2.4.0"
     }
 }
 

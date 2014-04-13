@@ -11,6 +11,21 @@
 /*    *** Components blocks  ***    */
 
 /*
+ * Textbox html widget
+ */
+@block textbox
+
+@var html <<<
+  <input type="text" id="{{ id }}" class="form-control" value="{{ value }}"
+  {% for at_name, at_value in attributes %}
+    {{ at_name }}="{{ at_value }}"
+  {% endfor %}
+ />
+>>>
+
+@end
+
+/*
  * Checkbox html widget
  */
 @block checkbox
@@ -188,7 +203,7 @@
 @block title
 
 @var html <<<
-    <legend>{{ text }}<legend>
+    <legend>{{ text }}</legend>
 >>>
 
 @end

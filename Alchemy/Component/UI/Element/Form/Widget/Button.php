@@ -17,10 +17,11 @@ class Button extends Widget
     protected $label = "";
     protected $url = "";
     protected $target = "";
+    protected $menu = array();
 
-    public function __construct(array $attributes = array())
+    public function __construct(array $attributes = array(), $parent = null)
     {
-        parent::__construct($attributes);
+        parent::__construct($attributes, $parent);
         $this->setXtype('button');
     }
 
@@ -88,6 +89,33 @@ class Button extends Widget
         return $this->type;
     }
 
+    /**
+     * @param array $menu
+     */
+    public function setMenu($menu)
+    {
+        $composed = array();
 
+        if (isset($menu["items"])) {
+            $composed["items"] = $menu["items"];
+        } else {
+            $composed["items"] = $menu;
+        }
+        if (isset($menu["type"])) {
+            $composed["type"] = $menu["type"];
+        } else {
+            $composed["type"] = "single";
+        }
+
+        $this->menu = $composed;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMenu()
+    {
+        return $this->menu;
+    }
 }
 

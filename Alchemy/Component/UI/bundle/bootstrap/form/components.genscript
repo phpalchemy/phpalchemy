@@ -92,22 +92,14 @@
 @end
 
 /*
- * buttongroup html widget
- */
-@block buttongroup
-
-@var html <<<
-ss
->>>
-
-@end
-
-/*
  * Select html widget
  */
 @block select
 
 @var html <<<
+{% if mode == 'view' %}
+    <span>{{ value }}</span>
+{% else %}
   <select
     class="form-control"
     id="{{ id }}"
@@ -130,6 +122,7 @@ ss
     >{{ item['label'] }}</option>
     {% endfor %}
   </select>
+{% endif %}
 >>>
 
 @end
@@ -172,6 +165,9 @@ ss
 @block textarea
 
 @var html <<<
+{% if mode == 'view' %}
+    <span>{{ value }}</span>
+{% else %}
 <textarea
   id="{{ id }}"
   class="form-control"
@@ -179,6 +175,75 @@ ss
     {{ at_name }}="{{ at_value }}"
   {% endfor %}
 >{{ value }}</textarea>
+{% endif %}
+>>>
+
+@end
+
+/*
+ * Button html widget
+ */
+@block button
+
+@var html <<<
+{% if mode == 'edit' %}
+  {% if type == 'link' %}
+    <a href="{{ url }}"{% if target %} target="{{ target }}"{% endif %} class="{{ class }}">{{ label }}</a>
+  {% else %}
+    {% if menu %}
+    <div class="btn-group">
+    {% endif %}
+    <button class="btn {%if type=='submit' %}btn-primary{% else %}btn-default{% endif %}{% if menu && menu['type'] == 'single' %} dropdown-toggle{% endif %} {{ class }}"
+        {% if url %} onclick="location.href='{{ url }}'"{% endif %}
+        {% if menu && menu['type'] == 'single' %}
+        data-toggle="dropdown"
+        {% endif %}
+    >
+    {{ label }}
+    {% if menu %}
+      {% if menu['type'] == 'split' %}
+        </button>
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        &nbsp;<span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+        </button>
+      {% else %}
+        <span class="caret"></span>
+        </button>
+      {% endif %}
+      <ul class="dropdown-menu" role="menu">
+      {% for menuItem in menu['items'] %}
+        <li><a href="{{ menuItem['url'] }}">{{ menuItem['label'] }}</a></li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      </button>
+    {% endif %}
+    {% if menu %}
+      </div>
+    {% endif %}
+  {% endif %}
+{% endif %}
+>>>
+
+@end
+
+/** Title Widget */
+@block title
+
+@var html <<<
+    <legend>{{ text }}</legend>
+>>>
+
+@end
+
+
+/** Hidden Widget */
+@block hidden
+
+@var html <<<
+    <input type="hidden" id="{{ id }}" value="{{ value }}"
+        {% for at_name, at_value in attributes %}{{ at_name }}="{{ at_value }}"{% endfor %}/>
 >>>
 
 @end
@@ -216,8 +281,10 @@ ss
 @block _default
 
 @var html <<<
+{% if mode == 'view' %}
+    <span>{{ value }}</span>
+{% else %}
   <input
-    type="{{ xtype }}"
     id="{{ id }}"
     value="{{ value }}"
     class="form-control"
@@ -225,6 +292,7 @@ ss
       {{ at_name }}="{{ at_value }}"
     {% endfor %}
   />
+{% endif %}
 >>>
 
 @end

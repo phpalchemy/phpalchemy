@@ -47,7 +47,7 @@ class Form extends Element
         return $this->items;
     }
 
-    public function getSubElements()
+    public function getSubElements($matchData = array())
     {
         $subElements = array();
         $items = array();
@@ -69,6 +69,8 @@ class Form extends Element
 
         foreach ($this->getButtons() as $buttonData) {
             $button = new Button($buttonData);
+            //$button->setMatchData($matchData);
+            //$button->setAttributesFromArray($buttonData);
 
             if (in_array($this->mode, $validModes)) {
                 $button->setMode($this->mode);
@@ -77,8 +79,16 @@ class Form extends Element
             $buttons[] = $button;
         }
 
+
         foreach ($this->getToolbar() as $tbItemData) {
-            $tbItems[] = new Button($tbItemData);
+            $tbItem = new Button(array(), $this);
+            $tbItem->setMatchData($matchData);
+            $tbItem->setAttributesFromArray($tbItemData);
+
+            if (in_array($this->mode, $validModes)) {
+                $button->setMode($this->mode);
+            }
+            $tbItems[] = $tbItem;
         }
 
         $subElements["items"] = $items;
