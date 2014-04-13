@@ -188,7 +188,10 @@
 @var html <<<
 {% if mode == 'edit' %}
   {% if type == 'link' %}
-    <a href="{{ url }}"{% if target %} target="{{ target }}"{% endif %} class="{{ class }}">{{ label }}</a>
+    <a href="{% if url %}{{ url }}{% else %}#{% endif %}"
+      {% if action %} onclick="{{ action }}"{% endif %}
+      {% if target %} target="{{ target }}"{% endif %} class="{{ class }}"
+    >{{ label }}</a>
   {% else %}
     {% if menu %}
     <div class="btn-group">
