@@ -20,6 +20,7 @@ class Datatable extends Element
     protected $serverSide = false;
     protected $columns = array();
     protected $data = array();
+    protected $toolbar = array();
 
     /**
      * @param string $xtype
@@ -133,4 +134,19 @@ class Datatable extends Element
         return $this->data;
     }
 
+    /**
+     * @param array $toolbar
+     */
+    public function setToolbar($toolbar)
+    {
+        $this->toolbar = $toolbar;
+    }
+
+    /**
+     * @return array
+     */
+    public function getToolbar()
+    {
+        return $this->toolbar;
+    }
 }
