@@ -53,8 +53,7 @@ class PropelBuildCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $bin = $this->config->get("app.root_dir") . "/vendor/propel/propel/bin/propel";
-
-        $inputDir = $this->config->get("propel.input_dir", $this->config->get("app.database_schema_dir"));
+        $inputDir = $this->config->get("propel.project.dir", $this->config->get("app.database_schema_dir"));
         $outputSchemaDir = $this->config->get("propel.schema_dir", $this->config->get("app.database_schema_dir"));
         $dbEngineConf = $this->config->get("database.engine", "");
 
@@ -111,10 +110,27 @@ class PropelBuildCommand extends Command
             throw new \RuntimeException("Seems propel is not installed in your project.");
         }
 
+        /** creating build.properties for propel */
+        $buildProperties = $this->config->getSection("propel");
+        $buildPropertiesContent = "# THIS IS A GENERATED FILE - DO NOT MODIFY" . PHP_EOL;
+        // prevent unexpected behaviours
+        unset($buildProperties["propel.project.dir"]); //var_dump($buildProperties); die;
+
+        // overrides of properties
+        if (isset($buildProperties["useDateTimeClass"]) && $buildProperties["useDateTimeClass"] == "false") {
+            $buildProperties["defaultTimeStampFormat"] = $this->config->get("regional.date_format", "Y-m-d H:i:s");
+        }
+
+        foreach ($buildProperties as $propKey => $propValue) {
+            $buildPropertiesContent .= "propel.$propKey = $propValue" . PHP_EOL;
+        }
+
+        file_put_contents($inputDir . DS . "build.properties", $buildPropertiesContent);
+
         $output->writeln("PhpAlchemy Helper for Propel2 ver. 1.0" . PHP_EOL);
         $output->writeln("<comment>Directories:</comment>");
 
-        $output->writeln("       Input dir: " . $outputSchemaDir);
+        $output->writeln("       Input dir: " . $inputDir);
         $output->writeln("Output class dir: " . $outputClassDir);
         $output->writeln("  Sql output dir: " . $outputSchemaDir);
         echo PHP_EOL;
@@ -124,6 +140,7 @@ class PropelBuildCommand extends Command
         $commands["sql"] = sprintf("%s sql:build --input-dir=%s --output-dir=%s --platform=%s", $bin, $inputDir, $outputSchemaDir, $dbEngine);
 
         $output->writeln("<comment>Execution:</comment>");
+
         foreach ($commands as $build => $command) {
 
             $output->write(sprintf(" %15s ... ", "Build $build"));
@@ -133,6 +150,9 @@ class PropelBuildCommand extends Command
         }
 
         echo PHP_EOL;
+
+        // tierdown routines
+        unlink($inputDir . DS . "build.properties");
     }
 
     public static function display_xml_error($error, $xml)
@@ -162,5 +182,6 @@ class PropelBuildCommand extends Command
 
         return "$return\n\n---\n\n";
     }
+
 }
 
