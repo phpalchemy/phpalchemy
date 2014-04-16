@@ -160,7 +160,7 @@ class PropelInitCommand extends Command
 
         $dbPort = empty($dbPort)? "": ";port=".$dbPort;
         $dsn = sprintf("%s:host=%s;dbname=%s;user=%s;password=%s%s", $dbEngineConf, $dbHost, $dbName, $dbUser, $dbPassword, $dbPort);
-        $command = sprintf("%s sql:insert --input-dir=%s --connection=\"%s=%s\"", $propelBin, $schemaDir, $srcName, $dsn);
+        $command = sprintf("%s sql:insert --input-dir=%s --sql-dir=%s --connection=\"%s=%s\"", $propelBin, $schemaDir, $schemaDir, $srcName, $dsn);
 
         echo "Building Data Base ... ";
         passthru($command, $stat);
