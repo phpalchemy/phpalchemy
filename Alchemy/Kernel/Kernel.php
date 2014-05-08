@@ -452,6 +452,9 @@ class Kernel implements KernelInterface
 
             // a target view exists, just set the generated ui to target view
             $targetView->setUiElement($element->getId(), $view->getOutput());
+            $elementObject = new \StdClass();
+            $elementObject->$elementId = $element;
+            $targetView->set($element->getXtype(), $elementObject);
         } catch (\Exception $e) {
             // skip exception for template not found
             if ($e->getCode() !== 404) {
