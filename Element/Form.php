@@ -42,6 +42,17 @@ class Form extends Element
         $this->items = $items;
     }
 
+    public function getItem($id)
+    {
+        foreach ($this->items as $item) {
+            if ($id == $item["id"]) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
     public function getItems()
     {
         return $this->items;
