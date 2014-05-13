@@ -135,6 +135,8 @@ class PropelBuildCommand extends Command
         $output->writeln("  Sql output dir: " . $outputSchemaDir);
         echo PHP_EOL;
 
+        passthru("rm -f $inputDir/sqldb.map", $stat);
+
         $commands = array();
         $commands["model"] = sprintf("%s model:build --input-dir=%s --output-dir=%s", $bin, $inputDir, $outputClassDir);
         $commands["sql"] = sprintf("%s sql:build --input-dir=%s --output-dir=%s --platform=%s", $bin, $inputDir, $outputSchemaDir, $dbEngine);
