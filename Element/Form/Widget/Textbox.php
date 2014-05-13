@@ -28,6 +28,8 @@ class Textbox extends Widget
 
     public $size;
 
+    protected $datemask = 'YYYY-MM-DD';
+
     public function __construct(array $attributes = array())
     {
         parent::__construct($attributes);
