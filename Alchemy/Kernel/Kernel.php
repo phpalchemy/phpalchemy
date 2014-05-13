@@ -244,7 +244,7 @@ class Kernel implements KernelInterface
 
             if (! ($response instanceof Response || $response instanceof JsonResponse)) {
                 if ($this->annotationReader->getAnnotation('JsonResponse')) {
-
+                    $controllerData = $response;
                     $response = new JsonResponse();
                     $response->setData($controllerData);
                 } else {
