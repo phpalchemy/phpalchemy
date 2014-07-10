@@ -271,12 +271,14 @@ class Kernel implements KernelInterface
             );
 
             // handling meta ui
-            $view = $this->handleMetaUi(
-                $controllerData,
-                $this->annotationReader->getAnnotation('ServeUi'),
-                $view,
-                $request
-            );
+            if ($this->annotationReader->getAnnotation('ServeUi')) {
+                $view = $this->handleMetaUi(
+                    $controllerData,
+                    $this->annotationReader->getAnnotation('ServeUi'),
+                    $view,
+                    $request
+                );
+            }
 
             // if there is a view adapter instance, get its contents and set to response content
             if (! empty($view)) {
