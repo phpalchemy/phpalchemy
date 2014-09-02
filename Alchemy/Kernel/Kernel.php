@@ -315,12 +315,12 @@ class Kernel implements KernelInterface
             $exceptionHandler = new Exception\Handler();
 
             if ($request->isXmlHttpRequest()) {
-                $responseContent = $e->getMessage();
+                $response = new JsonResponse();
+                $response->setData(array('success'=>false, 'message'=>$e->getMessage()));
             } else {
+                $response = new Response($responseContent, 500);
                 $responseContent = $exceptionHandler->getOutput($e);
             }
-
-            $response = new Response($responseContent, 500);
         }
 
         if ($this->annotationReader->hasTarget()) {
