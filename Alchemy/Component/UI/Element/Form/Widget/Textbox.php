@@ -25,13 +25,24 @@ class Textbox extends Widget
     public $wrap;
     public $rows;
     public $cols;
-
     public $size;
+
+    protected $datemask = 'YYYY-MM-DD';
 
     public function __construct(array $attributes = array())
     {
         parent::__construct($attributes);
         $this->setXtype('textbox');
+    }
+
+    public function setDatemask($datemask)
+    {
+        $this->datemask = $datemask;
+    }
+
+    public function getDatemask()
+    {
+        return $this->datemask;
     }
 }
 
