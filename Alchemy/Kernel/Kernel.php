@@ -300,12 +300,11 @@ class Kernel implements KernelInterface
             $exceptionHandler = new Exception\Handler();
 
             if ($request->isXmlHttpRequest()) {
-                $responseContent = $e->getMessage();
+                $response = new JsonResponse();
+                $response->setData(array('success'=>false, 'message'=>$e->getMessage()));
             } else {
-                $responseContent = $exceptionHandler->getOutput($e);
+                $response = new Response($exceptionHandler->getOutput($e), 404);
             }
-
-            $response = new Response($responseContent, 404);
         } catch (\Exception $e) {
 //            echo $e->getMessage();
 //            echo "<br><pre>";
@@ -318,8 +317,7 @@ class Kernel implements KernelInterface
                 $response = new JsonResponse();
                 $response->setData(array('success'=>false, 'message'=>$e->getMessage()));
             } else {
-                $response = new Response($responseContent, 500);
-                $responseContent = $exceptionHandler->getOutput($e);
+                $response = new Response($exceptionHandler->getOutput($e), 500);
             }
         }
 
